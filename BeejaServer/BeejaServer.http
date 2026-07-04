@@ -1,0 +1,6 @@
+@BeejaServer_HostAddress = http://localhost:5234
+
+GET {{BeejaServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

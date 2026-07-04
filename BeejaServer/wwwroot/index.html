@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Игра Beeja</title>
+</head>
+<body>
+    <h1>Вход в игру</h1>
+    <input type="text" id="username" placeholder="Твое имя">
+    <input type="number" id="table" placeholder="Номер стола">
+    <input type="number" id="gameId" placeholder="ID игры">
+    <button onclick="sendLogin()">Войти</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function sendLogin() {
+            const username = document.getElementById('username').value;
+            const table = document.getElementById('table').value;
+            const gameId = document.getElementById('gameId').value;
+
+            // Отправляем данные на твой контроллер
+            const response = await fetch(`/Users/login?username=${username}&tableNumber=${table}&gameId=${gameId}`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+            document.getElementById('result').innerText = data.message;
+            console.log(data);
+        }
+    </script>
+</body>
+</html>
