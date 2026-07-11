@@ -21,6 +21,12 @@
     <None Update="wwwroot\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="tests\BeejaServer.Tests\obj\BeejaServer.Tests.csproj.nuget.dgspec.json" />
+    <_ContentIncludedByDefault Remove="tests\BeejaServer.Tests\obj\project.assets.json" />
+    <_ContentIncludedByDefault Remove="tests\BeejaServer.Tests\obj\project.packagespec.json" />
   </ItemGroup> 
 
 </Project>

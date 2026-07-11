@@ -1,0 +1,44 @@
+name: BeerJa pipeline
+
+# IMPORTANT! NO NEED IN CHANGING THIS YML, JUST ADD TESTS TO 
+# ~/.../Beerja/tests/BeerjaServer.Tests/ FOLDER
+# IF U WANT TO DIVIDE TASKS IN PIPELINE, CONTACT ME (solvrx)
+
+on:
+  push:
+    branches:
+      - main
+      - ci_branch
+
+  pull_request:
+    branches:
+      - main
+
+# in case we add CD (e.g. docker xd)
+permissions:
+  contents: read
+
+jobs:
+  # build and test in one job, if u don't like it, text me
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # perhaps, we can add more dependency checks sooner
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Beerja.slnx
+
+      - name: Build
+        run: dotnet build Beerja.slnx --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test Beerja.slnx --configuration Release --no-build
