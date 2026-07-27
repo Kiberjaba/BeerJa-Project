@@ -3,20 +3,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BeejaServer.Models
 {
-    [Table("users")] // Имя таблицы в базе
+    [Table("users")]
     public class User
     {
         [Key]
-        [Column("user_id")] 
+        [Column("user_id")]
         public int UserId { get; set; }
 
         [Column("username")]
-        public string? Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
-        [Column("table_number")] 
-        public int TableNumber { get; set; }
+        [Column("email")]
+        public string Email { get; set; } = string.Empty;
 
-        [Column("current_game_id")] 
-        public int CurrentGameId { get; set; }
+        [Column("password_hash")]
+        public string PasswordHash { get; set; } = string.Empty;
+
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

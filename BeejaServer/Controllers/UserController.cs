@@ -1,44 +1,62 @@
-using Microsoft.AspNetCore.Mvc;
 using BeejaServer.Data;
+using BeejaServer.DTOs;
 using BeejaServer.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BeejaServer.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class UsersController : ControllerBase
+    [Route("api/[controller]")]
+    public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public UsersController(AppDbContext context)
+        public UserController(AppDbContext context)
         {
             _context = context;
         }
 
-        [HttpPost("login")]
-        public IActionResult Login(int gameId, int tableNumber, string username)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            // Проверяем, есть ли уже такой юзер (чтобы не дублировать)
-            var existingUser = _context.Users
-                .FirstOrDefault(u => u.Username == username && u.CurrentGameId == gameId);
-
-            if (existingUser != null)
+            // 1. Проверяем, существует ли пользователь с таким email или username
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             {
-                return Ok(new { userId = existingUser.UserId, message = "С возвращением!" });
+                return BadRequest(new { message = "Пользователь с таким Email уже существует" });
             }
 
-            // Если новый — создаем
-            var newUser = new User
+            if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
             {
-                Username = username,
-                TableNumber = tableNumber,
-                CurrentGameId = gameId
+                return BadRequest(new { message = "Имя пользователя уже занято" });
+            }
+
+            // 2. Хэшируем пароль
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+            // 3. Создаем сущность пользователя
+            var user = new User
+            {
+                Username = dto.Username,
+                Email = dto.Email,
+                PasswordHash = passwordHash,
+                CreatedAt = DateTime.UtcNow
             };
 
-            _context.Users.Add(newUser);
-            _context.SaveChanges();
+            // 4. Сохраняем в БД
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-            return Ok(new { userId = newUser.UserId, message = "Добро пожаловать в игру!" });
+            // 5. Формируем ответ (без пароля!)
+            var response = new UserResponseDto
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Email = user.Email,
+                CreatedAt = user.CreatedAt
+            };
+
+            return Ok(response);
         }
     }
 }
