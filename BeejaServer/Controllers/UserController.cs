@@ -1,8 +1,13 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using BeejaServer.Data;
 using BeejaServer.DTOs;
 using BeejaServer.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BeejaServer.Controllers
 {
@@ -11,12 +16,17 @@ namespace BeejaServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UserController(AppDbContext context)
+        public UserController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
+        // ==========================================
+        // 1. РЕГИСТРАЦИЯ (POST api/v1/User/register)
+        // ==========================================
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
@@ -25,13 +35,13 @@ namespace BeejaServer.Controllers
                 var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
                 var normalizedUsername = dto.Username.Trim();
 
-                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
-
-                if (existingUser != null)
+                // Проверка существования Email
+                if (await _context.Users.AnyAsync(u => u.Email == normalizedEmail))
                 {
                     return Conflict(new { message = "Email уже зарегистрирован" });
                 }
 
+                // Проверка существования Username
                 if (await _context.Users.AnyAsync(u => u.Username == normalizedUsername))
                 {
                     return Conflict(new { message = "Имя пользователя уже занято" });
@@ -82,8 +92,117 @@ namespace BeejaServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка регистрации: {ex}");
-                return StatusCode(500, new { message = "Ошибка при регистрации пользователя на сервере" });
+                return StatusCode(500, new { message = "Ошибка при регистрации пользователя на сервере", error = ex.Message });
             }
+        }
+
+        // ==========================================
+        // 2. АВТОРИЗАЦИЯ / ВХОД (POST api/v1/User/login)
+        // ==========================================
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            try
+            {
+                var input = dto.LoginOrEmail.Trim().ToLowerInvariant();
+
+                // Ищем по Email (в нижнем регистре) или Username
+                var user = await _context.Users.FirstOrDefaultAsync(u => 
+                    u.Email == input || u.Username.ToLower() == input);
+
+                if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                {
+                    return BadRequest(new { message = "Неверный логин/email или пароль" });
+                }
+
+                // Генерируем токен
+                string token = GenerateJwtToken(user);
+
+                var response = new AuthResponseDto
+                {
+                    Token = token,
+                    User = new UserResponseDto
+                    {
+                        UserId = user.UserId,
+                        Username = user.Username,
+                        Email = user.Email,
+                        CreatedAt = user.CreatedAt
+                    }
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка входа: {ex}");
+                return StatusCode(500, new { message = "Ошибка при авторизации на сервере" });
+            }
+        }
+
+        // ==========================================
+        // 3. ЛИЧНЫЙ КАБИНЕТ (GET api/v1/User/me)
+        // ==========================================
+        [HttpGet("me")]
+        [Authorize] // Защищённый эндпоинт, доступен только с JWT-токеном
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                // Достаём UserId из Claims внутри JWT-токена
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new { message = "Недействительный токен" });
+                }
+
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { message = "Пользователь не найден" });
+                }
+
+                var response = new UserResponseDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка получения профиля: {ex}");
+                return StatusCode(500, new { message = "Ошибка сервера при получении профиля" });
+            }
+        }
+
+        // ==========================================
+        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+        // ==========================================
+        private string GenerateJwtToken(User user)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         private async Task<bool> SendConfirmationEmailAsync(string email)
