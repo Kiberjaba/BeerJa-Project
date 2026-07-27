@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BeejaServer.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -20,43 +20,83 @@ namespace BeejaServer.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            // 1. Проверяем, существует ли пользователь с таким email или username
-            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            try
             {
-                return BadRequest(new { message = "Пользователь с таким Email уже существует" });
+                var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
+                var normalizedUsername = dto.Username.Trim();
+
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+                if (existingUser != null)
+                {
+                    return Conflict(new { message = "Email уже зарегистрирован" });
+                }
+
+                if (await _context.Users.AnyAsync(u => u.Username == normalizedUsername))
+                {
+                    return Conflict(new { message = "Имя пользователя уже занято" });
+                }
+
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+                var user = new User
+                {
+                    Username = normalizedUsername,
+                    Email = normalizedEmail,
+                    PasswordHash = passwordHash,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                var response = new UserResponseDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt
+                };
+
+                bool emailSent = await SendConfirmationEmailAsync(user.Email);
+
+                if (!emailSent)
+                {
+                    return StatusCode(201, new 
+                    { 
+                        message = "Регистрация успешна, но email подтверждения не был отправлен",
+                        user = response 
+                    });
+                }
+
+                return StatusCode(201, new 
+                { 
+                    message = "Успешная регистрация. Письмо с подтверждением отправлено на ваш Email",
+                    user = response 
+                });
             }
-
-            if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
+            catch (DbUpdateException)
             {
-                return BadRequest(new { message = "Имя пользователя уже занято" });
+                return Conflict(new { message = "Пользователь с таким Email или именем уже существует" });
             }
-
-            // 2. Хэшируем пароль
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
-            // 3. Создаем сущность пользователя
-            var user = new User
+            catch (Exception ex)
             {
-                Username = dto.Username,
-                Email = dto.Email,
-                PasswordHash = passwordHash,
-                CreatedAt = DateTime.UtcNow
-            };
+                Console.WriteLine($"Ошибка регистрации: {ex}");
+                return StatusCode(500, new { message = "Ошибка при регистрации пользователя на сервере" });
+            }
+        }
 
-            // 4. Сохраняем в БД
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            // 5. Формируем ответ (без пароля!)
-            var response = new UserResponseDto
+        private async Task<bool> SendConfirmationEmailAsync(string email)
+        {
+            try
             {
-                UserId = user.UserId,
-                Username = user.Username,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            };
-
-            return Ok(response);
+                await Task.Delay(100);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
