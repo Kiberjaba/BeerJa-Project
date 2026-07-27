@@ -1,7 +1,32 @@
+using System.Text;
 using BeejaServer.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Сервисы
+builder.Services.AddSingleton<JwtService>();
+
+// Настраиваем аутентификацию через JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Подключаем базу данных
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -14,16 +39,22 @@ builder.Services.AddSwaggerGen();           // Обязательно для С�
 
 var app = builder.Build();
 
-app.UseDefaultFiles(); //Ищет индекс штмл в рут
-app.UseStaticFiles(); //отдает файлы в рут
-
+// Настройка HTTP-пайплайна (ПОРЯДОК ВАЖЕН!)
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(); //подрубает свагу
-    app.UseSwaggerUI(); //включает табло сваги
+    app.UseSwagger();   // подрубает свагу
+    app.UseSwaggerUI(); // включает табло сваги
 }
 
-app.UseHttpsRedirection();
-app.MapControllers(); // Это нужно, чтобы контроллеры заработали
+app.UseDefaultFiles();  // Ищет index.html в wwwroot
+app.UseStaticFiles();   // Отдает статические файлы
 
-app.Run();
+app.UseHttpsRedirection();
+
+// Аутентификация и Авторизация строго перед MapControllers!
+app.UseAuthentication(); 
+app.UseAuthorization();
+
+app.MapControllers(); // Маппинг контроллеров
+
+app.Run();м
