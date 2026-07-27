@@ -49,7 +49,9 @@ namespace BeejaServer.Controllers
                     Username = normalizedUsername,
                     Email = normalizedEmail,
                     PasswordHash = passwordHash,
-                    CreatedAt = DateTime.UtcNow
+                    TotalPoints = 0,
+                    Level = 1,
+                    CreatedAtUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 };
 
                 _context.Users.Add(user);
@@ -63,7 +65,7 @@ namespace BeejaServer.Controllers
                     CreatedAt = user.CreatedAt
                 };
 
-                bool emailSent = await SendConfirmationEmailAsync(user.Email);
+                bool emailSent = await SendConfirmationEmailAsync(user.Email, user.Username);
 
                 if (!emailSent)
                 {
@@ -76,7 +78,7 @@ namespace BeejaServer.Controllers
 
                 return StatusCode(201, new 
                 { 
-                    message = "Успешная регистрация. Письмо с подтверждением отправлено на ваш Email",
+                    message = "Успешная регистрация. Ссылка отправлена в консоль!",
                     user = response 
                 });
             }
@@ -86,9 +88,8 @@ namespace BeejaServer.Controllers
             }
             catch (Exception ex)
             {
-                 Console.WriteLine($"Ошибка входа: {ex}");
-                  // Возвращаем ex.Message, чтобы в Swagger сразу увидеть причину
-                return StatusCode(500, new { message = "Ошибка при авторизации на сервере", error = ex.Message });
+                Console.WriteLine($"Ошибка регистрации: {ex}");
+                return StatusCode(500, new { message = "Ошибка при регистрации пользователя на сервере", error = ex.Message });
             }
         }
 
@@ -126,7 +127,7 @@ namespace BeejaServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка входа: {ex}");
-                return StatusCode(500, new { message = "Ошибка при авторизации на сервере" });
+                return StatusCode(500, new { message = "Ошибка при авторизации на сервере", error = ex.Message });
             }
         }
 
@@ -154,6 +155,8 @@ namespace BeejaServer.Controllers
                     UserId = user.UserId,
                     Username = user.Username,
                     Email = user.Email,
+                    TotalPoints = user.TotalPoints,
+                    Level = user.Level,
                     CreatedAt = user.CreatedAt
                 };
 
@@ -164,6 +167,21 @@ namespace BeejaServer.Controllers
                 Console.WriteLine($"Ошибка получения профиля: {ex}");
                 return StatusCode(500, new { message = "Ошибка сервера при получении профиля" });
             }
+        }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email.ToLowerInvariant());
+            if (user == null)
+            {
+                return NotFound(new { message = "Пользователь не найден" });
+            }
+            
+            user.IsEmailConfirmed = true;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Email {email} успешно подтверждён!" });
         }
 
         private string GenerateJwtToken(User user)
@@ -188,18 +206,18 @@ namespace BeejaServer.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-        private async Task<bool> SendConfirmationEmailAsync(string email)
+        private async Task<bool> SendConfirmationEmailAsync(string toEmail, string username)
         {
-            try
-            {
-                await Task.Delay(100);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            string confirmationLink = $"http://localhost:5234/api/v1/User/confirm-email?email={Uri.EscapeDataString(toEmail)}";
+
+            // Выводим ссылку прямо в терминал
+            Console.WriteLine($"\n==================================================");
+            Console.WriteLine($"[EMAIL MOCK] Ссылка подтверждения для {username} ({toEmail}):");
+            Console.WriteLine(confirmationLink);
+            Console.WriteLine($"==================================================\n");
+
+            await Task.CompletedTask;
+            return true;
         }
     }
 }

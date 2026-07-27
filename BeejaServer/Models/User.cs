@@ -3,23 +3,32 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BeejaServer.Models
 {
-    [Table("users")] // Убедитесь, что таблица в базе называется именно users
+    [Table("users")]
     public class User
     {
         [Key]
-        [Column("user_id")] // Проверьте, так ли назван id в базе (может быть просто id)
+        [Column("user_id")]
         public int UserId { get; set; }
 
-        [Column("user_name")] // <-- Указали точное имя колонки в базе данных!
+        [Column("user_name")]
         public string Username { get; set; } = string.Empty;
 
-        [Column("email")] // Проверьте имя колонки email
+        [Column("email")]
         public string Email { get; set; } = string.Empty;
 
-        [Column("password_hash")] // Проверьте, как называется колонка с паролем (может быть password)
+        [Column("password_hash")]
         public string PasswordHash { get; set; } = string.Empty;
 
-        [Column("created_at")] // Проверьте имя колонки с датой
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [Column("total_points")]
+        public int TotalPoints { get; set; }
+
+        [Column("level")]
+        public int Level { get; set; }
+
+        [Column("created_at")]
+        public long CreatedAtUnix { get; set; }
+
+        [NotMapped]
+        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnix).UtcDateTime;
     }
 }

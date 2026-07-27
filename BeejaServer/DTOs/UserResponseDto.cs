@@ -5,6 +5,8 @@ namespace BeejaServer.DTOs
         public int UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public int TotalPoints { get; set; }
+        public int Level { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }
