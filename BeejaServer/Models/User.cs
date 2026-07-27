@@ -19,6 +19,9 @@ namespace BeejaServer.Models
         [Column("password_hash")]
         public string PasswordHash { get; set; } = string.Empty;
 
+        [Column("is_email_confirmed")]
+        public bool IsEmailConfirmed { get; set; } = false;
+
         [Column("total_points")]
         public int TotalPoints { get; set; }
 

@@ -53,7 +53,7 @@ namespace BeejaServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("orders");
+                    b.ToTable("orders", (string)null);
                 });
 
             modelBuilder.Entity("BeejaServer.Models.PriceHistory", b =>
@@ -75,7 +75,7 @@ namespace BeejaServer.Migrations
 
                     b.HasKey("HistoryId");
 
-                    b.ToTable("price_history");
+                    b.ToTable("price_history", (string)null);
                 });
 
             modelBuilder.Entity("BeejaServer.Models.Product", b =>
@@ -106,7 +106,7 @@ namespace BeejaServer.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("products");
+                    b.ToTable("products", (string)null);
                 });
 
             modelBuilder.Entity("BeejaServer.Models.User", b =>
@@ -145,7 +145,7 @@ namespace BeejaServer.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("users");
+                    b.ToTable("users", (string)null);
                 });
 #pragma warning restore 612, 618
         }
