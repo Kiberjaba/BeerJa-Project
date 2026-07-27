@@ -1,12 +1,13 @@
 using System.Text;
 using BeejaServer.Data;
+using BeejaServer.Services; // Если JwtService лежит тут
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Сервисы
+// Регистрация сервисов
 builder.Services.AddSingleton<JwtService>();
 
 // Настраиваем аутентификацию через JWT
@@ -34,27 +35,25 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer(); // Обязательно для Сваги
-builder.Services.AddSwaggerGen();           // Обязательно для Сваги
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Настройка HTTP-пайплайна (ПОРЯДОК ВАЖЕН!)
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();   // подрубает свагу
-    app.UseSwaggerUI(); // включает табло сваги
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseDefaultFiles();  // Ищет index.html в wwwroot
-app.UseStaticFiles();   // Отдает статические файлы
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
-// Аутентификация и Авторизация строго перед MapControllers!
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers(); // Маппинг контроллеров
+app.MapControllers();
 
-app.Run();м
+app.Run();
