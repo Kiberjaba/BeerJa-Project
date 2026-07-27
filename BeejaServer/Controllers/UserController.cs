@@ -24,9 +24,6 @@ namespace BeejaServer.Controllers
             _configuration = configuration;
         }
 
-        // ==========================================
-        // 1. РЕГИСТРАЦИЯ (POST api/v1/User/register)
-        // ==========================================
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
@@ -35,13 +32,11 @@ namespace BeejaServer.Controllers
                 var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
                 var normalizedUsername = dto.Username.Trim();
 
-                // Проверка существования Email
                 if (await _context.Users.AnyAsync(u => u.Email == normalizedEmail))
                 {
                     return Conflict(new { message = "Email уже зарегистрирован" });
                 }
 
-                // Проверка существования Username
                 if (await _context.Users.AnyAsync(u => u.Username == normalizedUsername))
                 {
                     return Conflict(new { message = "Имя пользователя уже занято" });
@@ -92,13 +87,10 @@ namespace BeejaServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка регистрации: {ex}");
-                return StatusCode(500, new { message = "Ошибка при регистрации пользователя на сервере", error = ex.Message });
+                return StatusCode(500, new { message = "Ошибка при регистрации пользователя на сервере" });
             }
         }
 
-        // ==========================================
-        // 2. АВТОРИЗАЦИЯ / ВХОД (POST api/v1/User/login)
-        // ==========================================
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
@@ -106,7 +98,6 @@ namespace BeejaServer.Controllers
             {
                 var input = dto.LoginOrEmail.Trim().ToLowerInvariant();
 
-                // Ищем по Email (в нижнем регистре) или Username
                 var user = await _context.Users.FirstOrDefaultAsync(u => 
                     u.Email == input || u.Username.ToLower() == input);
 
@@ -115,7 +106,6 @@ namespace BeejaServer.Controllers
                     return BadRequest(new { message = "Неверный логин/email или пароль" });
                 }
 
-                // Генерируем токен
                 string token = GenerateJwtToken(user);
 
                 var response = new AuthResponseDto
@@ -139,16 +129,12 @@ namespace BeejaServer.Controllers
             }
         }
 
-        // ==========================================
-        // 3. ЛИЧНЫЙ КАБИНЕТ (GET api/v1/User/me)
-        // ==========================================
         [HttpGet("me")]
-        [Authorize] // Защищённый эндпоинт, доступен только с JWT-токеном
+        [Authorize]
         public async Task<IActionResult> GetProfile()
         {
             try
             {
-                // Достаём UserId из Claims внутри JWT-токена
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
@@ -179,9 +165,6 @@ namespace BeejaServer.Controllers
             }
         }
 
-        // ==========================================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ==========================================
         private string GenerateJwtToken(User user)
         {
             var claims = new[]
