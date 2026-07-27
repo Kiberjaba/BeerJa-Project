@@ -86,8 +86,9 @@ namespace BeejaServer.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка регистрации: {ex}");
-                return StatusCode(500, new { message = "Ошибка при регистрации пользователя на сервере" });
+                 Console.WriteLine($"Ошибка входа: {ex}");
+                  // Возвращаем ex.Message, чтобы в Swagger сразу увидеть причину
+                return StatusCode(500, new { message = "Ошибка при авторизации на сервере", error = ex.Message });
             }
         }
 
