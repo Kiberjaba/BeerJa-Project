@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using BeejaServer.Data;
 using BeejaServer.DTOs;
 using BeejaServer.Models;
+using BeejaServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -145,7 +146,7 @@ namespace BeejaServer.Controllers
 
         #endregion
 
-        #region Standard Auth
+        #region Standard Auth & Points
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
@@ -280,6 +281,14 @@ namespace BeejaServer.Controllers
                     return NotFound(new { message = "Пользователь не найден" });
                 }
 
+                // Автоматическая проверка и синхронизация уровня по очкам
+                int calculatedLevel = LevelService.CalculateLevel(user.TotalPoints);
+                if (user.Level != calculatedLevel)
+                {
+                    user.Level = calculatedLevel;
+                    await _context.SaveChangesAsync();
+                }
+
                 var response = new UserResponseDto
                 {
                     UserId = user.UserId,
@@ -300,6 +309,64 @@ namespace BeejaServer.Controllers
             }
         }
 
+        [HttpPost("add-points-by-username")]
+        public async Task<IActionResult> AddPointsByUsername([FromBody] AddPointsByUsernameDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Username))
+            {
+                return BadRequest(new { message = "Укажите имя пользователя" });
+            }
+
+            if (dto.Points <= 0)
+            {
+                return BadRequest(new { message = "Количество очков должно быть больше нуля" });
+            }
+
+            try
+            {
+                var normalizedUsername = dto.Username.Trim().ToLowerInvariant();
+
+                // Ищем пользователя по никнейму в базе (без учета регистра)
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == normalizedUsername);
+                
+                if (user == null)
+                {
+                    return NotFound(new { message = $"Пользователь с ником '{dto.Username}' не найден" });
+                }
+
+                int oldLevel = user.Level;
+
+                // 1. Прибавляем очки
+                user.TotalPoints += dto.Points;
+
+                // 2. Пересчитываем уровень через наш LevelService
+                int newLevel = LevelService.CalculateLevel(user.TotalPoints);
+                bool leveledUp = newLevel > oldLevel;
+
+                user.Level = newLevel;
+                await _context.SaveChangesAsync();
+
+                // 3. Формируем ответ
+                var response = new AddPointsResponseDto
+                {
+                    Message = leveledUp ? $"Пользователь {user.Username} достиг {newLevel} уровня!" : $"Пользователю {user.Username} начислено +{dto.Points} очков!",
+                    AddedPoints = dto.Points,
+                    TotalPoints = user.TotalPoints,
+                    Level = user.Level,
+                    LeveledUp = leveledUp,
+                    NextLevelPoints = LevelService.GetRequiredPointsForLevel(user.Level + 1),
+                    ProgressPercentage = LevelService.CalculateProgressPercentage(user.TotalPoints)
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка начисления очков по нику: {ex}");
+                return StatusCode(500, new { message = "Ошибка при начислении очков" });
+            }
+        }
+
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string email)
         {
@@ -313,6 +380,59 @@ namespace BeejaServer.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = $"Email {email} успешно подтверждён!" });
+        }
+
+        [HttpPost("add-points")]
+        [Authorize]
+        public async Task<IActionResult> AddPoints([FromBody] AddPointsDto dto)
+        {
+            if (dto.Points <= 0)
+            {
+                return BadRequest(new { message = "Количество очков должно быть больше нуля" });
+            }
+
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new { message = "Недействительный токен" });
+                }
+
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { message = "Пользователь не найден" });
+                }
+
+                int oldLevel = user.Level;
+
+                // 1. Прибавляем очки
+                user.TotalPoints += dto.Points;
+                int newLevel = LevelService.CalculateLevel(user.TotalPoints);
+                bool leveledUp = newLevel > oldLevel;
+
+                user.Level = newLevel;
+                await _context.SaveChangesAsync();
+
+                var response = new AddPointsResponseDto
+                {
+                    Message = leveledUp ? $"Поздравляем! Вы достигли {newLevel} уровня!" : $"Начислено +{dto.Points} очков!",
+                    AddedPoints = dto.Points,
+                    TotalPoints = user.TotalPoints,
+                    Level = user.Level,
+                    LeveledUp = leveledUp,
+                    NextLevelPoints = LevelService.GetRequiredPointsForLevel(user.Level + 1),
+                    ProgressPercentage = LevelService.CalculateProgressPercentage(user.TotalPoints)
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка начисления очков: {ex}");
+                return StatusCode(500, new { message = "Ошибка при начислении очков" });
+            }
         }
 
         #endregion
@@ -358,7 +478,13 @@ namespace BeejaServer.Controllers
         #endregion
     }
 
-    #region Yandex DTOs
+    #region Extra DTOs
+
+    public class AddPointsByUsernameDto
+    {
+        public string Username { get; set; } = string.Empty;
+        public int Points { get; set; }
+    }
 
     public class YandexTokenResponse
     {
@@ -373,6 +499,22 @@ namespace BeejaServer.Controllers
 
         [JsonPropertyName("display_login")]
         public string DisplayLogin { get; set; } = string.Empty;
+    }
+
+    public class AddPointsDto
+    {
+        public int Points { get; set; }
+    }
+
+    public class AddPointsResponseDto
+    {
+        public string Message { get; set; } = string.Empty;
+        public int AddedPoints { get; set; }
+        public int TotalPoints { get; set; }
+        public int Level { get; set; }
+        public bool LeveledUp { get; set; }
+        public int NextLevelPoints { get; set; }
+        public double ProgressPercentage { get; set; }
     }
 
     #endregion

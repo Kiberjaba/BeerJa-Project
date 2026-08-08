@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пульт ведущего — киновикторина</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+    --cream: #efece3;
+    --cream-2: #e5e1d5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+    overflow:hidden;
+  }
+
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 430px;
+      height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex: 0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 18px 14px;
+  }
+  .role-chip{
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .role-chip .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+  }
+  .badge{
+    width: 44px; height:44px; border-radius:50%;
+    background: var(--lime);
+    color:#10130a;
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 900;
+    font-size: 15px;
+    flex-shrink:0;
+    transition: transform .15s ease;
+  }
+  .badge.pulse{ animation: pulse 1s ease infinite; }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.06); }
+  }
+
+  /* ===== STATS ===== */
+  .stats{
+    flex: 0 0 auto;
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 0 18px 16px;
+  }
+  .stat{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 6px;
+    text-align:center;
+  }
+  .stat b{ display:block; font-size: 19px; font-weight:900; }
+  .stat span{ display:block; font-size: 10px; color: var(--text-dim); font-weight:600; margin-top:2px; }
+
+  /* ===== SCROLL AREA ===== */
+  .content{
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 18px 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .content::-webkit-scrollbar{ width:0; }
+
+  .hero{
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(120% 100% at 100% 0%, rgba(198,255,61,0.08), transparent 55%);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 800;
+    margin-bottom: 10px;
+    position:relative;
+  }
+  .hero h1{
+    font-size: 26px;
+    line-height: 1.15;
+    font-weight: 900;
+    margin-bottom: 10px;
+    position:relative;
+  }
+  .hero p{
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    position:relative;
+  }
+
+  .listcard{
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+  }
+  .list-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 4px 4px 12px;
+    font-size: 13px; font-weight: 800;
+  }
+  .list-head .muted{ color: var(--text-dim); font-weight:700; font-size:12px; }
+
+  .preview-box{
+    background: var(--cream);
+    color: #17181a;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .preview-question{
+    font-size: 16px;
+    font-weight: 800;
+    line-height:1.3;
+  }
+  .preview-row{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+  }
+  .preview-meta{
+    flex-shrink:0;
+    font-size: 11px;
+    font-weight: 800;
+    color: #6c6f6e;
+    text-align:right;
+  }
+  .preview-img{
+    margin-top: 12px;
+    height: 120px;
+    border-radius: 12px;
+    background:
+      linear-gradient(160deg, #9a9d90, #4c4e46),
+      repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0 2px, transparent 2px 6px);
+    display:flex; align-items:center; justify-content:center;
+    color: rgba(255,255,255,0.75);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing:.03em;
+  }
+  .preview-caption{
+    margin-top: 12px;
+    font-size: 12px;
+    color: #6c6f6e;
+    line-height:1.4;
+  }
+
+  .countdown-box{
+    background: var(--cream-2);
+    color: #17181a;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .countdown-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size: 12px; font-weight: 700; color:#5a5d55;
+  }
+  .countdown-num{
+    font-size: 40px;
+    font-weight: 900;
+    line-height:1;
+    margin-top: 4px;
+  }
+
+  .row{
+    display:flex; justify-content:space-between; align-items:flex-start; gap: 12px;
+    padding: 13px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .row:last-child{ border-bottom:none; padding-bottom:4px; }
+  .row .rt{ font-size: 13px; font-weight: 700; }
+  .row .rs{ font-size: 12px; color: var(--text-dim); margin-top:3px; }
+  .row .tag{
+    flex-shrink:0;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--lime);
+    text-transform: lowercase;
+    white-space:nowrap;
+    padding-top:2px;
+  }
+
+  /* ===== BOTTOM BAR ===== */
+  .bottom{
+    flex: 0 0 auto;
+    display:flex;
+    gap: 10px;
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .pill{
+    flex: 0 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0 18px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13px;
+    display:flex; align-items:center;
+    min-width: 74px;
+    justify-content:center;
+    text-align:center;
+  }
+  .main-btn{
+    flex:1;
+    background: var(--lime);
+    color: #10130a;
+    border: none;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 14px;
+    cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .main-btn:hover{ transform: translateY(-1px); }
+  .main-btn:active{ transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <div class="role-chip"><span class="dot"></span>Ведущий</div>
+    <div class="badge" id="badge">QR</div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="content">
+    <div class="hero" id="hero"></div>
+    <div class="listcard" id="listcard"></div>
+  </div>
+
+  <div class="bottom">
+    <div class="pill" id="pill"></div>
+    <button class="main-btn" id="mainbtn"></button>
+  </div>
+</div>
+
+<script>
+  const TEAMS = 10;
+  const PARTICIPANTS = 56;
+
+  const QUESTIONS = [
+    {
+      qIndex: 1, total: 3, round: 1,
+      roundLabel: 'УЗНАЙ ФИЛЬМ',
+      readyTitle: 'Раунд 1 готов',
+      question: 'Какой фильм спрятан в этом кадре?',
+      hasImage: true,
+      typeSub: 'Один вариант · изображение',
+      time: 15,
+      meta: 'Р1-В1'
+    },
+    {
+      qIndex: 2, total: 3, round: 1,
+      roundLabel: 'УЗНАЙ ФИЛЬМ',
+      readyTitle: 'Вопрос 2 готов',
+      question: 'Какие два фильма снял Леонид Гайдай?',
+      hasImage: false,
+      typeSub: 'Несколько вариантов',
+      time: 15,
+      meta: 'Р1-В2'
+    },
+    {
+      qIndex: 3, total: 3, round: 1,
+      roundLabel: 'УЗНАЙ ФИЛЬМ',
+      readyTitle: 'Вопрос 3 готов',
+      question: 'Кто сыграл Штирлица в «Семнадцати мгновениях весны»?',
+      hasImage: false,
+      typeSub: 'Один вариант · текст',
+      time: 15,
+      meta: 'Р1-В3'
+    }
+  ];
+
+  let phase = { screen: 'lobby' };
+  let answered = 0;
+  let remaining = 0;
+  let timer = null;
+
+  const $ = id => document.getElementById(id);
+
+  function stopTimer(){ if(timer){ clearInterval(timer); timer = null; } }
+
+  function go(next){
+    stopTimer();
+    phase = next;
+    if(phase.screen === 'counting'){
+      const q = QUESTIONS[phase.qi];
+      answered = 0;
+      remaining = q.time;
+      timer = setInterval(tick, 1000);
+    }
+    render();
+  }
+
+  function tick(){
+    const q = QUESTIONS[phase.qi];
+    remaining = Math.max(0, remaining - 1);
+    if(Math.random() < 0.75 && answered < TEAMS - 1){
+      answered += 1;
+    }
+    if(remaining === 0){
+      answered = Math.max(answered, TEAMS - 1);
+      stopTimer();
+      render();
+      setTimeout(() => go({ screen:'closed', qi: phase.qi }), 500);
+      return;
+    }
+    render();
+  }
+
+  function onMainBtn(){
+    if(phase.screen === 'lobby'){
+      go({ screen:'ready', qi:0 });
+    } else if(phase.screen === 'ready'){
+      go({ screen:'counting', qi: phase.qi });
+    } else if(phase.screen === 'counting'){
+      go({ screen:'closed', qi: phase.qi });
+    } else if(phase.screen === 'closed'){
+      const next = phase.qi + 1;
+      if(next < QUESTIONS.length){
+        go({ screen:'ready', qi: next });
+      } else {
+        answered = 0;
+        go({ screen:'lobby' });
+      }
+    }
+  }
+
+  function rowHTML(t, s, tag){
+    return `<div class="row">
+      <div><div class="rt">${t}</div>${s ? `<div class="rs">${s}</div>` : ''}</div>
+      <div class="tag">${tag}</div>
+    </div>`;
+  }
+
+  function render(){
+    const btn = $('mainbtn');
+    const pill = $('pill');
+    const badge = $('badge');
+    const stats = $('stats');
+    const hero = $('hero');
+    const list = $('listcard');
+
+    badge.classList.remove('pulse');
+
+    if(phase.screen === 'lobby'){
+      badge.textContent = 'QR';
+      stats.innerHTML = statBoxes(0);
+      hero.innerHTML = `
+        <div class="eyebrow">Киновечер: крупный план</div>
+        <h1>Всё готово<br>к началу</h1>
+        <p>После запуска капитан и команда закрепятся до конца игры.</p>`;
+      list.innerHTML = `
+        <div class="list-head"><span>Всё готово к началу</span><span class="muted">QR-2048</span></div>
+        ${rowHTML('10 из 10 команд в комнате','56 участников','готово')}
+        ${rowHTML('Кандидат в капитаны — Майя Волкова','закрепится после запуска','голос')}
+        ${rowHTML('Общий экран подключён','код комнаты готов к показу','эфир')}
+        ${rowHTML('После запуска','команду и капитана сменить нельзя','замок')}`;
+      pill.textContent = '10/10';
+      btn.textContent = 'Начать игру';
+    }
+
+    else if(phase.screen === 'ready'){
+      const q = QUESTIONS[phase.qi];
+      badge.textContent = q.time;
+      stats.innerHTML = statBoxes(0);
+      hero.innerHTML = `
+        <div class="eyebrow">${q.roundLabel}</div>
+        <h1>${q.readyTitle}</h1>
+        <p>Следующий вопрос запускает только ведущий.</p>`;
+      list.innerHTML = `
+        <div class="list-head"><span>Раунд ${q.round} · Узнай фильм</span><span class="muted">вопрос ${q.qIndex} из ${q.total}</span></div>
+        <div class="preview-box">
+          <div class="preview-question">${q.question}</div>
+          ${q.hasImage ? `<div class="preview-img">КАДР ИЗ ФИЛЬМА</div>` : ''}
+          <div class="preview-caption">На всех экранах вопрос появится одновременно. Отсчёт начнётся после нажатия.</div>
+        </div>
+        ${rowHTML('Тип ответа', q.typeSub, 'готово')}
+        ${rowHTML('Время', 'единый синхронный отсчёт', q.time + 'с')}
+        ${rowHTML('Правильный ответ', null, 'скрыт')}`;
+      pill.textContent = q.time + ' секунд';
+      btn.textContent = 'Показать вопрос всем';
+    }
+
+    else if(phase.screen === 'counting'){
+      const q = QUESTIONS[phase.qi];
+      badge.textContent = remaining;
+      badge.classList.add('pulse');
+      stats.innerHTML = statBoxes(answered);
+      hero.innerHTML = `
+        <div class="eyebrow">Идёт отсчёт</div>
+        <h1>Ответили ${answered}<br>из ${TEAMS} команд</h1>
+        <p>Один синхронный таймер работает на всех ролях.</p>`;
+      list.innerHTML = `
+        <div class="list-head"><span>Идёт отсчёт</span><span class="muted">Ответили ${answered} из ${TEAMS}</span></div>
+        <div class="preview-box">
+          <div class="preview-row">
+            <div class="preview-question">${q.question}</div>
+            <div class="preview-meta">${q.meta}</div>
+          </div>
+          ${q.hasImage ? `<div class="preview-img">КАДР ИЗ ФИЛЬМА</div>` : ''}
+        </div>
+        <div class="countdown-box">
+          <div class="countdown-top"><span>${remaining} секунд</span><span>осталось</span></div>
+          <div class="countdown-num">${remaining}</div>
+        </div>
+        ${rowHTML('Вопрос на всех экранах', 'игроки обсуждают, капитаны отвечают', 'эфир')}
+        ${rowHTML('Ответили', `${answered} из ${TEAMS} команд уже отправили вариант`, `${answered}/${TEAMS}`)}
+        ${rowHTML('Правильные ответы', 'скрыты до завершения всех вопросов раунда', 'скрыты')}`;
+      pill.textContent = `${answered} из ${TEAMS}`;
+      btn.textContent = 'Закрыть приём ответов';
+    }
+
+    else if(phase.screen === 'closed'){
+      const q = QUESTIONS[phase.qi];
+      const isLast = phase.qi === QUESTIONS.length - 1;
+      badge.textContent = '0';
+      stats.innerHTML = statBoxes(answered);
+      hero.innerHTML = `
+        <div class="eyebrow">Время вышло</div>
+        <h1>Приём ответов<br>закрыт</h1>
+        <p>Верные ответы остаются скрыты до ${isLast ? 'разбора раунда' : 'конца следующего вопроса'}.</p>`;
+      list.innerHTML = `
+        <div class="list-head"><span>Приём ответов закрыт</span><span class="muted">время вышло</span></div>
+        ${rowHTML(`Ответили ${answered} из ${TEAMS} команд`, 'полученные варианты неизменяемы', `${answered}/${TEAMS}`)}
+        ${rowHTML('Правильный ответ', isLast ? 'будет показан в разборе раунда' : 'останется скрытым до следующего вопроса', 'скрыт')}
+        ${rowHTML('Следующий шаг', isLast ? 'разбор раунда и итоги' : `вопрос ${q.qIndex + 1} без промежуточного разбора`, isLast ? 'итоги' : 'вопрос')}`;
+      pill.textContent = `${q.qIndex} из ${q.total}`;
+      btn.textContent = isLast ? 'Завершить раунд' : 'Подготовить следующий вопрос';
+    }
+  }
+
+  function statBoxes(ans){
+    return `
+      <div class="stat"><b>${ans}</b><span>ответили</span></div>
+      <div class="stat"><b>${TEAMS}</b><span>команд</span></div>
+      <div class="stat"><b>${PARTICIPANTS}</b><span>участников</span></div>
+      <div class="stat"><b>1</b><span>главная кнопка</span></div>`;
+  }
+
+  $('mainbtn').addEventListener('click', onMainBtn);
+  render();
+</script>
+
+</body>
+</html>
