@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Личный кабинет ведущего</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+    overflow:hidden;
+  }
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 440px;
+      height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 18px 16px;
+  }
+  .role-chip{
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .role-chip .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+  }
+  .profile-chip{
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 6px 14px 6px 6px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor:pointer;
+  }
+  .profile-chip .avatar{
+    width: 28px; height:28px; border-radius:50%;
+    background: linear-gradient(135deg, #3a3f2a, #1c1e16);
+    border: 2px solid var(--lime);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px; font-weight:800; color: var(--lime);
+  }
+
+  /* ===== STATS ===== */
+  .stats{
+    flex:0 0 auto;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 18px 16px;
+  }
+  .stat{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align:center;
+  }
+  .stat b{ display:block; font-size: 22px; font-weight:900; }
+  .stat b.lime{ color: var(--lime); }
+  .stat span{ display:block; font-size: 10px; color: var(--text-dim); font-weight:600; margin-top:4px; line-height:1.3; }
+
+  /* ===== SCROLL AREA ===== */
+  .content{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding: 0 18px 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .content::-webkit-scrollbar{ width:0; }
+
+  .section-title{
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-dim);
+    margin: 4px 0 10px;
+  }
+
+  .game-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    margin-bottom: 12px;
+  }
+  .game-top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+    margin-bottom: 4px;
+  }
+  .game-name{ font-size: 15px; font-weight: 800; line-height:1.3; }
+  .game-room{ font-size: 12px; color: var(--text-faint); margin-top:3px; font-weight:600; }
+
+  .status-tag{
+    flex-shrink:0;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 5px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-draft{ background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .status-done{ background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .status-ready{ background: rgba(198,255,61,0.12); color: var(--lime); }
+
+  .game-meta{
+    font-size: 12px; color: var(--text-dim); margin-top: 10px; line-height:1.5;
+  }
+
+  .game-actions{ margin-top: 14px; }
+  .btn-outline{
+    width:100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 0;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor:pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-outline:hover{ border-color: var(--lime); color: var(--lime); }
+  .btn-lime{
+    width:100%;
+    background: var(--lime);
+    color: #10130a;
+    border: none;
+    padding: 12px 0;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 13px;
+    cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .btn-lime:hover{ transform: translateY(-1px); }
+  .btn-disabled{
+    width:100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-faint);
+    padding: 11px 0;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor:not-allowed;
+  }
+  .progress-track{
+    height: 6px; border-radius: 999px; background: #2a2c2e;
+    overflow:hidden; margin-top: 12px;
+  }
+  .progress-fill{
+    height:100%; width: 42%;
+    background: var(--text-faint);
+    border-radius: 999px;
+  }
+
+  /* ===== BOTTOM BAR ===== */
+  .bottom{
+    flex:0 0 auto;
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .bottom .btn-lime{ font-size:14px; padding:14px 0; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <div class="role-chip"><span class="dot"></span>Ведущий</div>
+    <div class="profile-chip" onclick="alert('Заглушка: настройки профиля')">
+      <div class="avatar">И</div>
+      Игорь
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b class="lime">2</b><span>сессий<br>проведено</span></div>
+    <div class="stat"><b>4</b><span>игр<br>создано</span></div>
+    <div class="stat"><b>112</b><span>участников<br>охвачено</span></div>
+  </div>
+
+  <div class="content">
+    <div class="section-title">Мои игры</div>
+
+    <!-- В процессе создания -->
+    <div class="game-card">
+      <div class="game-top">
+        <div>
+          <div class="game-name">Летний квиз 2026</div>
+          <div class="game-room">черновик · без комнаты</div>
+        </div>
+        <div class="status-tag status-draft">в процессе создания</div>
+      </div>
+      <div class="game-meta">Заполнено 3 из 7 разделов сценария. Автосохранение включено.</div>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <div class="game-actions">
+        <button class="btn-disabled" disabled>Игра ещё не готова к запуску</button>
+      </div>
+    </div>
+
+    <!-- Завершена 1 -->
+    <div class="game-card">
+      <div class="game-top">
+        <div>
+          <div class="game-name">Киновечер: крупный план</div>
+          <div class="game-room">Комната QR-2048</div>
+        </div>
+        <div class="status-tag status-done">завершена</div>
+      </div>
+      <div class="game-meta">10 команд · 56 участников · проведена 7 августа</div>
+      <div class="game-actions">
+        <button class="btn-outline" onclick="alert('Заглушка: статистика игры QR-2048')">Посмотреть статистику</button>
+      </div>
+    </div>
+
+    <!-- Завершена 2 -->
+    <div class="game-card">
+      <div class="game-top">
+        <div>
+          <div class="game-name">Винный батл со слепой дегустацией</div>
+          <div class="game-room">Комната QR-3311</div>
+        </div>
+        <div class="status-tag status-done">завершена</div>
+      </div>
+      <div class="game-meta">6 команд · 24 участника · проведена 23 июля</div>
+      <div class="game-actions">
+        <button class="btn-outline" onclick="alert('Заглушка: статистика игры QR-3311')">Посмотреть статистику</button>
+      </div>
+    </div>
+
+    <!-- Готова к запуску -->
+    <div class="game-card">
+      <div class="game-top">
+        <div>
+          <div class="game-name">Название любой игры</div>
+          <div class="game-room">Комната QR-5678</div>
+        </div>
+        <div class="status-tag status-ready">готова к запуску</div>
+      </div>
+      <div class="game-meta">Сценарий готов, команда может подключаться по коду комнаты.</div>
+      <div class="game-actions">
+        <button class="btn-lime" onclick="alert('Заглушка: запуск игры QR-5678')">Запустить</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <button class="btn-lime" onclick="alert('Заглушка: создание новой игры')">+ Создать новую игру</button>
+  </div>
+</div>
+
+</body>
+</html>
