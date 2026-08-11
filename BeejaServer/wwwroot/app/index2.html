@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BeerJa — интерактивные мероприятия</title>
+
+  <script>
+    if (new URLSearchParams(window.location.search).get("tour") === "1") {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+  </script>
+  
+  <meta name="theme-color" content="#101116" />
+  <meta name="beerja-api-base" content="/api/v1" />
+  <meta name="description" content="BeerJa — интерактивные квизы, голосования и сценарии для живых мероприятий." />
+  <meta property="og:title" content="BeerJa — зал становится частью игры" />
+  <meta property="og:description" content="Ведущий управляет событием, участники входят по QR или коду, результат видит весь зал." />
+  <meta property="og:image" content="../assets/generated/quiz-lobby-night-v1-web.jpg" />
+  <link rel="icon" href="/assets/generated/quiz-entry-qr-v1.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/app/colors_and_type.css" />
+  <link rel="stylesheet" href="/app/styles.css" />
+  <link rel="stylesheet" href="/app/forms-and-overlays.css" />
+  <link rel="stylesheet" href="/app/product.css" />
+</head>
+<body>
+  <div id="app" aria-live="polite"></div>
+  <script type="module" src="/app/bootstrap.js"></script>
+</body>
+</html>
