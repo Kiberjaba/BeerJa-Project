@@ -5,7 +5,8 @@ import {
   organizerStates,
   playerStates,
   publicStates,
-  roles
+  roles,
+  user
 } from "./data.js";
 import { renderHost } from "./screens-host.js";
 import { renderOrganizer } from "./screens-organizer.js";
@@ -48,6 +49,8 @@ import {
 let state = loadState();
 let toastTimer = null;
 let tourAutomationTimer = null;
+let soloGameTimer = null;
+let soloQuestionTimer = null;
 let scheduledTourKey = "";
 let lastRenderedTourIdentity = null;
 let lastRenderedFocusIdentity = null;
@@ -85,6 +88,45 @@ function livePhaseFromStep(step) {
 
 function publicTourMode() {
   return new URLSearchParams(window.location.search).get("publictour") === "1";
+}
+
+function soloPreviewMode() {
+  const params = new URLSearchParams(window.location.search);
+  return !tourMode()
+    && !publicTourMode()
+    && params.get("demo") !== "1"
+    && params.get("data") !== "api";
+}
+
+function clearSoloGameAutomation() {
+  window.clearTimeout(soloGameTimer);
+  window.clearTimeout(soloQuestionTimer);
+  soloGameTimer = null;
+  soloQuestionTimer = null;
+}
+
+function scheduleSoloGameAutomation() {
+  clearSoloGameAutomation();
+  if (!soloPreviewMode()) return;
+
+  soloGameTimer = window.setTimeout(() => {
+    soloGameTimer = null;
+    if (!state.team.voteSubmitted || state.live.gameStarted) return;
+    setToast(advanceHost(state));
+    state.activeRole = state.team.captainId === user.id ? "captain" : "player";
+    saveState(state);
+    render();
+    emitStateChanged(state, "solo:start-game");
+
+    soloQuestionTimer = window.setTimeout(() => {
+      soloQuestionTimer = null;
+      if (!state.live.gameStarted || state.live.phase !== "roundIntro") return;
+      setToast(advanceHost(state));
+      saveState(state);
+      render();
+      emitStateChanged(state, "solo:start-question");
+    }, 700);
+  }, 550);
 }
 
 function livePhaseFromPublicStep(step) {
@@ -899,8 +941,12 @@ function handleAction(action, value) {
     if (!state.team.captainLocked) {
       state.team.voteSubmitted = true;
       setToast("Голос за капитана учтён");
+      scheduleSoloGameAutomation();
     }
-  } else if (action === "edit-captain-vote") state.team.voteSubmitted = false;
+  } else if (action === "edit-captain-vote") {
+    clearSoloGameAutomation();
+    state.team.voteSubmitted = false;
+  }
   else if (action === "host-next") setToast(advanceHost(state));
   else if (action === "pause-timer") {
     if (pauseTimer(state)) setToast("Отсчёт приостановлен");

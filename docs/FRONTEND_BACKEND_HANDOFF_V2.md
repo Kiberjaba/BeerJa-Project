@@ -32,6 +32,8 @@ All new product operations go through `product-contracts.js`, which delegates to
 
 There is no automatic fallback from API errors to mock success.
 
+For solo product review, the legacy clean-player mock automatically advances from a confirmed captain vote to the first question. This convenience automation is disabled in `?data=api`; production game start remains owned by the host/backend.
+
 ### Auth
 
 - `POST /api/v1/User/register`

@@ -163,6 +163,11 @@ function lobbyContent(state) {
   const captain = currentCaptain(state);
   const team = currentTeam(state);
   const submitted = state.team.voteSubmitted;
+  const params = new URLSearchParams(window.location.search);
+  const soloPreview = params.get("tour") !== "1"
+    && params.get("publictour") !== "1"
+    && params.get("demo") !== "1"
+    && params.get("data") !== "api";
   const candidates = currentTeamMembers(state).map((member) => {
     const votes = member.votes + (submitted && member.id === captain.id ? 1 : 0);
     return {
@@ -189,8 +194,12 @@ function lobbyContent(state) {
           ${locked
             ? `Ответы команды отправляет ${esc(firstName(captain.name))}. Сменить капитана и команду теперь нельзя.`
             : submitted
-              ? "До начала игры выбор можно изменить. Сам голос не запускает игру — ждём ведущего."
-              : "Вы выбираете кандидата и отдельно подтверждаете голос. Игру запускает только ведущий."}
+              ? soloPreview
+                ? "Голос учтён. Сейчас автоматически откроется первый раунд."
+                : "До начала игры выбор можно изменить. Сам голос не запускает игру — ждём ведущего."
+              : soloPreview
+                ? "Подтвердите кандидата — демо автоматически откроет первый вопрос."
+                : "Вы выбираете кандидата и отдельно подтверждаете голос. Игру запускает только ведущий."}
         </p>
         ${locked
           ? `<div class="lock-note">Команда закреплена после старта</div>`
@@ -202,7 +211,7 @@ function lobbyContent(state) {
     ${locked
       ? stickyStatus("замок", "Ждём вопрос ведущего", { tone: "signal" })
       : submitted
-        ? stickyStatus("голос учтён", "Ждём остальных")
+        ? stickyStatus("голос учтён", soloPreview ? "Запускаем игру" : "Ждём остальных")
         : stickyAction("ваш голос", `Проголосовать за ${accusativeFirstName(captain.name)}`, "submit-captain-vote", { tone: "signal", testId: "captain-vote-submit" })}
   `;
 }

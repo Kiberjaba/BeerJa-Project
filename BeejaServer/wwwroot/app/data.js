@@ -87,6 +87,7 @@ export const publicStates = [
 ];
 
 export const user = {
+  id: "maya",
   name: "Майя Волкова",
   shortName: "Майя",
   yandexId: "maya.volkova",

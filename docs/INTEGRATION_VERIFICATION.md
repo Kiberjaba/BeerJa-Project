@@ -10,7 +10,7 @@ Frontend integration status: PASS.
 ## Checks completed against BeerJa paths
 
 - JavaScript syntax: every module in `BeejaServer/wwwroot/app/*.js` passed `node --check`.
-- Product browser suite: 12/12 end-to-end checks passed.
+- Product browser suite: 14/14 end-to-end checks passed.
 - Responsive matrix: 13 production routes × 6 viewports = 78/78 checks.
 - Root opens the canonical product landing at `/app/`.
 - Live Signal renders from BeerJa-owned static files; no dependency on the old Open Design workspace.
@@ -20,6 +20,7 @@ Frontend integration status: PASS.
 - Demo overview renders five mobile role frames and one public screen.
 - Public screen keeps a 16:9 ratio.
 - Active live-game exit requires explicit confirmation and returns to `/app/` only after approval.
+- In mock preview, captain vote automatically starts the game and opens the first question; `?data=api` preserves host/backend-controlled start.
 - Runtime console errors: 0.
 - Runtime page errors: 0.
 - Failed asset requests: 0.

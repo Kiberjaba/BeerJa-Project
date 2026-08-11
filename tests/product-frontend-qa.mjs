@@ -174,6 +174,23 @@ try {
   assert(await legacyPage.locator(".product-root").count() === 0, "Guided tour must stay isolated from product shell");
   pass("Legacy guided tour isolation");
 
+  const soloPlayerPage = await context.newPage();
+  attachDiagnostics(soloPlayerPage, "solo-player-autostart");
+  await soloPlayerPage.goto(`${baseUrl}/app/?demo=0&role=player&player=lobby&clear=1`, { waitUntil: "networkidle" });
+  await soloPlayerPage.locator('[data-testid="captain-vote-submit"]').click();
+  await soloPlayerPage.waitForSelector('[data-testid="question-surface"]');
+  assert(await soloPlayerPage.locator('[data-testid="answer-submit"]').count() === 1, "Selected local captain must reach the first answer automatically");
+  assert((await soloPlayerPage.locator(".hero-title").innerText()).includes("Выберите ответ"), "Solo player flow must promote the selected local captain");
+  pass("Captain vote → automatic first question in mock preview");
+
+  const apiPlayerPage = await context.newPage();
+  attachDiagnostics(apiPlayerPage, "api-player-host-boundary");
+  await apiPlayerPage.goto(`${baseUrl}/app/?data=api&role=player&player=lobby&clear=1`, { waitUntil: "networkidle" });
+  await apiPlayerPage.locator('[data-testid="captain-vote-submit"]').click();
+  await apiPlayerPage.waitForTimeout(1600);
+  assert(await apiPlayerPage.locator('[data-testid="question-surface"]').count() === 0, "API mode must keep game start under host/backend control");
+  pass("API mode preserves host-controlled game start");
+
   const livePage = await context.newPage();
   attachDiagnostics(livePage, "live-exit");
   await livePage.goto(`${baseUrl}/app/?role=host&host=question&clear=1`, { waitUntil: "networkidle" });
