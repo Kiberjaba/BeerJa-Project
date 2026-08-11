@@ -94,6 +94,7 @@ export function createInitialState() {
     ui: {
       sheet: null,
       resetConfirm: false,
+      exitConfirm: false,
       authScenario: "success",
       teamScenario: "found",
       emptyHistory: false,
@@ -144,6 +145,7 @@ export function saveState(state) {
   persistent.toast = "";
   persistent.ui.sheet = null;
   persistent.ui.resetConfirm = false;
+  persistent.ui.exitConfirm = false;
   localStorage.setItem(storageKey, JSON.stringify(persistent));
 }
 

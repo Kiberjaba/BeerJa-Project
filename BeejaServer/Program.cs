@@ -56,5 +56,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers(); // Маппинг контроллеров
+app.MapFallbackToFile("/app/{*path:nonfile}", "app/index.html");
 
 app.Run();

@@ -451,6 +451,36 @@ function renderResetConfirm() {
   `;
 }
 
+function renderLiveExit() {
+  const params = new URLSearchParams(window.location.search);
+  const previewMode = tourMode() || publicTourMode() || params.get("demo") === "1";
+  const activeGame = state.live.gameStarted && ["player", "captain", "host"].includes(state.activeRole);
+  if (previewMode || !activeGame) return "";
+
+  return `
+    <button class="live-exit-button" data-action="request-product-exit" type="button" aria-label="Выйти из активной игры на главную">
+      <span aria-hidden="true">←</span>
+      На главную
+    </button>
+  `;
+}
+
+function renderExitConfirm() {
+  if (!state.ui.exitConfirm) return "";
+  return `
+    <div class="sheet-backdrop">
+      <section class="confirm-dialog" role="alertdialog" aria-modal="true" aria-label="Выйти из активной игры">
+        <h2>Выйти из игры?</h2>
+        <p>Текущий экран закроется. Прогресс игры сохранится на этом устройстве.</p>
+        <div class="inline-actions">
+          ${button("cancel-product-exit", "Остаться", { className: "secondary-button" })}
+          ${button("confirm-product-exit", "Выйти", { className: "primary-button signal" })}
+        </div>
+      </section>
+    </div>
+  `;
+}
+
 function tourViewIdentity() {
   return [
     state.player.step,
@@ -473,7 +503,8 @@ function focusViewIdentity() {
     state.live.questionIndex,
     state.live.revealIndex,
     state.ui.sheet?.type || "",
-    state.ui.resetConfirm ? "reset" : ""
+    state.ui.resetConfirm ? "reset" : "",
+    state.ui.exitConfirm ? "exit" : ""
   ].join(":");
 }
 
@@ -559,8 +590,10 @@ function render() {
       ${guidedTour ? renderTourBar(state) : guidedPublic ? publicTourBar() : showDemo ? demoBar() : ""}
       <section class="stage">${renderStage()}</section>
       ${state.toast ? `<div class="toast-message" role="status">${esc(state.toast)}</div>` : ""}
+      ${renderLiveExit()}
       ${renderSheet()}
       ${renderResetConfirm()}
+      ${renderExitConfirm()}
     </main>
   `;
   if (tourIdentityChanged) window.scrollTo(0, 0);
@@ -790,6 +823,14 @@ function handleAction(action, value) {
   else if (action === "set-demo-step") setDemoStep(value);
   else if (action === "reset-demo") state.ui.resetConfirm = true;
   else if (action === "cancel-reset") state.ui.resetConfirm = false;
+  else if (action === "request-product-exit") state.ui.exitConfirm = true;
+  else if (action === "cancel-product-exit") state.ui.exitConfirm = false;
+  else if (action === "confirm-product-exit") {
+    state.ui.exitConfirm = false;
+    saveState(state);
+    window.location.assign("/app/");
+    return;
+  }
   else if (action === "confirm-reset") {
     const demoVisible = new URLSearchParams(window.location.search).get("demo") === "1";
     state = createInitialState();

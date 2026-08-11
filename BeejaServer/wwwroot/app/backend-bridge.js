@@ -73,6 +73,48 @@ export const beerJaApi = Object.freeze({
       method: "POST",
       body: JSON.stringify(payload)
     });
+  },
+  register(payload) {
+    return request("/User/register", { method: "POST", body: JSON.stringify(payload) });
+  },
+  login(payload) {
+    return request("/User/login", { method: "POST", body: JSON.stringify(payload) });
+  },
+  getRoomByCode(code) {
+    return request(`/rooms/by-code/${encodeURIComponent(code)}`);
+  },
+  joinRoom(roomId, payload = {}) {
+    return request(`/rooms/${encodeURIComponent(roomId)}/join`, { method: "POST", body: JSON.stringify(payload) });
+  },
+  getPlayerProfile() {
+    return request("/users/me/profile");
+  },
+  getPlayerGames() {
+    return request("/users/me/games");
+  },
+  getPlayerGame(gameId) {
+    return request(`/users/me/games/${encodeURIComponent(gameId)}`);
+  },
+  getHostGames() {
+    return request("/hosts/me/games");
+  },
+  getHostGame(gameId) {
+    return request(`/hosts/me/games/${encodeURIComponent(gameId)}`);
+  },
+  getHostAnalytics(gameId) {
+    return request(`/hosts/me/games/${encodeURIComponent(gameId)}/analytics`);
+  },
+  getMechanics() {
+    return request("/mechanics");
+  },
+  getMechanic(slug) {
+    return request(`/mechanics/${encodeURIComponent(slug)}`);
+  },
+  createOrder(payload) {
+    return request("/orders", { method: "POST", body: JSON.stringify(payload) });
+  },
+  getOrder(orderId) {
+    return request(`/orders/${encodeURIComponent(orderId)}`);
   }
 });
 
