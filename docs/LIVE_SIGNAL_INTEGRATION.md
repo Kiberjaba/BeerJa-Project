@@ -8,7 +8,8 @@ Live Signal перенесён в BeerJa как полноценный стат�
 
 - Product source: `BeejaServer/wwwroot/app/`.
 - ASP.NET Core раздаёт папку через `UseStaticFiles()`.
-- Root `BeejaServer/wwwroot/index.html` переводит пользователя в `/app/?tour=1`.
+- Root `BeejaServer/wwwroot/index.html` переводит пользователя в canonical product entry `/app/`.
+- Исторические live-game demo доступны по явным query-маршрутам (`?tour=1`, `?demo=1`, `?publictour=1`) и изолированы от продуктового router.
 - Все изображения находятся в `BeejaServer/wwwroot/assets/generated/`; внешняя Open Design папка для runtime не требуется.
 
 ## Что уже работает во frontend
@@ -21,6 +22,7 @@ Live Signal перенесён в BeerJa как полноценный стат�
 - Разбор трёх ответов после раунда, лидерборд и финал.
 - Линейный 27-шаговый tour на одном устройстве.
 - Русский интерфейс, keyboard/focus/reduced-motion состояния.
+- Публичная главная, room join, role-aware auth, кабинеты игрока/ведущего, каталог механик, заказ и аналитика.
 
 ## Временный mock boundary
 
@@ -33,6 +35,7 @@ Live Signal перенесён в BeerJa как полноценный стат�
 - `beerja:state-changed` — снимок состояния после изменения.
 - `beerja:ready` — frontend готов к интеграции.
 - `/app/?data=api` — явный интеграционный режим; обычный demo остаётся детерминированным.
+- Для продуктовых экранов transport boundary находится в `product-contracts.js`; полный mapping — в `FRONTEND_BACKEND_HANDOFF_V2.md`.
 
 События нужны для диагностики и постепенного подключения endpoint-ов. Они не являются серверным event log.
 

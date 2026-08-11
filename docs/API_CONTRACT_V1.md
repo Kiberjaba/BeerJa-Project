@@ -4,6 +4,8 @@ Base URL: `/api/v1`
 
 Существующий `UserController` остаётся источником авторизации. Ниже — контракт следующего слоя; endpoint-ы перечислены до реализации, чтобы frontend, backend и math work могли идти параллельно.
 
+Контракты продуктовых экранов (комнаты, кабинеты, каталог, заказ и аналитика) и их точный frontend mapping находятся в `FRONTEND_BACKEND_HANDOFF_V2.md`.
+
 ## Existing user endpoints
 
 - `GET /User/yandex-login`

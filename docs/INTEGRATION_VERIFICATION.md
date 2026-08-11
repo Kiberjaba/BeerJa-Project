@@ -1,6 +1,6 @@
 # Integration verification
 
-Generated: 2026-08-11 11:15 MSK
+Updated: 2026-08-11
 Branch: `codex/live-signal-integration`
 
 ## Result
@@ -10,21 +10,23 @@ Frontend integration status: PASS.
 ## Checks completed against BeerJa paths
 
 - JavaScript syntax: every module in `BeejaServer/wwwroot/app/*.js` passed `node --check`.
-- Browser smoke: 18/18 checks passed.
-- Root opens `/app/?tour=1`.
+- Product browser suite: 12/12 end-to-end checks passed.
+- Responsive matrix: 13 production routes × 6 viewports = 78/78 checks.
+- Root opens the canonical product landing at `/app/`.
 - Live Signal renders from BeerJa-owned static files; no dependency on the old Open Design workspace.
 - Backend bridge is exposed as `window.BeerJaFrontend`.
 - `mock` is the default mode; `?data=api` selects integration mode.
 - Clean player route hides the QA navigator.
 - Demo overview renders five mobile role frames and one public screen.
 - Public screen keeps a 16:9 ratio.
+- Active live-game exit requires explicit confirmation and returns to `/app/` only after approval.
 - Runtime console errors: 0.
 - Runtime page errors: 0.
 - Failed asset requests: 0.
 
 ## Regression suite reused from Live Signal
 
-- Guided tour: PASS; 27 visible steps, 9 questions, 36 view transitions, 0 console/page errors.
+- Guided tour: PASS; 9 questions, 12 screenshots, 0 console/page errors.
 - Functional: PASS; 13/13 stages, 0 console/page errors.
 - Keyboard/focus: PASS; 48 keyboard activations, 45 transitions, 0 mouse clicks, 0 console/page errors.
 - Visual: PASS; 8 route/viewport reports, 0 failed checks.
@@ -36,10 +38,10 @@ The repository was verified with a temporary official Microsoft .NET SDK 10.0.30
 
 - `dotnet restore Beerja.slnx`: PASS.
 - `dotnet build Beerja.slnx --configuration Release --no-restore`: PASS, 0 warnings, 0 errors.
-- `dotnet test Beerja.slnx --configuration Release --no-build`: PASS, 3/3 tests.
+- `dotnet test Beerja.slnx --configuration Release`: PASS, 4/4 tests.
 
 The upstream GitHub Actions run still requires first-time contributor approval from `Kiberjaba` because the pull request comes from a fork.
 
 ## GitHub permission state
 
-The repository invitation was accepted successfully, but GitHub reports `viewerPermission: READ` even though the original invitation advertised `write`. The integration is prepared in a local branch. If direct push remains blocked, push the same commit from a fork and open a pull request, or ask `Kiberjaba` to grant Write access.
+GitHub reports `viewerPermission: READ` for upstream `Kiberjaba/BeerJa-Project`. Delivery therefore uses fork branch `Temik812/BeerJa-Project:codex/live-signal-integration`; upstream PR #2 is the review and merge boundary.

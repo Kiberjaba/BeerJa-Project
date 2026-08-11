@@ -17,7 +17,22 @@ public class StaticFrontendTests
         "screens-public.js",
         "styles.css",
         "forms-and-overlays.css",
-        "colors_and_type.css"
+        "colors_and_type.css",
+        "bootstrap.js",
+        "product-app.js",
+        "product-data.js",
+        "product-contracts.js",
+        "product-ui.js",
+        "router.js",
+        "app-shell.js",
+        "screens-public-site.js",
+        "screens-auth.js",
+        "screens-user-account.js",
+        "screens-host-account.js",
+        "screens-mechanics.js",
+        "screens-order.js",
+        "screens-analytics.js",
+        "product.css"
     ];
 
     [Fact]
@@ -32,12 +47,13 @@ public class StaticFrontendTests
     }
 
     [Fact]
-    public void RootPage_OpensGuidedBeerJaTour()
+    public void RootPage_OpensBeerJaProduct()
     {
         var rootIndex = File.ReadAllText(Path.Combine(
             RepositoryRoot(), "BeejaServer", "wwwroot", "index.html"));
 
-        Assert.Contains("/app/?tour=1", rootIndex);
+        Assert.Contains("url=/app/", rootIndex);
+        Assert.DoesNotContain("url=/app/?tour=1", rootIndex);
     }
 
     [Fact]
@@ -58,6 +74,21 @@ public class StaticFrontendTests
             "assets",
             "generated",
             "quiz-entry-qr-v1.svg")));
+    }
+
+    [Fact]
+    public void ProductFrontend_HasApiBoundaryAndPreservesTour()
+    {
+        var appRoot = Path.Combine(RepositoryRoot(), "BeejaServer", "wwwroot", "app");
+        var bootstrap = File.ReadAllText(Path.Combine(appRoot, "bootstrap.js"));
+        var contracts = File.ReadAllText(Path.Combine(appRoot, "product-contracts.js"));
+        var bridge = File.ReadAllText(Path.Combine(appRoot, "backend-bridge.js"));
+
+        Assert.Contains("import(\"./app.js\")", bootstrap);
+        Assert.Contains("import(\"./product-app.js\")", bootstrap);
+        Assert.Contains("integrationMode === \"api\"", contracts);
+        Assert.Contains("createOrder", bridge);
+        Assert.Contains("getHostAnalytics", bridge);
     }
 
     private static string RepositoryRoot()
