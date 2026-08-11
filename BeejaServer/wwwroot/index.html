@@ -1,33 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Игра Beeja</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="refresh" content="0; url=/app/?tour=1" />
+  <meta name="theme-color" content="#101116" />
+  <link rel="icon" href="/assets/generated/quiz-entry-qr-v1.svg" type="image/svg+xml" />
+  <title>BeerJa</title>
 </head>
 <body>
-    <h1>Вход в игру</h1>
-    <input type="text" id="username" placeholder="Твое имя">
-    <input type="number" id="table" placeholder="Номер стола">
-    <input type="number" id="gameId" placeholder="ID игры">
-    <button onclick="sendLogin()">Войти</button>
-
-    <div id="result"></div>
-
-    <script>
-        async function sendLogin() {
-            const username = document.getElementById('username').value;
-            const table = document.getElementById('table').value;
-            const gameId = document.getElementById('gameId').value;
-
-            // Отправляем данные на твой контроллер
-            const response = await fetch(`/Users/login?username=${username}&tableNumber=${table}&gameId=${gameId}`, {
-                method: 'POST'
-            });
-
-            const data = await response.json();
-            document.getElementById('result').innerText = data.message;
-            console.log(data);
-        }
-    </script>
+  <p>Открываем <a href="/app/?tour=1">интерактивный прототип BeerJa</a>.</p>
 </body>
 </html>
