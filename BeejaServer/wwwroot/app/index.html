@@ -4,6 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BeerJa — интерактивные мероприятия</title>
+
+  <script>
+    if (new URLSearchParams(window.location.search).get("tour") === "1") {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+  </script>
+  
   <meta name="theme-color" content="#101116" />
   <meta name="beerja-api-base" content="/api/v1" />
   <link rel="icon" href="../assets/generated/quiz-entry-qr-v1.svg" type="image/svg+xml" />

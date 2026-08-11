@@ -41,8 +41,8 @@ export function tourView(state) {
     return {
       step: 27,
       simulation: "Профиль показывает опыт платформы, достижения и историю отдельно от счёта.",
-      action: "tour-restart",
-      actionLabel: "Начать заново"
+      action: "tour-exit", // <-- Изменили экшен
+      actionLabel: "Вернуться на сайт" // <-- Изменили текст кнопки
     };
   }
 
@@ -106,12 +106,17 @@ export function renderTourBar(state) {
         <strong>Демо-тур · шаг ${view.step} из ${TOUR_TOTAL_STEPS}</strong>
       </div>
       <p>Сейчас симулируется: ${esc(view.simulation)}</p>
-      ${view.action
-        ? button(view.action, view.actionLabel, {
-          className: "tour-next-button",
-          testId: view.action === "tour-restart" ? "tour-restart" : "tour-next"
-        })
-        : ""}
+      <div style="display: flex; gap: 10px; align-items: center;">
+        ${view.action
+          ? button(view.action, view.actionLabel, {
+              className: "tour-next-button",
+              testId: view.action === "tour-restart" ? "tour-restart" : "tour-next"
+            })
+          : ""}
+        <button onclick="window.location.href='../ved.html'" class="tour-next-button" style="opacity: 0.85;">
+          Выйти из демо-тура
+        </button>
+      </div>
     </aside>
   `;
 }
