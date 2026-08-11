@@ -1,0 +1,75 @@
+:root {
+  --ink: #101116;
+  --night: #191b22;
+  --cloud: #f4f2ec;
+  --fog: #9699a3;
+  --pulse: #705cff;
+  --signal: #c9ff47;
+  --coral: #ff6b61;
+  --gold: #ffc85a;
+  --surface: rgba(25, 27, 34, 0.86);
+  --surface-strong: rgba(16, 17, 22, 0.94);
+  --line: rgba(244, 242, 236, 0.14);
+  --scrim: linear-gradient(180deg, rgba(16, 17, 22, 0.08), rgba(16, 17, 22, 0.5) 44%, rgba(16, 17, 22, 0.96));
+  --scrim-solid: rgba(16, 17, 22, 0.88);
+  --phone-max: 430px;
+  --phone-base-width: 390px;
+  --phone-base-height: 844px;
+  --page-pad-sm: 14px;
+  --page-pad: 16px;
+  --page-pad-lg: 18px;
+  --gap-xs: 8px;
+  --gap-sm: 10px;
+  --gap-md: 12px;
+  --touch: 48px;
+  --radius-sm: 16px;
+  --radius-card: 20px;
+  --radius-md: 24px;
+  --radius-choice: 28px;
+  --radius-xl: 36px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+  --shadow-live: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --shadow-choice: 0 22px 52px rgba(0, 0, 0, 0.32);
+  --motion-fast: 90ms;
+  --motion-ui: 180ms;
+  --motion-state: 260ms;
+  --motion-panel: 440ms;
+  --motion-rich: 700ms;
+  --font-ui: "Onest", "Avenir Next", "SF Pro Text", system-ui, sans-serif;
+  --font-display: "Onest", "Arial Rounded MT Bold", "SF Pro Display", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--ink);
+  color: var(--cloud);
+  font-family: var(--font-ui);
+  letter-spacing: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: 0;
+}
+
+button {
+  min-height: var(--touch);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
