@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Личный кабинет игрока</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+    overflow:hidden;
+  }
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 440px;
+      height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 18px 8px;
+  }
+  .role-chip{
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .role-chip .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+  }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--border); background: var(--card);
+    color: var(--text); font-size:15px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ===== SCROLL AREA ===== */
+  .content{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding: 10px 18px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .content::-webkit-scrollbar{ width:0; }
+
+  .profile-head{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .avatar-big{
+    width: 76px; height:76px; border-radius: 50%;
+    background: linear-gradient(135deg, #3a3f2a, #1c1e16);
+    border: 3px solid var(--lime);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 26px; font-weight:800; color:var(--lime);
+    position: relative;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .avatar-edit{
+    position:absolute; bottom:-2px; right:-2px;
+    width:24px; height:24px; border-radius:50%;
+    background: var(--lime); color:#10130a;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px; font-weight:900;
+    border: 2px solid var(--bg);
+  }
+  .profile-name{ display:flex; flex-direction:column; gap:6px; }
+  .nick{ font-size: 20px; font-weight: 800; }
+  .change-avatar{
+    font-size: 12px; color: var(--lime); font-weight:700;
+    background:none; border:none; cursor:pointer; padding:0;
+    text-align:left;
+  }
+
+  .level-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px 18px;
+    margin-bottom: 16px;
+  }
+  .level-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom: 12px;
+  }
+  .level-num{ font-size: 22px; font-weight:900; }
+  .level-num span{ color: var(--lime); }
+  .level-pts{ font-size: 12px; color: var(--text-dim); font-weight:700; }
+  .bar-track{
+    height: 8px; border-radius: 999px;
+    background: #2a2c2e;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%; width: 64%;
+    background: var(--lime);
+    border-radius: 999px;
+  }
+  .bar-caption{
+    margin-top:8px; font-size:11px; color: var(--text-faint);
+  }
+
+  .stats-row{
+    display:flex; gap: 12px; margin-bottom: 20px;
+  }
+  .stat-box{
+    flex:1;
+    background: var(--card-2);
+    border:1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px 14px;
+  }
+  .stat-num{ font-size: 22px; font-weight:900; color: var(--lime); }
+  .stat-label{ font-size: 11px; color: var(--text-dim); margin-top:4px; font-weight:600; }
+
+  .section-title{
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .history{ display:flex; flex-direction:column; gap:10px; }
+  .history-item{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 14px;
+  }
+  .hist-left{ display:flex; flex-direction:column; gap:3px; }
+  .hist-name{ font-size:13px; font-weight:700; }
+  .hist-date{ font-size:11px; color: var(--text-faint); }
+  .hist-score{ font-size: 13px; font-weight:800; color: var(--lime); }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <div class="role-chip"><span class="dot"></span>Игрок</div>
+    <button class="icon-btn" onclick="alert('Заглушка: настройки')">⚙</button>
+  </div>
+
+  <div class="content">
+    <div class="profile-head">
+      <div class="avatar-big" onclick="alert('Заглушка: выбор аватара')">
+        М
+        <div class="avatar-edit">✎</div>
+      </div>
+      <div class="profile-name">
+        <div class="nick">Майя</div>
+        <button class="change-avatar" onclick="alert('Заглушка: выбор аватара')">Сменить аватар</button>
+      </div>
+    </div>
+
+    <div class="level-card">
+      <div class="level-top">
+        <div class="level-num">Уровень <span>7</span></div>
+        <div class="level-pts">640 / 1000 очков</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill"></div></div>
+      <div class="bar-caption">До уровня 8 осталось 360 очков</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Сессий пройдено</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">3 240</div>
+        <div class="stat-label">Баллов всего</div>
+      </div>
+    </div>
+
+    <div class="section-title">История сессий</div>
+    <div class="history">
+      <div class="history-item">
+        <div class="hist-left">
+          <div class="hist-name">Комната QR-2048</div>
+          <div class="hist-date">7 августа, 21:14</div>
+        </div>
+        <div class="hist-score">+280</div>
+      </div>
+      <div class="history-item">
+        <div class="hist-left">
+          <div class="hist-name">Комната Neon-Loop</div>
+          <div class="hist-date">3 августа, 19:02</div>
+        </div>
+        <div class="hist-score">+150</div>
+      </div>
+      <div class="history-item">
+        <div class="hist-left">
+          <div class="hist-name">Комната QR-1103</div>
+          <div class="hist-date">29 июля, 20:40</div>
+        </div>
+        <div class="hist-score">+410</div>
+      </div>
+      <div class="history-item">
+        <div class="hist-left">
+          <div class="hist-name">Комната Pulse-9</div>
+          <div class="hist-date">21 июля, 18:15</div>
+        </div>
+        <div class="hist-score">+95</div>
+      </div>
+      <div class="history-item">
+        <div class="hist-left">
+          <div class="hist-name">Комната QR-3311</div>
+          <div class="hist-date">23 июля, 20:00</div>
+        </div>
+        <div class="hist-score">+320</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
