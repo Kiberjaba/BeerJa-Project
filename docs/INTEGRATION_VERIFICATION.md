@@ -30,9 +30,15 @@ Frontend integration status: PASS.
 - Visual: PASS; 8 route/viewport reports, 0 failed checks.
 - Route audit: PASS; 47/47 player, captain, organizer, host, public, overview, error, empty and responsive states; 0 failures.
 
-## Server build limitation
+## Server build
 
-The local Mac does not currently have a `dotnet` executable, so the .NET build and xUnit tests cannot be executed locally. The repository GitHub Actions workflow installs .NET SDK 10 and runs restore/build/test on pull requests to `main`; that CI result is the authoritative server compilation gate for this branch.
+The repository was verified with a temporary official Microsoft .NET SDK 10.0.302 installation; no system-wide SDK or project configuration was changed.
+
+- `dotnet restore Beerja.slnx`: PASS.
+- `dotnet build Beerja.slnx --configuration Release --no-restore`: PASS, 0 warnings, 0 errors.
+- `dotnet test Beerja.slnx --configuration Release --no-build`: PASS, 3/3 tests.
+
+The upstream GitHub Actions run still requires first-time contributor approval from `Kiberjaba` because the pull request comes from a fork.
 
 ## GitHub permission state
 
