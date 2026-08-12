@@ -139,9 +139,10 @@
     overflow:hidden;
   }
   .bar-fill{
-    height:100%; width: 64%;
+    height:100%; width: 0%;
     background: var(--lime);
     border-radius: 999px;
+    transition: width 0.6s ease-out;
   }
   .bar-caption{
     margin-top:8px; font-size:11px; color: var(--text-faint);
@@ -193,32 +194,32 @@
 
   <div class="content">
     <div class="profile-head">
-      <div class="avatar-big" onclick="alert('Заглушка: выбор аватара')">
-        М
+      <div class="avatar-big" id="avatarLetter" onclick="alert('Заглушка: выбор аватара')">
+        -
         <div class="avatar-edit">✎</div>
       </div>
       <div class="profile-name">
-        <div class="nick">Майя</div>
+        <div class="nick" id="userNickname">Загрузка...</div>
         <button class="change-avatar" onclick="alert('Заглушка: выбор аватара')">Сменить аватар</button>
       </div>
     </div>
 
     <div class="level-card">
       <div class="level-top">
-        <div class="level-num">Уровень <span>7</span></div>
-        <div class="level-pts">640 / 1000 очков</div>
+        <div class="level-num">Уровень <span id="userLevel">-</span></div>
+        <div class="level-pts" id="levelProgressText">0 / 0 очков</div>
       </div>
-      <div class="bar-track"><div class="bar-fill"></div></div>
-      <div class="bar-caption">До уровня 8 осталось 360 очков</div>
+      <div class="bar-track"><div class="bar-fill" id="progressBar"></div></div>
+      <div class="bar-caption" id="remainingText">Загрузка данных...</div>
     </div>
 
     <div class="stats-row">
       <div class="stat-box">
-        <div class="stat-num">12</div>
+        <div class="stat-num" id="sessionsCount">0</div>
         <div class="stat-label">Сессий пройдено</div>
       </div>
       <div class="stat-box">
-        <div class="stat-num">3 240</div>
+        <div class="stat-num" id="totalPoints">0</div>
         <div class="stat-label">Баллов всего</div>
       </div>
     </div>
@@ -239,30 +240,102 @@
         </div>
         <div class="hist-score">+150</div>
       </div>
-      <div class="history-item">
-        <div class="hist-left">
-          <div class="hist-name">Комната QR-1103</div>
-          <div class="hist-date">29 июля, 20:40</div>
-        </div>
-        <div class="hist-score">+410</div>
-      </div>
-      <div class="history-item">
-        <div class="hist-left">
-          <div class="hist-name">Комната Pulse-9</div>
-          <div class="hist-date">21 июля, 18:15</div>
-        </div>
-        <div class="hist-score">+95</div>
-      </div>
-      <div class="history-item">
-        <div class="hist-left">
-          <div class="hist-name">Комната QR-3311</div>
-          <div class="hist-date">23 июля, 20:00</div>
-        </div>
-        <div class="hist-score">+320</div>
-      </div>
     </div>
   </div>
 </div>
+
+<script>
+  // Укажите URL вашего сервера backend
+  const API_BASE_URL = 'http://localhost:5234/api/v1/User';
+
+  async function loadUserProfile() {
+    // Получаем токен из LocalStorage (сохраненный при входе/регистрации)
+    const token = localStorage.getItem('jwt_token');
+
+    if (!token) {
+      console.warn('Токен авторизации не найден. Перенаправление на вход...');
+      // window.location.href = '/login.html'; // Разкомментируйте для авто-перенаправления
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/profile-data`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert('Сессия истекла. Пожалуйста, войдите снова.');
+        }
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Отрисовка полученных данных
+      document.getElementById('userNickname').innerText = data.username;
+      document.getElementById('sessionsCount').innerText = data.sessionsCount;
+      document.getElementById('totalPoints').innerText = data.totalPoints;
+
+      // Инициал для аватарки
+      if (data.username && data.username.length > 0) {
+        const firstLetter = data.username.charAt(0).toUpperCase();
+        document.getElementById('avatarLetter').childNodes[0].nodeValue = firstLetter + ' ';
+      }
+
+      document.getElementById('userLevel').innerText = data.level;
+      document.getElementById('levelProgressText').innerText = `${data.pointsInCurrentLevel} / ${data.pointsRequiredForNext} очков`;
+      
+      // Заполнение шкалы прогресса (ограничиваем от 0 до 100%)
+      const progress = Math.min(Math.max(data.progressPercentage, 0), 100);
+      document.getElementById('progressBar').style.width = `${progress}%`;
+
+      document.getElementById('remainingText').innerText = `До уровня ${data.level + 1} осталось ${data.pointsRemaining} очков`;
+      document.getElementById('sessionsCount').innerText = data.sessionsCount;
+      document.getElementById('totalPoints').innerText = data.totalPoints.toLocaleString('ru-RU');
+      
+      // Отрисовка истории чекинов
+      const historyContainer = document.querySelector('.history');
+      historyContainer.innerHTML = ''; // Очищаем статические карточки
+
+      if (!data.recentCheckins || data.recentCheckins.length === 0) {
+        historyContainer.innerHTML = '<div style="color: var(--text-faint); font-size: 13px;">У вас пока нет пройденных сессий</div>';
+      } else {
+        data.recentCheckins.forEach(item => {
+          const dateObj = new Date(item.checkedInAt);
+          const formattedDate = dateObj.toLocaleString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          const itemHtml = `
+            <div class="history-item">
+              <div class="hist-left">
+                <div class="hist-name">${item.eventTitle}</div>
+                <div class="hist-date">${formattedDate}</div>
+              </div>
+              <div class="hist-score">+${item.pointsAwarded}</div>
+            </div>
+          `;
+          historyContainer.insertAdjacentHTML('beforeend', itemHtml);
+        });
+}
+    } catch (error) {
+      console.error('Не удалось загрузить профиль:', error);
+      document.getElementById('remainingText').innerText = 'Ошибка загрузки данных';
+    }
+    
+  }
+
+  // Запуск загрузки при загрузке страницы
+  document.addEventListener('DOMContentLoaded', loadUserProfile);
+</script>
 
 </body>
 </html>

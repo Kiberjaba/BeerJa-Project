@@ -9,7 +9,8 @@ namespace BeejaServer.Data
 
         // Это дорога к SQL таблицам 
         public DbSet<User> Users { get; set; }
-
+        public DbSet<EventCheckin> EventCheckins { get; set; }
+        public DbSet<Event> Events { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()

@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace BeejaServer.Controllers
 {
@@ -52,7 +54,6 @@ namespace BeejaServer.Controllers
             {
                 using var httpClient = new HttpClient();
 
-                // 1. Обмениваем временный code на access_token от Яндекса
                 var tokenRequestParams = new Dictionary<string, string>
                 {
                     { "grant_type", "authorization_code" },
@@ -73,7 +74,6 @@ namespace BeejaServer.Controllers
                     return BadRequest(new { message = "Не удалось распарсить токен Яндекс" });
                 }
 
-                // 2. С помощью access_token запрашиваем данные пользователя из Яндекс ID
                 httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("OAuth", tokenData.AccessToken);
                 var userInfoResponse = await httpClient.GetAsync("https://login.yandex.ru/info?format=json");
 
@@ -88,7 +88,6 @@ namespace BeejaServer.Controllers
                     return BadRequest(new { message = "Email не предоставлен сервисом Яндекс" });
                 }
 
-                // 3. Ищем пользователя в базе или создаем нового
                 var normalizedEmail = yandexUser.DefaultEmail.Trim().ToLowerInvariant();
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
 
@@ -98,8 +97,8 @@ namespace BeejaServer.Controllers
                     {
                         Username = !string.IsNullOrEmpty(yandexUser.DisplayLogin) ? yandexUser.DisplayLogin : yandexUser.DefaultEmail.Split('@')[0],
                         Email = normalizedEmail,
-                        PasswordHash = string.Empty, // При входе через OAuth пароль не нужен
-                        IsEmailConfirmed = true,     // Почта Яндекса проверена
+                        PasswordHash = string.Empty,
+                        IsEmailConfirmed = true,
                         TotalPoints = 0,
                         Level = 1,
                         CreatedAtUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
@@ -117,7 +116,6 @@ namespace BeejaServer.Controllers
                     }
                 }
 
-                // 4. Генерируем собственный JWT-токен
                 string jwtToken = GenerateJwtToken(user);
 
                 var response = new AuthResponseDto
@@ -281,7 +279,6 @@ namespace BeejaServer.Controllers
                     return NotFound(new { message = "Пользователь не найден" });
                 }
 
-                // Автоматическая проверка и синхронизация уровня по очкам
                 int calculatedLevel = LevelService.CalculateLevel(user.TotalPoints);
                 if (user.Level != calculatedLevel)
                 {
@@ -309,6 +306,82 @@ namespace BeejaServer.Controllers
             }
         }
 
+        [HttpGet("profile-data")]
+        [Authorize]
+        public async Task<IActionResult> GetProfileData()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new { message = "Недействительный токен" });
+                }
+
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { message = "Пользователь не найден" });
+                }
+
+                // 1. Расчёт уровня и прогресса
+                int currentLevel = LevelService.CalculateLevel(user.TotalPoints);
+                if (user.Level != currentLevel)
+                {
+                    user.Level = currentLevel;
+                    await _context.SaveChangesAsync();
+                }
+
+                int currentLevelBase = LevelService.GetRequiredPointsForLevel(currentLevel);
+                int nextLevelBase = LevelService.GetRequiredPointsForLevel(currentLevel + 1);
+
+                int pointsInCurrentLevel = user.TotalPoints - currentLevelBase;
+                int pointsRequiredForNext = nextLevelBase - currentLevelBase;
+                int pointsRemaining = nextLevelBase - user.TotalPoints;
+
+                double progressPercentage = LevelService.CalculateProgressPercentage(user.TotalPoints);
+
+                // 2. Считаем реальное количество пройденных сессий из event_checkins
+                int realSessionsCount = await _context.EventCheckins
+                    .CountAsync(c => c.UserId == userId);
+
+                // 3. Загружаем последние 10 чекинов с именами игр/ивентов через JOIN с таблицей events
+                var recentCheckins = await _context.EventCheckins
+                    .Where(c => c.UserId == userId)
+                    .OrderByDescending(c => c.CheckedInAt)
+                    .Take(10)
+                    .Select(c => new UserCheckinHistoryDto
+                    {
+                         // Берём название из связанной таблицы events
+                        EventTitle = c.Event != null ? c.Event.Title : "Мероприятие",
+                        CheckedInAt = c.CheckedInAt,
+                        PointsAwarded = c.PointsAwarded
+                    })
+                    .ToListAsync();
+
+        // 4. Формируем итоговый ответ
+                var response = new UserProfileUiDto
+                {
+                    Username = user.Username, // если в модели поле называется UserName, замените на user.UserName
+                    Level = currentLevel,
+                    TotalPoints = user.TotalPoints,
+                    PointsInCurrentLevel = pointsInCurrentLevel,
+                    PointsRequiredForNext = pointsRequiredForNext,
+                    PointsRemaining = pointsRemaining,
+                    ProgressPercentage = progressPercentage,
+                    SessionsCount = realSessionsCount,
+                    RecentCheckins = recentCheckins
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка загрузки данных профиля: {ex}");
+                return StatusCode(500, new { message = "Ошибка сервера" });
+            }
+        }
+
         [HttpPost("add-points-by-username")]
         public async Task<IActionResult> AddPointsByUsername([FromBody] AddPointsByUsernameDto dto)
         {
@@ -326,7 +399,6 @@ namespace BeejaServer.Controllers
             {
                 var normalizedUsername = dto.Username.Trim().ToLowerInvariant();
 
-                // Ищем пользователя по никнейму в базе (без учета регистра)
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == normalizedUsername);
                 
                 if (user == null)
@@ -336,17 +408,14 @@ namespace BeejaServer.Controllers
 
                 int oldLevel = user.Level;
 
-                // 1. Прибавляем очки
                 user.TotalPoints += dto.Points;
 
-                // 2. Пересчитываем уровень через наш LevelService
                 int newLevel = LevelService.CalculateLevel(user.TotalPoints);
                 bool leveledUp = newLevel > oldLevel;
 
                 user.Level = newLevel;
                 await _context.SaveChangesAsync();
 
-                // 3. Формируем ответ
                 var response = new AddPointsResponseDto
                 {
                     Message = leveledUp ? $"Пользователь {user.Username} достиг {newLevel} уровня!" : $"Пользователю {user.Username} начислено +{dto.Points} очков!",
@@ -407,7 +476,6 @@ namespace BeejaServer.Controllers
 
                 int oldLevel = user.Level;
 
-                // 1. Прибавляем очки
                 user.TotalPoints += dto.Points;
                 int newLevel = LevelService.CalculateLevel(user.TotalPoints);
                 bool leveledUp = newLevel > oldLevel;
@@ -478,7 +546,7 @@ namespace BeejaServer.Controllers
         #endregion
     }
 
-    #region Extra DTOs
+    #region DTOs
 
     public class AddPointsByUsernameDto
     {
@@ -517,5 +585,26 @@ namespace BeejaServer.Controllers
         public double ProgressPercentage { get; set; }
     }
 
+    public class UserProfileUiDto
+    {
+        public string Username { get; set; } = string.Empty;
+        public int Level { get; set; }
+        public int TotalPoints { get; set; }
+        public int PointsInCurrentLevel { get; set; }
+        public int PointsRequiredForNext { get; set; }
+        public int PointsRemaining { get; set; }
+        public double ProgressPercentage { get; set; }
+        public int SessionsCount { get; set; }
+
+
+        public List<UserCheckinHistoryDto> RecentCheckins { get; set; } = new();
+    }
+    
+    public class UserCheckinHistoryDto
+    {
+        public string EventTitle { get; set; } = string.Empty;
+        public DateTime CheckedInAt { get; set; }
+        public int PointsAwarded { get; set; }
+    }
     #endregion
 }

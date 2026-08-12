@@ -9,6 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Сервисы
 //builder.Services.AddSingleton<JwtService>();
 
+// 1. Добавляем политику CORS (разрешает запросы с любых источников, в т.ч. с Live Server)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Настраиваем аутентификацию через JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -45,6 +56,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();   // подрубает свагу
     app.UseSwaggerUI(); // включает табло сваги
 }
+
+// 2. Включаем CORS middleware (ОБЯЗАТЕЛЬНО перед UseAuthentication и UseAuthorization!)
+app.UseCors("AllowAll");
 
 app.UseDefaultFiles();  // Ищет index.html в wwwroot
 app.UseStaticFiles();   // Отдает статические файлы
