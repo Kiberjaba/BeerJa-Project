@@ -232,16 +232,10 @@
 <header>
   <div class="wrap nav">
     <div class="nav-left"><span class="dot"></span>БИРЖА</div>
-
-    <!-- Гость -->
-    <div class="auth-actions" id="auth-guest">
-      <button class="btn-ghost" onclick="setLoggedIn(true)">Войти</button>
-      <button class="btn-lime-sm" onclick="setLoggedIn(true)">Регистрация</button>
-    </div>
-
+    
     <!-- Авторизован -->
     <div class="auth-actions" id="auth-user" style="display:none;">
-      <div class="profile-chip" onclick="window.location.href='lichved.html'">
+      <button class="profile-chip" onclick="window.location.href='lichved.html'">
         <div class="avatar">В</div>
         Профиль
       </div>

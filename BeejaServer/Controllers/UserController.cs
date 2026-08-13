@@ -223,12 +223,26 @@ namespace BeejaServer.Controllers
         {
             try
             {
-                var input = dto.LoginOrEmail.Trim().ToLowerInvariant();
+                if (string.IsNullOrWhiteSpace(dto.LoginOrEmail) || string.IsNullOrWhiteSpace(dto.Password))
+                {
+                    return BadRequest(new { message = "Заполните все поля" });
+                }
 
+                var input = dto.LoginOrEmail.Trim();
+                var inputLower = input.ToLowerInvariant();
+
+        // Поиск без завязания на точный регистр через EF.Functions.ILike (если PostgreSQL)
+        // либо через обычное сравнение Email в нижнем регистре ИЛИ логина без учета регистра
                 var user = await _context.Users.FirstOrDefaultAsync(u =>
-                    u.Email == input || u.Username.ToLower() == input);
+                    u.Email.ToLower() == inputLower || u.Username.ToLower() == inputLower);
 
-                if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                if (user == null)
+                {
+                    return BadRequest(new { message = "Неверный логин/email или пароль" });
+                }
+
+        // Проверяем BCrypt пароль
+                if (string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 {
                     return BadRequest(new { message = "Неверный логин/email или пароль" });
                 }
