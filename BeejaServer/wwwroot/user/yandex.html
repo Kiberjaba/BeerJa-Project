@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход — РАУНД</title>
+  <style>
+    :root {
+      --ink: #101116;
+      --night: #191b22;
+      --cloud: #f4f2ec;
+      --fog: #9699a3;
+      --pulse: #705cff;
+      --signal: #c9ff47;
+      --coral: #ff6b61;
+      --gold: #ffc85a;
+      --surface: rgba(25, 27, 34, 0.86);
+      --surface-strong: rgba(16, 17, 22, 0.94);
+      --line: rgba(244, 242, 236, 0.14);
+      --phone-max: 430px;
+      --radius-card: 20px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --font-ui: "Onest", "Avenir Next", "SF Pro Text", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--ink);
+      color: var(--cloud);
+      font-family: var(--font-ui);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: var(--phone-max);
+      min-height: 100vh;
+      background: var(--night);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-height: 700px) {
+      .phone-shell {
+        min-height: 844px;
+        height: auto;
+        border-radius: 40px;
+        border: 1px solid var(--line);
+        margin: 20px 0;
+      }
+    }
+
+    /* === TOAST / ВСПЛЫВАЮЩИЕ УВЕДОМЛЕНИЯ === */
+    .toast-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .toast.error {
+      background: rgba(255, 107, 97, 0.95);
+      color: #ffffff;
+      border: 1px solid var(--coral);
+    }
+
+    .toast.success {
+      background: rgba(201, 255, 71, 0.95);
+      color: var(--ink);
+      border: 1px solid var(--signal);
+    }
+
+    .toast-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* === ШАПКА И ИНФО-БАННЕР === */
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(244, 242, 236, 0.08);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      color: var(--fog);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+    }
+
+    .info-banner {
+      background: rgba(112, 92, 255, 0.12);
+      border: 1px solid rgba(112, 92, 255, 0.3);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--cloud);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-banner-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .hero-content {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand {
+      color: var(--signal);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .description {
+      color: var(--fog);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    /* === ТАБЫ ПЕРЕКЛЮЧЕНИЯ === */
+    .auth-tabs {
+      display: flex;
+      background: rgba(244, 242, 236, 0.06);
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      margin-top: 20px;
+      gap: 4px;
+      border: 1px solid var(--line);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--fog);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      background: var(--surface-strong);
+      color: var(--cloud);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* === ФОРМА И ПОЛЯ === */
+    .form-container {
+      margin-top: 16px;
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-label {
+      font-size: 12px;
+      color: var(--fog);
+      margin-left: 4px;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      color: var(--cloud);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--pulse);
+    }
+
+    .input-field::placeholder {
+      color: rgba(150, 153, 163, 0.5);
+    }
+
+    /* === КНОПКИ === */
+    .btn {
+      min-height: 52px;
+      width: 100%;
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .yandex-btn {
+      background: #fc3f1d;
+      color: #ffffff;
+    }
+
+    .yandex-btn:hover {
+      background: #e03515;
+    }
+
+    .yandex-logo {
+      width: 22px;
+      height: 22px;
+      background: #ffffff;
+      color: #fc3f1d;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 14px;
+      font-family: sans-serif;
+    }
+
+    .primary-btn {
+      background: var(--signal);
+      color: var(--ink);
+      margin-top: 4px;
+    }
+
+    .primary-btn:hover {
+      background: #b5e838;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .link {
+      color: var(--fog);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .link:hover {
+      color: var(--cloud);
+    }
+
+    .demo-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--fog);
+      margin-top: 20px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="phone-shell">
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div>
+      <header class="top-bar">
+        <div class="header">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span>Игрок</span>
+          </div>
+        </div>
+
+        <div class="info-banner">
+          <span class="info-banner-icon">🎮</span>
+          <span>Далее вы сможете подключиться к любой уже созданной игре</span>
+        </div>
+      </header>
+
+      <section class="hero-content">
+        <span class="brand">РАУНД</span>
+        <h1 class="title">Вход в систему</h1>
+        <p class="description">Войдите, чтобы сохранить свой прогресс, рейтинг и историю всех сыгранных матчей.</p>
+      </section>
+
+      <div class="auth-tabs">
+        <button class="tab-btn active" onclick="switchTab('yandex', event)">Яндекс ID</button>
+        <button class="tab-btn" onclick="switchTab('login', event)">Логин и пароль</button>
+      </div>
+
+      <div class="form-container">
+        <!-- Таб 1: Яндекс -->
+        <div id="tab-yandex" class="tab-content active">
+          <p style="font-size: 13px; color: var(--fog); margin-bottom: 8px; text-align: center;">
+            Самый быстрый способ войти в один клик без ввода паролей
+          </p>
+          <button class="btn yandex-btn" type="button" onclick="handleYandexLogin()">
+            <span class="yandex-logo">Я</span>
+            <span>Продолжить с Яндекс ID</span>
+          </button>
+        </div>
+
+        <!-- Таб 2: Форма Логин / Пароль -->
+        <div id="tab-login" class="tab-content">
+          <form id="classicLoginForm" onsubmit="handleClassicLogin(event)">
+            <div class="input-group">
+              <label class="input-label" for="username">Логин или E-mail</label>
+              <input class="input-field" type="text" id="username" placeholder="user@example.com" required>
+            </div>
+
+            <div class="input-group" style="margin-top: 10px;">
+              <label class="input-label" for="password">Пароль</label>
+              <input class="input-field" type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-footer">
+              <a href="#" class="link" onclick="showToast('Восстановление доступа временно недоступно', 'error'); return false;">Забыли пароль?</a>
+              <a href="register.html" class="link" style="color: var(--signal);">Регистрация</a>
+            </div>
+
+            <button class="btn primary-btn" type="submit" style="margin-top: 16px;">
+              Войти в профиль
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <p class="demo-note">Авторизуясь, вы принимаете правила сервиса и соглашение об обработке персональных данных.</p>
+  </main>
+
+  <script>
+    function showToast(message, type = 'error') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      const icon = type === 'error' ? '⚠️' : '✅';
+      toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+
+      container.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 10);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function switchTab(tabName, event) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
+
+      if (tabName === 'yandex') {
+        document.getElementById('tab-yandex').classList.add('active');
+      } else {
+        document.getElementById('tab-login').classList.add('active');
+      }
+    }
+
+    function handleYandexLogin() {
+      window.location.assign("/api/v1/User/yandex-login");
+    }
+
+    async function handleClassicLogin(e) {
+      e.preventDefault();
+
+      const loginInput = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (password.length < 6) {
+        showToast('Пароль слишком короткий (минимум 6 символов)', 'error');
+        return;
+      }
+
+      try {
+        const API_BASE = window.location.port === '5500' 
+          ? 'http://localhost:5234' 
+          : '';
+
+        const response = await fetch(`${API_BASE}/api/v1/User/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            LoginOrEmail: loginInput,
+            loginOrEmail: loginInput,
+            login_or_email: loginInput,
+            Email: loginInput,
+            Username: loginInput,
+            email: loginInput,
+            username: loginInput,
+            Password: password,
+            password: password
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok) {
+          showToast('Успешный вход!', 'success');
+
+          if (data && data.token) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('authToken', data.token);
+          }
+          if (data && data.user_id) {
+            localStorage.setItem('userId', data.user_id);
+          }
+
+          setTimeout(() => {
+            window.location.href = 'join-room.html';
+          }, 800);
+        } else {
+          let errorMsg = data.message || data.title || 'Неверный логин или пароль';
+
+          if (data.errors) {
+            const firstKey = Object.keys(data.errors)[0];
+            errorMsg = `${firstKey}: ${data.errors[firstKey][0]}`;
+          }
+
+          showToast(errorMsg, 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Сервер недоступен. Локальный переход...', 'success');
+        setTimeout(() => {
+          window.location.href = 'join-room.html';
+        }, 1000);
+      }
+    }
+  </script>
+</body>
+</html>

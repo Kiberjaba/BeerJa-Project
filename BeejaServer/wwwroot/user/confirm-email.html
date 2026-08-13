@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подтверждение почты — РАУНД</title>
+  <style>
+    :root {
+      --ink: #101116;
+      --night: #191b22;
+      --cloud: #f4f2ec;
+      --fog: #9699a3;
+      --pulse: #705cff;
+      --signal: #c9ff47;
+      --coral: #ff6b61;
+      --gold: #ffc85a;
+      --surface: rgba(25, 27, 34, 0.86);
+      --surface-strong: rgba(16, 17, 22, 0.94);
+      --line: rgba(244, 242, 236, 0.14);
+      --phone-max: 430px;
+      --radius-card: 20px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --font-ui: "Onest", "Avenir Next", "SF Pro Text", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--ink);
+      color: var(--cloud);
+      font-family: var(--font-ui);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: var(--phone-max);
+      min-height: 100vh;
+      background: var(--night);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-height: 700px) {
+      .phone-shell {
+        min-height: 844px;
+        height: auto;
+        border-radius: 40px;
+        border: 1px solid var(--line);
+        margin: 20px 0;
+      }
+    }
+
+    /* === TOAST / ВСПЛЫВАЮЩИЕ УВЕДОМЛЕНИЯ === */
+    .toast-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .toast.error {
+      background: rgba(255, 107, 97, 0.95);
+      color: #ffffff;
+      border: 1px solid var(--coral);
+    }
+
+    .toast.success {
+      background: rgba(201, 255, 71, 0.95);
+      color: var(--ink);
+      border: 1px solid var(--signal);
+    }
+
+    .toast-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* === ШАПКА И ИНФО-БАННЕР === */
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(244, 242, 236, 0.08);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      color: var(--fog);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+    }
+
+    .info-banner {
+      background: rgba(112, 92, 255, 0.12);
+      border: 1px solid rgba(112, 92, 255, 0.3);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--cloud);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-banner-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* === БЛОК СООБЩЕНИЯ === */
+    .mail-card {
+      margin-top: 30px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .mail-icon-wrapper {
+      width: 64px;
+      height: 64px;
+      background: rgba(201, 255, 71, 0.12);
+      border: 1px solid rgba(201, 255, 71, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .description {
+      color: var(--fog);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .email-badge {
+      display: inline-block;
+      background: var(--night);
+      border: 1px solid var(--line);
+      color: var(--signal);
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    /* === КНОПКИ === */
+    .action-area {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      min-height: 50px;
+      width: 100%;
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .secondary-btn {
+      background: rgba(244, 242, 236, 0.08);
+      color: var(--cloud);
+      border: 1px solid var(--line);
+    }
+
+    .secondary-btn:hover {
+      background: rgba(244, 242, 236, 0.15);
+    }
+
+    .secondary-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 13px;
+      margin-top: 10px;
+      gap: 6px;
+      color: var(--fog);
+    }
+
+    .link {
+      color: var(--signal);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .demo-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--fog);
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="phone-shell">
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div>
+      <header class="top-bar">
+        <div class="header">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span>Игрок</span>
+          </div>
+        </div>
+
+        <div class="info-banner">
+          <span class="info-banner-icon">🎮</span>
+          <span>Далее вы сможете подключиться к любой уже созданной игре</span>
+        </div>
+      </header>
+
+      <section class="mail-card">
+        <div class="mail-icon-wrapper">📩</div>
+        <h1 class="title">Проверьте вашу почту</h1>
+        <p class="description">
+          Мы отправили письмо со ссылкой для подтверждения регистрации на адрес:
+        </p>
+        <div class="email-badge" id="userEmail">user@example.com</div>
+        <p class="description" style="font-size: 12px;">
+          Перейдите по ссылке из письма, чтобы активировать аккаунт (поле <code style="color: var(--gold);">is_email_confirmed = 1</code> в базе).
+        </p>
+      </section>
+
+      <div class="action-area">
+        <button id="resendBtn" class="btn secondary-btn" type="button" onclick="handleResendEmail()">
+          Отправить письмо повторно
+        </button>
+
+        <div class="form-footer">
+          <span>Уже подтвердили?</span>
+          <a href="yandex.html" class="link">Войти в профиль</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="demo-note">Не пришли письма? Проверьте папку «Спам» или перепроверьте правильность введённого адреса.</p>
+  </main>
+
+  <script>
+    // 1. Динамический адрес API для dev и prod
+    const API_BASE = window.location.port === '5500' ? 'http://localhost:7001' : '';
+
+    // 2. Получаем e-mail, переданный из формы регистрации (или берём дефолтный)
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('email') || localStorage.getItem('registeredEmail') || 'user@example.com';
+    document.getElementById('userEmail').textContent = emailParam;
+
+    // Функция для Toast-уведомлений
+    function showToast(message, type = 'error') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icon = type === 'error' ? '⚠️' : '✅';
+      toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+      
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Повторная отправка письма с таймером
+    let cooldownTimer = 0;
+
+    async function handleResendEmail() {
+      const btn = document.getElementById('resendBtn');
+      if (cooldownTimer > 0) return;
+
+      try {
+        /*
+          Пример запроса к вашему API повторной отправки:
+          
+          const response = await fetch(`${API_BASE}/api/v1/User/resend-confirmation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailParam })
+          });
+
+          if (!response.ok) {
+            showToast('Не удалось отправить письмо', 'error');
+            return;
+          }
+        */
+
+        showToast('Письмо повторно отправлено!', 'success');
+
+        // Запуск таймера на 60 секунд
+        cooldownTimer = 60;
+        btn.disabled = true;
+
+        const interval = setInterval(() => {
+          cooldownTimer--;
+          btn.textContent = `Повторная отправка через ${cooldownTimer}с`;
+
+          if (cooldownTimer <= 0) {
+            clearInterval(interval);
+            btn.disabled = false;
+            btn.textContent = 'Отправить письмо повторно';
+          }
+        }, 1000);
+
+      } catch (err) {
+        showToast('Ошибка сети при отправке письма', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

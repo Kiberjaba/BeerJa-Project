@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подключение к комнате</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f1319;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Главная карточка */
+    .card {
+      background-color: #171d25;
+      border: 1px solid #283240;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    /* Шапка карточки */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .badge {
+      color: #a4f800;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* Кнопка Личного кабинета */
+    .profile-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      background-color: #0f1319;
+      border: 1px solid #283240;
+      border-radius: 20px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .profile-link:hover {
+      border-color: #a4f800;
+      color: #a4f800;
+    }
+
+    .profile-icon {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #929bb0;
+      font-size: 14px;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #929bb0;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      background-color: #0f1319;
+      border: 1px solid #283240;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-align: center;
+      text-transform: uppercase;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #a4f800;
+    }
+
+    input[type="text"]::placeholder {
+      color: #4a5568;
+      letter-spacing: normal;
+      font-weight: 400;
+      font-size: 15px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background-color: #a4f800;
+      color: #0f1319;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+      background-color: #b5ff1a;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    /* Уведомления (Toast) */
+    #toastContainer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background-color: #ff5252;
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background-color: #2e7d32;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="toastContainer"></div>
+
+  <!-- Карточка обернута правильно -->
+  <div class="card">
+    <div class="card-header">
+      <div class="badge">РАУНД</div>
+      <a href="../lichuser.html" class="profile-link">
+        <span class="profile-icon">👤</span>
+        <span>Кабинет</span>
+      </a>
+    </div>
+
+    <h1>Подключитесь к комнате игры</h1>
+    <p class="subtitle">Введите код комнаты, чтобы присоединиться к текущей игровой сессии.</p>
+
+    <form onsubmit="handleJoinRoom(event)">
+      <div class="form-group">
+        <label for="roomCode">КОД КОМНАТЫ</label>
+        <input 
+          type="text" 
+          id="roomCode" 
+          placeholder="Например: X7B9A" 
+          maxlength="10" 
+          required 
+          autocomplete="off"
+        />
+      </div>
+
+      <button type="submit" class="btn-submit">Войти в комнату</button>
+    </form>
+  </div>
+
+  <script>
+    function showToast(message, type = 'error') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icon = type === 'error' ? '⚠️' : '✅';
+      toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+      
+      container.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 10);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    async function handleJoinRoom(e) {
+      e.preventDefault();
+      
+      const roomCodeInput = document.getElementById('roomCode');
+      const roomCode = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : '';
+
+      if (!roomCode || roomCode.length < 3) {
+        showToast('Введите корректный код комнаты (минимум 3 символа)', 'error');
+        return;
+      }
+
+      try {
+        const API_BASE = window.location.port === '5500' 
+          ? 'http://localhost:5234' 
+          : '';
+
+        const response = await fetch(`${API_BASE}/api/v1/Room/join`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          },
+          body: JSON.stringify({
+            roomCode: roomCode,
+            room_code: roomCode,
+            code: roomCode
+          })
+        });
+
+        if (response.status === 404) {
+          showToast('Комната с таким кодом не найдена', 'error');
+        } 
+        else if (response.status === 400) {
+          const data = await response.json();
+          let errorMsg = 'Ошибка при входе в комнату';
+          
+          if (data.errors) {
+            const firstKey = Object.keys(data.errors)[0];
+            errorMsg = `${firstKey}: ${data.errors[firstKey][0]}`;
+          } else if (data.message) {
+            errorMsg = data.message;
+          }
+
+          showToast(errorMsg, 'error');
+        } 
+        else if (response.ok) {
+          const data = await response.json().catch(() => ({}));
+          showToast('Успешное подключение!', 'success');
+
+          if (data.roomId) localStorage.setItem('currentRoomId', data.roomId);
+          localStorage.setItem('currentRoomCode', roomCode);
+
+          setTimeout(() => {
+            window.location.href = `game-lobby.html?code=${encodeURIComponent(roomCode)}`;
+          }, 1000);
+        } 
+        else {
+          showToast('Ошибка сервера: ' + response.status, 'error');
+        }
+
+      } catch (err) {
+        console.error(err);
+        showToast('Не удалось связаться с сервером', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

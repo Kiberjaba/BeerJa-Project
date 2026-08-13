@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация — РАУНД</title>
+  <style>
+    :root {
+      --ink: #101116;
+      --night: #191b22;
+      --cloud: #f4f2ec;
+      --fog: #9699a3;
+      --pulse: #705cff;
+      --signal: #c9ff47;
+      --coral: #ff6b61;
+      --gold: #ffc85a;
+      --surface: rgba(25, 27, 34, 0.86);
+      --surface-strong: rgba(16, 17, 22, 0.94);
+      --line: rgba(244, 242, 236, 0.14);
+      --phone-max: 430px;
+      --radius-card: 20px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --font-ui: "Onest", "Avenir Next", "SF Pro Text", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--ink);
+      color: var(--cloud);
+      font-family: var(--font-ui);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: var(--phone-max);
+      min-height: 100vh;
+      background: var(--night);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-height: 700px) {
+      .phone-shell {
+        min-height: 844px;
+        height: auto;
+        border-radius: 40px;
+        border: 1px solid var(--line);
+        margin: 20px 0;
+      }
+    }
+
+    /* === TOAST / ВСПЛЫВАЮЩИЕ УВЕДОМЛЕНИЯ === */
+    .toast-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .toast.error {
+      background: rgba(255, 107, 97, 0.95);
+      color: #ffffff;
+      border: 1px solid var(--coral);
+    }
+
+    .toast.success {
+      background: rgba(201, 255, 71, 0.95);
+      color: var(--ink);
+      border: 1px solid var(--signal);
+    }
+
+    .toast-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* === ШАПКА И ИНФО-БАННЕР === */
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(244, 242, 236, 0.08);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      color: var(--fog);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+    }
+
+    .info-banner {
+      background: rgba(112, 92, 255, 0.12);
+      border: 1px solid rgba(112, 92, 255, 0.3);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--cloud);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-banner-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .hero-content {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .brand {
+      color: var(--signal);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .description {
+      color: var(--fog);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* === ФОРМА И ПОЛЯ === */
+    .form-container {
+      margin-top: 16px;
+    }
+
+    .register-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-label {
+      font-size: 12px;
+      color: var(--fog);
+      margin-left: 4px;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 46px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      color: var(--cloud);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--pulse);
+    }
+
+    .input-field::placeholder {
+      color: rgba(150, 153, 163, 0.5);
+    }
+
+    /* === КНОПКИ === */
+    .btn {
+      min-height: 50px;
+      width: 100%;
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .primary-btn {
+      background: var(--signal);
+      color: var(--ink);
+      margin-top: 8px;
+    }
+
+    .primary-btn:hover {
+      background: #b5e838;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 13px;
+      margin-top: 10px;
+      gap: 6px;
+      color: var(--fog);
+    }
+
+    .link {
+      color: var(--signal);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .link:hover {
+      opacity: 0.8;
+    }
+
+    .demo-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--fog);
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="phone-shell">
+    <!-- Контейнер для всплывающих ошибок/уведомлений -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div>
+      <header class="top-bar">
+        <div class="header">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span>Игрок</span>
+          </div>
+        </div>
+
+        <div class="info-banner">
+          <span class="info-banner-icon">🎮</span>
+          <span>Далее вы сможете подключиться к любой уже созданной игре</span>
+        </div>
+      </header>
+
+      <section class="hero-content">
+        <span class="brand">РАУНД</span>
+        <h1 class="title">Новый профиль</h1>
+        <p class="description">Заполните данные для создания аккаунта и участия в играх.</p>
+      </section>
+
+      <div class="form-container">
+        <form id="registerForm" class="register-form" onsubmit="handleRegister(event)">
+          <!-- Поле для никнейма -->
+          <div class="input-group">
+            <label class="input-label" for="nickname">Игровой никнейм</label>
+            <input class="input-field" type="text" id="nickname" placeholder="Например: CyberMaster" required>
+          </div>
+
+          <!-- Поле для логина / e-mail -->
+          <div class="input-group">
+            <label class="input-label" for="email">E-mail или логин</label>
+            <input class="input-field" type="text" id="email" placeholder="user@example.com" required>
+          </div>
+
+          <!-- Поле для пароля -->
+          <div class="input-group">
+            <label class="input-label" for="password">Пароль</label>
+            <input class="input-field" type="password" id="password" placeholder="Минимум 6 символов" required>
+          </div>
+
+          <!-- Повтор пароля -->
+          <div class="input-group">
+            <label class="input-label" for="confirmPassword">Повторите пароль</label>
+            <input class="input-field" type="password" id="confirmPassword" placeholder="••••••••" required>
+          </div>
+
+          <button class="btn primary-btn" type="submit">
+            Создать аккаунт
+          </button>
+
+          <div style="text-align: center; margin-top: 15px;">
+            <span>Уже есть аккаунт? </span>
+            <a href="yandex.html" class="link" style="color: var(--signal);">Войти</a>
+          </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <p class="demo-note">Регистрируясь, вы принимаете правила сервиса и согласие на обработку персональных данных.</p>
+  </main>
+
+  <script>
+    function showToast(message, type = 'error') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+    
+      const icon = type === 'error' ? '⚠️' : '✅';
+      toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+    
+      container.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 10);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+    
+      const nickname = document.getElementById('nickname').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!nickname || nickname.length < 2) {
+        showToast('Введите имя пользователя (минимум 2 символа)', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast('Пароль слишком короткий (минимум 6 символов)', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showToast('Пароли не совпадают', 'error');
+        return;
+      }
+
+      try {
+        const API_BASE = window.location.port === '5500' 
+          ? 'http://localhost:5234' 
+          : '';
+
+        const response = await fetch(`${API_BASE}/api/v1/User/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Username: nickname,    // То, что явно просит C# на скриншоте
+            userName: nickname,    // camelCase
+            user_name: nickname,   // snake_case под БД
+            email: email,
+            password: password
+          })
+        });
+
+        if (response.status === 400) {
+          const data = await response.json();
+          let serverMessage = 'Ошибка в данных';
+
+          if (data.errors) {
+            const firstKey = Object.keys(data.errors)[0];
+            serverMessage = `${firstKey}: ${data.errors[firstKey][0]}`;
+          } else if (data.message) {
+            serverMessage = data.message;
+          }
+
+          showToast(serverMessage, 'error');
+        } 
+        else if (response.status === 409) {
+          showToast('Пользователь с таким e-mail или никнеймом уже существует', 'error');
+        } 
+        else if (response.ok) {
+          showToast('Аккаунт успешно создан!', 'success');
+        
+          localStorage.setItem('registeredEmail', email);
+          setTimeout(() => {
+            window.location.href = `confirm-email.html?email=${encodeURIComponent(email)}`;
+          }, 1200);
+        } 
+        else {
+          showToast('Ошибка сервера: ' + response.status, 'error');
+        }
+  
+      } catch (err) {
+        showToast('Не удалось связаться с сервером', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
