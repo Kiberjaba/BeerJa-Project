@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Настройки профиля</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+    --coral: #ff6b61;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+    overflow:hidden;
+  }
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 440px;
+      height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 18px 18px 8px;
+  }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--border); background: var(--card);
+    color: var(--text); font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    text-decoration:none;
+    flex-shrink:0;
+  }
+  .top-title{
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  /* ===== SCROLL AREA ===== */
+  .content{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding: 14px 18px 24px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .content::-webkit-scrollbar{ width:0; }
+
+  /* ===== AVATAR SECTION ===== */
+  .avatar-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .avatar-big{
+    width: 96px; height:96px; border-radius: 50%;
+    background: linear-gradient(135deg, #3a3f2a, #1c1e16);
+    border: 3px solid var(--lime);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 32px; font-weight:800; color:var(--lime);
+    position: relative;
+    flex-shrink:0;
+    cursor:pointer;
+    overflow: hidden;
+  }
+  .avatar-big img{
+    width:100%; height:100%; object-fit:cover;
+  }
+  .avatar-edit{
+    position:absolute; bottom:0px; right:0px;
+    width:28px; height:28px; border-radius:50%;
+    background: var(--lime); color:#10130a;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13px; font-weight:900;
+    border: 2px solid var(--bg);
+  }
+  .change-avatar-btn{
+    font-size: 13px; color: var(--lime); font-weight:700;
+    background:none; border:none; cursor:pointer; padding:0;
+  }
+  .avatar-hint{
+    font-size: 11px; color: var(--text-faint); text-align:center;
+  }
+
+  /* ===== FORM ===== */
+  .field-group{
+    margin-bottom: 18px;
+  }
+  .field-label{
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .field-input{
+    width: 100%;
+    height: 48px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .field-input:focus{
+    border-color: var(--lime);
+  }
+  .field-error{
+    font-size: 12px;
+    color: var(--coral);
+    margin-top: 6px;
+    min-height: 14px;
+  }
+  .field-success{
+    font-size: 12px;
+    color: var(--lime);
+    margin-top: 6px;
+    min-height: 14px;
+  }
+
+  .save-btn{
+    width: 100%;
+    height: 50px;
+    border-radius: 999px;
+    border: none;
+    background: var(--lime);
+    color: #10130a;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 8px;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+  .save-btn:active{
+    transform: scale(0.98);
+  }
+  .save-btn:disabled{
+    opacity: 0.5;
+    cursor: default;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <a href="lichuser.html" class="icon-btn">←</a>
+    <div class="top-title">Настройки профиля</div>
+  </div>
+
+  <div class="content">
+    <!-- ===== АВАТАР ===== -->
+    <div class="avatar-section">
+      <div class="avatar-big" id="avatarPreview" onclick="document.getElementById('avatarFile').click()">
+        <span id="avatarLetter">-</span>
+        <div class="avatar-edit">✎</div>
+      </div>
+      <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarSelect(event)">
+      <button class="change-avatar-btn" onclick="document.getElementById('avatarFile').click()">Сменить аватар</button>
+      <div class="avatar-hint">JPG или PNG, до 5 МБ</div>
+    </div>
+
+    <!-- ===== ИМЯ ПОЛЬЗОВАТЕЛЯ ===== -->
+    <div class="field-group">
+      <label class="field-label" for="usernameInput">Имя пользователя</label>
+      <input class="field-input" id="usernameInput" type="text" maxlength="32" placeholder="Введите имя">
+      <div class="field-error" id="usernameError"></div>
+    </div>
+
+    <button class="save-btn" id="saveBtn" onclick="saveProfile()">Сохранить изменения</button>
+    <div class="field-success" id="saveSuccess" style="text-align:center; margin-top:12px;"></div>
+  </div>
+</div>
+
+<script>
+  // Укажите URL вашего сервера backend
+  const API_BASE_URL = 'http://localhost:5234/api/v1/User';
+
+  let currentUsername = '';
+  let selectedAvatarBase64 = null;
+
+  function getToken() {
+    return localStorage.getItem('token') || localStorage.getItem('authToken');
+  }
+
+  // ===== ЗАГРУЗКА ТЕКУЩЕГО ПРОФИЛЯ =====
+  async function loadProfile() {
+    const token = getToken();
+    if (!token) {
+      console.warn('Токен не найден. Войдите заново.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/profile-data`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+
+      const data = await response.json();
+      currentUsername = data.username || '';
+
+      document.getElementById('usernameInput').value = currentUsername;
+
+      if (data.avatarUrl) {
+        setAvatarPreview(data.avatarUrl);
+      } else if (currentUsername) {
+        document.getElementById('avatarLetter').textContent = currentUsername.charAt(0).toUpperCase();
+      }
+    } catch (error) {
+      console.error('Не удалось загрузить профиль:', error);
+    }
+  }
+
+  // ===== ВЫБОР НОВОГО АВАТАРА =====
+  function handleAvatarSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      document.getElementById('usernameError').textContent = '';
+      alert('Файл слишком большой (максимум 5 МБ)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      selectedAvatarBase64 = e.target.result;
+      setAvatarPreview(selectedAvatarBase64);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function setAvatarPreview(src) {
+    const preview = document.getElementById('avatarPreview');
+    preview.innerHTML = `<img src="${src}" alt="Аватар"><div class="avatar-edit">✎</div>`;
+  }
+
+  // ===== СОХРАНЕНИЕ ИЗМЕНЕНИЙ =====
+  async function saveProfile() {
+    const usernameInput = document.getElementById('usernameInput');
+    const error = document.getElementById('usernameError');
+    const success = document.getElementById('saveSuccess');
+    const saveBtn = document.getElementById('saveBtn');
+
+    const newUsername = usernameInput.value.trim();
+    error.textContent = '';
+    success.textContent = '';
+
+    if (!newUsername) {
+      error.textContent = 'Введите имя пользователя';
+      return;
+    }
+
+    const token = getToken();
+    if (!token) {
+      error.textContent = 'Сессия истекла, войдите заново';
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Сохранение...';
+
+    try {
+      // Ожидаемые эндпоинты на бэкенде:
+      // PUT /api/v1/User/update-username  { username }
+      // PUT /api/v1/User/update-avatar    { avatarBase64 }
+      const requests = [];
+
+      if (newUsername !== currentUsername) {
+        requests.push(
+          fetch(`${API_BASE_URL}/update-username`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: newUsername })
+          })
+        );
+      }
+
+      if (selectedAvatarBase64) {
+        requests.push(
+          fetch(`${API_BASE_URL}/update-avatar`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ avatarBase64: selectedAvatarBase64 })
+          })
+        );
+      }
+
+      if (requests.length === 0) {
+        success.textContent = 'Изменений нет';
+        return;
+      }
+
+      const responses = await Promise.all(requests);
+
+      for (const response of responses) {
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          error.textContent = data.message || 'Не удалось сохранить изменения';
+          return;
+        }
+      }
+
+      currentUsername = newUsername;
+      selectedAvatarBase64 = null;
+      success.textContent = 'Профиль обновлён';
+
+    } catch (err) {
+      console.error('Ошибка сохранения профиля:', err);
+      error.textContent = 'Не удалось связаться с сервером';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Сохранить изменения';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+
+</body>
+</html>
