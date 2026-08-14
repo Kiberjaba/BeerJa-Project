@@ -66,6 +66,7 @@ app.UseStaticFiles();   // Отдает статические файлы
 app.UseHttpsRedirection();
 
 // Аутентификация и Авторизация строго перед MapControllers!
+app.UseStaticFiles();
 app.UseAuthentication(); 
 app.UseAuthorization();
 

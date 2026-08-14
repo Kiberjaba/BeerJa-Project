@@ -215,10 +215,11 @@
 
 <script>
   // Укажите URL вашего сервера backend
-  const API_BASE_URL = 'http://localhost:5234/api/v1/User';
+  const API_HOST = 'http://localhost:5234';
+  const API_BASE_URL = `${API_HOST}/api/v1/User`;
 
   let currentUsername = '';
-  let selectedAvatarBase64 = null;
+  let selectedAvatarFile = null;
 
   function getToken() {
     return localStorage.getItem('token') || localStorage.getItem('authToken');
@@ -248,8 +249,8 @@
 
       document.getElementById('usernameInput').value = currentUsername;
 
-      if (data.avatarUrl) {
-        setAvatarPreview(data.avatarUrl);
+      if (data.photo) {
+        setAvatarPreview(`${API_HOST}${data.photo}`);
       } else if (currentUsername) {
         document.getElementById('avatarLetter').textContent = currentUsername.charAt(0).toUpperCase();
       }
@@ -264,16 +265,16 @@
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      document.getElementById('usernameError').textContent = '';
       alert('Файл слишком большой (максимум 5 МБ)');
+      event.target.value = '';
       return;
     }
 
+    selectedAvatarFile = file;
+
+    // Локальное превью до отправки на сервер
     const reader = new FileReader();
-    reader.onload = (e) => {
-      selectedAvatarBase64 = e.target.result;
-      setAvatarPreview(selectedAvatarBase64);
-    };
+    reader.onload = (e) => setAvatarPreview(e.target.result);
     reader.readAsDataURL(file);
   }
 
@@ -304,58 +305,63 @@
       return;
     }
 
+    if (!selectedAvatarFile && newUsername === currentUsername) {
+      success.textContent = 'Изменений нет';
+      return;
+    }
+
     saveBtn.disabled = true;
     saveBtn.textContent = 'Сохранение...';
 
     try {
-      // Ожидаемые эндпоинты на бэкенде:
-      // PUT /api/v1/User/update-username  { username }
-      // PUT /api/v1/User/update-avatar    { avatarBase64 }
-      const requests = [];
-
+      // 1) Имя пользователя — JSON на PUT /update-username
       if (newUsername !== currentUsername) {
-        requests.push(
-          fetch(`${API_BASE_URL}/update-username`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username: newUsername })
-          })
-        );
-      }
+        const usernameResponse = await fetch(`${API_BASE_URL}/update-username`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username: newUsername })
+        });
 
-      if (selectedAvatarBase64) {
-        requests.push(
-          fetch(`${API_BASE_URL}/update-avatar`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ avatarBase64: selectedAvatarBase64 })
-          })
-        );
-      }
+        const usernameData = await usernameResponse.json().catch(() => ({}));
 
-      if (requests.length === 0) {
-        success.textContent = 'Изменений нет';
-        return;
-      }
-
-      const responses = await Promise.all(requests);
-
-      for (const response of responses) {
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          error.textContent = data.message || 'Не удалось сохранить изменения';
+        if (!usernameResponse.ok) {
+          error.textContent = usernameData.message || 'Не удалось сохранить имя';
           return;
         }
+
+        currentUsername = newUsername;
       }
 
-      currentUsername = newUsername;
-      selectedAvatarBase64 = null;
+      // 2) Аватар — multipart/form-data на POST /upload-avatar
+      //    (без Content-Type в headers — браузер сам проставит boundary)
+      if (selectedAvatarFile) {
+        const formData = new FormData();
+        formData.append('file', selectedAvatarFile);
+
+        const avatarResponse = await fetch(`${API_BASE_URL}/upload-avatar`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const avatarData = await avatarResponse.json().catch(() => ({}));
+
+        if (!avatarResponse.ok) {
+          error.textContent = avatarData.message || 'Не удалось сохранить аватар';
+          return;
+        }
+
+        if (avatarData.photo) {
+          setAvatarPreview(`${API_HOST}${avatarData.photo}`);
+        }
+        selectedAvatarFile = null;
+      }
+
       success.textContent = 'Профиль обновлён';
 
     } catch (err) {

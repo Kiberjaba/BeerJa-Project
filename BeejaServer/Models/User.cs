@@ -16,6 +16,9 @@ namespace BeejaServer.Models
         [Column("email")]
         public string Email { get; set; } = string.Empty;
 
+        [Column("Photo")]
+        public string? Photo { get; set; }
+
         [Column("password_hash")]
         public string PasswordHash { get; set; } = string.Empty;
 

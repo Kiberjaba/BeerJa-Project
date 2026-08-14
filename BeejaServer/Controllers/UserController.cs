@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
 
 namespace BeejaServer.Controllers
 {
@@ -124,6 +127,7 @@ namespace BeejaServer.Controllers
                         UserId = user.UserId,
                         Username = user.Username,
                         Email = user.Email,
+                        Photo = user.Photo,
                         IsEmailConfirmed = user.IsEmailConfirmed,
                         TotalPoints = user.TotalPoints,
                         Level = user.Level,
@@ -137,6 +141,123 @@ namespace BeejaServer.Controllers
             {
                 Console.WriteLine($"Ошибка OAuth Яндекс: {ex}");
                 return StatusCode(500, new { message = "Ошибка авторизации через Яндекс", error = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Profile Updates (Photo & Username)
+
+        [HttpPut("update-username")]
+        [Authorize]
+        public async Task<IActionResult> UpdateUsername([FromBody] UpdateUsernameDto dto)
+        {
+            try
+            {
+                if (dto == null || string.IsNullOrWhiteSpace(dto.Username))
+                {
+                    return BadRequest(new { message = "Укажите новое имя пользователя" });
+                }
+
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new { message = "Недействительный токен" });
+                }
+
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { message = "Пользователь не найден" });
+                }
+
+                var newUsername = dto.Username.Trim();
+
+                if (await _context.Users.AnyAsync(u => u.Username == newUsername && u.UserId != userId))
+                {
+                    return Conflict(new { message = "Имя пользователя уже занято" });
+                }
+
+                user.Username = newUsername;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Имя пользователя успешно обновлено", username = user.Username });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка обновления имени пользователя: {ex}");
+                return StatusCode(500, new { message = "Ошибка при обновлении имени пользователя", error = ex.Message });
+            }
+        }
+
+        [HttpPost("upload-avatar")]
+        [Authorize]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest(new { message = "Файл не выбран" });
+                }
+
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new { message = "Недействительный токен" });
+                }
+
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { message = "Пользователь не найден" });
+                }
+
+        // Путь для сохранения (все сжатые аватарки сохраняем в .jpg)
+                var fileName = $"user_{userId}_{Guid.NewGuid()}.jpg";
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "photos");
+
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                var filePath = Path.Combine(folderPath, fileName);
+
+        // Открываем входящую картинку через ImageSharp
+                using (var stream = file.OpenReadStream())
+                using (var image = await Image.LoadAsync(stream))
+                {
+            // 1. Если ширина или высота больше 1024px — уменьшаем размер пропорционально
+                    int maxDimension = 1024;
+                   if (image.Width > maxDimension || image.Height > maxDimension)
+                    {
+                        image.Mutate(x => x.Resize(new ResizeOptions
+                        {
+                            Size = new Size(maxDimension, maxDimension),
+                            Mode = ResizeMode.Max
+                        }));
+                    }
+
+            // 2. Сохраняем с оптимизированным сжатием JPEG (качество 75%)
+                    var encoder = new JpegEncoder
+                    {
+                       Quality = 75 // 75% даёт отличное визуальное качество при размерах всего 100–400 КБ
+                    };
+
+                    await image.SaveAsync(filePath, encoder);
+                }
+
+                var photoUrl = $"/photos/{fileName}";
+                user.Photo = photoUrl;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Аватар успешно загружен и сжат", photo = photoUrl });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка загрузки аватара: {ex}");
+                return StatusCode(500, new { message = "Ошибка при обработке изображения", error = ex.Message });
             }
         }
 
@@ -183,6 +304,7 @@ namespace BeejaServer.Controllers
                     UserId = user.UserId,
                     Username = user.Username,
                     Email = user.Email,
+                    Photo = user.Photo,
                     IsEmailConfirmed = user.IsEmailConfirmed,
                     TotalPoints = user.TotalPoints,
                     Level = user.Level,
@@ -229,9 +351,6 @@ namespace BeejaServer.Controllers
 
                 var input = dto.LoginOrEmail.Trim().ToLowerInvariant();
 
-                // Сравниваем в нижнем регистре напрямую (без LIKE), чтобы:
-                // 1) вход по email работал независимо от регистра и провайдера БД (LIKE не везде регистронезависим);
-                // 2) символы "_" и "%" в email/логине не трактовались как wildcard-шаблоны LIKE.
                 var user = await _context.Users.FirstOrDefaultAsync(u =>
                     (u.Email != null && u.Email.ToLower() == input) ||
                     (u.Username != null && u.Username.ToLower() == input));
@@ -270,6 +389,7 @@ namespace BeejaServer.Controllers
                         UserId = user.UserId,
                         Username = user.Username,
                         Email = user.Email,
+                        Photo = user.Photo,
                         IsEmailConfirmed = user.IsEmailConfirmed,
                         TotalPoints = user.TotalPoints,
                         Level = user.Level,
@@ -315,6 +435,7 @@ namespace BeejaServer.Controllers
                     UserId = user.UserId,
                     Username = user.Username,
                     Email = user.Email,
+                    Photo = user.Photo,
                     IsEmailConfirmed = user.IsEmailConfirmed,
                     TotalPoints = user.TotalPoints,
                     Level = user.Level,
@@ -382,6 +503,7 @@ namespace BeejaServer.Controllers
                 var response = new UserProfileUiDto
                 {
                     Username = user.Username,
+                    Photo = user.Photo,
                     Level = currentLevel,
                     TotalPoints = user.TotalPoints,
                     PointsInCurrentLevel = pointsInCurrentLevel,
@@ -419,7 +541,7 @@ namespace BeejaServer.Controllers
                 var normalizedUsername = dto.Username.Trim().ToLowerInvariant();
 
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == normalizedUsername);
-                
+
                 if (user == null)
                 {
                     return NotFound(new { message = $"Пользователь с ником '{dto.Username}' не найден" });
@@ -565,7 +687,12 @@ namespace BeejaServer.Controllers
         #endregion
     }
 
-    #region DTOs
+    #region Helper DTOs for UserController
+
+    public class UpdateUsernameDto
+    {
+        public string Username { get; set; } = string.Empty;
+    }
 
     public class AddPointsByUsernameDto
     {
@@ -607,6 +734,7 @@ namespace BeejaServer.Controllers
     public class UserProfileUiDto
     {
         public string Username { get; set; } = string.Empty;
+        public string? Photo { get; set; }
         public int Level { get; set; }
         public int TotalPoints { get; set; }
         public int PointsInCurrentLevel { get; set; }
@@ -617,7 +745,7 @@ namespace BeejaServer.Controllers
 
         public List<UserCheckinHistoryDto> RecentCheckins { get; set; } = new();
     }
-    
+
     public class UserCheckinHistoryDto
     {
         public string EventTitle { get; set; } = string.Empty;

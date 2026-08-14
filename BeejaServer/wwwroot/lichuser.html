@@ -102,6 +102,10 @@
     position: relative;
     flex-shrink:0;
     cursor:pointer;
+    overflow: hidden;
+  }
+  .avatar-big img{
+    width:100%; height:100%; object-fit:cover;
   }
   .avatar-edit{
     position:absolute; bottom:-2px; right:-2px;
@@ -194,13 +198,13 @@
 
   <div class="content">
     <div class="profile-head">
-      <div class="avatar-big" id="avatarLetter" onclick="alert('Заглушка: выбор аватара')">
-        -
+      <div class="avatar-big" id="avatarBig" onclick="window.location.href='user/settings.html'">
+        <span id="avatarLetter">-</span>
         <div class="avatar-edit">✎</div>
       </div>
       <div class="profile-name">
         <div class="nick" id="userNickname">Загрузка...</div>
-        <button class="change-avatar" onclick="alert('Заглушка: выбор аватара')">Сменить аватар</button>
+        <button class="change-avatar" onclick="window.location.href='settings.html'">Сменить аватар</button>
       </div>
     </div>
 
@@ -246,7 +250,11 @@
 
 <script>
   // Укажите URL вашего сервера backend
-  const API_BASE_URL = 'http://localhost:5234/api/v1/User';
+  const API_HOST = 'http://localhost:5234';
+  const API_BASE_URL = `${API_HOST}/api/v1/User`;
+
+  // Текущее имя пользователя, подтягивается при загрузке профиля
+  let currentUsername = '';
 
   async function loadUserProfile() {
     // Получаем токен из LocalStorage (сохраненный при входе/регистрации).
@@ -277,15 +285,20 @@
 
       const data = await response.json();
 
+      // Сохраняем текущее имя, чтобы поле настроек всегда открывалось с актуальным значением
+      currentUsername = data.username;
+
       // Отрисовка полученных данных
       document.getElementById('userNickname').innerText = data.username;
       document.getElementById('sessionsCount').innerText = data.sessionsCount;
       document.getElementById('totalPoints').innerText = data.totalPoints;
 
-      // Инициал для аватарки
-      if (data.username && data.username.length > 0) {
-        const firstLetter = data.username.charAt(0).toUpperCase();
-        document.getElementById('avatarLetter').childNodes[0].nodeValue = firstLetter + ' ';
+      // Аватар: показываем загруженное фото, иначе — инициал ника
+      if (data.photo) {
+        document.getElementById('avatarBig').innerHTML =
+          `<img src="${API_HOST}${data.photo}" alt="Аватар"><div class="avatar-edit">✎</div>`;
+      } else if (data.username && data.username.length > 0) {
+        document.getElementById('avatarLetter').textContent = data.username.charAt(0).toUpperCase();
       }
 
       document.getElementById('userLevel').innerText = data.level;
@@ -336,6 +349,7 @@
 
   // Запуск загрузки при загрузке страницы
   document.addEventListener('DOMContentLoaded', loadUserProfile);
+
 </script>
 
 </body>
