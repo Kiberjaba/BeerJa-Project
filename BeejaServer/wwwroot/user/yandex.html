@@ -100,12 +100,14 @@
       transform: translateY(0) scale(1);
     }
 
+    /* Ошибка (400, 409, 500 и т.д.) */
     .toast.error {
       background: rgba(255, 107, 97, 0.95);
       color: #ffffff;
       border: 1px solid var(--coral);
     }
 
+    /* Успех */
     .toast.success {
       background: rgba(201, 255, 71, 0.95);
       color: var(--ink);
@@ -360,6 +362,7 @@
 <body>
 
   <main class="phone-shell">
+    <!-- Контейнер для всплывающих ошибок/уведомлений -->
     <div id="toastContainer" class="toast-container"></div>
 
     <div>
@@ -383,13 +386,14 @@
         <p class="description">Войдите, чтобы сохранить свой прогресс, рейтинг и историю всех сыгранных матчей.</p>
       </section>
 
+      <!-- Переключатель способов входа -->
       <div class="auth-tabs">
         <button class="tab-btn active" onclick="switchTab('yandex', event)">Яндекс ID</button>
         <button class="tab-btn" onclick="switchTab('login', event)">Логин и пароль</button>
       </div>
 
       <div class="form-container">
-        <!-- Таб 1: Яндекс -->
+        <!-- Таб 1: Быстрый вход через Яндекс -->
         <div id="tab-yandex" class="tab-content active">
           <p style="font-size: 13px; color: var(--fog); margin-bottom: 8px; text-align: center;">
             Самый быстрый способ войти в один клик без ввода паролей
@@ -430,111 +434,117 @@
   </main>
 
   <script>
-    function showToast(message, type = 'error') {
-      const container = document.getElementById('toastContainer');
-      if (!container) return;
+    // === ФУНКЦИЯ ДЛЯ ВСПЛЫВАЮЩИХ УВЕДОМЛЕНИЙ (TOAST) ===
+      function showToast(message, type = 'error') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+      
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+      
+        const icon = type === 'error' ? '⚠️' : '✅';
+        toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+      
+        container.appendChild(toast);
 
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
+      // Анимация появления
+        setTimeout(() => {
+          toast.classList.add('show');
+        }, 10);
 
-      const icon = type === 'error' ? '⚠️' : '✅';
-      toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+        // Автоматическое удаление через 3.5 секунды
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            toast.remove();
+          }, 300);
+        }, 3500);
+      }
 
-      container.appendChild(toast);
+    // Переключение между вкладками
+       function switchTab(tabName, event) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-      setTimeout(() => toast.classList.add('show'), 10);
-
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
-    }
-
-    function switchTab(tabName, event) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-      if (event && event.target) {
+        if (event && event.target) {
         event.target.classList.add('active');
       }
 
-      if (tabName === 'yandex') {
-        document.getElementById('tab-yandex').classList.add('active');
-      } else {
-        document.getElementById('tab-login').classList.add('active');
-      }
-    }
-
-    function handleYandexLogin() {
-      window.location.assign("/api/v1/User/yandex-login");
-    }
-
-    async function handleClassicLogin(e) {
-      e.preventDefault();
-
-      const loginInput = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (password.length < 6) {
-        showToast('Пароль слишком короткий (минимум 6 символов)', 'error');
-        return;
+        if (tabName === 'yandex') {
+          document.getElementById('tab-yandex').classList.add('active');
+        } else {
+          document.getElementById('tab-login').classList.add('active');
+        }
       }
 
-      try {
-        const API_BASE = window.location.port === '5500' 
-          ? 'http://localhost:5234' 
-          : '';
+    // Вход через Яндекс ID
+      function handleYandexLogin() {
+        window.location.assign("/api/v1/User/yandex-login");
+      }
 
-        const response = await fetch(`${API_BASE}/api/v1/User/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            LoginOrEmail: loginInput,
-            loginOrEmail: loginInput,
-            login_or_email: loginInput,
-            Email: loginInput,
-            Username: loginInput,
-            email: loginInput,
-            username: loginInput,
-            Password: password,
-            password: password
-          })
-        });
+    // Классический вход
+      async function handleClassicLogin(e) {
+        e.preventDefault();
 
-        const data = await response.json().catch(() => ({}));
+        const loginInput = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
 
-        if (response.ok) {
-          showToast('Успешный вход!', 'success');
+        if (password.length < 6) {
+          showToast('Пароль слишком короткий (минимум 6 символов)', 'error');
+          return;
+        }
 
-          if (data && data.token) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('authToken', data.token);
+        try {
+          const API_BASE = window.location.port === '5500' 
+            ? 'http://localhost:5234' 
+            : '';
+
+          const response = await fetch(`${API_BASE}/api/v1/User/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              LoginOrEmail: loginInput,
+              Password: password
+            })
+          });
+
+          if (response.status === 400) {
+            const errorData = await response.json().catch(() => ({}));
+            showToast(errorData.message || errorData.title || 'Неверный логин или пароль', 'error');
+          } 
+          else if (response.ok) {
+            showToast('Успешный вход!', 'success');
+
+            try {
+              const data = await response.json();
+              if (data && data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('authToken', data.token);
+              }
+              if (data && data.user_id) {
+                localStorage.setItem('userId', data.user_id);
+              }
+            } catch (e) {
+              console.log('Ответ сервера без JSON');
+            }
+
+          // ГАРАНТИРОВАННЫЙ ПЕРЕХОД
+            setTimeout(() => {
+              window.location.href = 'join-room.html';
+            }, 800);
+          } 
+          else {
+            showToast('Ошибка авторизации (' + response.status + ')', 'error');
           }
-          if (data && data.user_id) {
-            localStorage.setItem('userId', data.user_id);
-          }
-
+        } catch (err) {
+          console.error(err);
+          // В случае отсутствия сервера для теста тоже перенаправляем:
+          showToast('Вход выполнен (локально)', 'success');
           setTimeout(() => {
             window.location.href = 'join-room.html';
           }, 800);
-        } else {
-          let errorMsg = data.message || data.title || 'Неверный логин или пароль';
-
-          if (data.errors) {
-            const firstKey = Object.keys(data.errors)[0];
-            errorMsg = `${firstKey}: ${data.errors[firstKey][0]}`;
-          }
-
-          showToast(errorMsg, 'error');
         }
-      } catch (err) {
-        console.error(err);
-        showToast('Сервер недоступен. Локальный переход...', 'success');
-        setTimeout(() => {
-          window.location.href = 'join-room.html';
-        }, 1000);
-      }
     }
-  </script>
+</script>
 </body>
 </html>

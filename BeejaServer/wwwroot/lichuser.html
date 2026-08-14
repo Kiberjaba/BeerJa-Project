@@ -249,8 +249,9 @@
   const API_BASE_URL = 'http://localhost:5234/api/v1/User';
 
   async function loadUserProfile() {
-    // Получаем токен из LocalStorage (сохраненный при входе/регистрации)
-    const token = localStorage.getItem('jwt_token');
+    // Получаем токен из LocalStorage (сохраненный при входе/регистрации).
+    // Страница входа сохраняет его под ключами 'token' и 'authToken' — читаем их же.
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
 
     if (!token) {
       console.warn('Токен авторизации не найден. Перенаправление на вход...');

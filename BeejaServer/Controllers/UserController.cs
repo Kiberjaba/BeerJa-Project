@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Linq;
 
 namespace BeejaServer.Controllers
 {
@@ -223,33 +222,47 @@ namespace BeejaServer.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(dto.LoginOrEmail) || string.IsNullOrWhiteSpace(dto.Password))
+                if (dto == null || string.IsNullOrWhiteSpace(dto.LoginOrEmail) || string.IsNullOrWhiteSpace(dto.Password))
                 {
                     return BadRequest(new { message = "Заполните все поля" });
                 }
 
-                var input = dto.LoginOrEmail.Trim();
-                var inputLower = input.ToLowerInvariant();
+                var input = dto.LoginOrEmail.Trim().ToLowerInvariant();
 
-        // Поиск без завязания на точный регистр через EF.Functions.ILike (если PostgreSQL)
-        // либо через обычное сравнение Email в нижнем регистре ИЛИ логина без учета регистра
+                // Сравниваем в нижнем регистре напрямую (без LIKE), чтобы:
+                // 1) вход по email работал независимо от регистра и провайдера БД (LIKE не везде регистронезависим);
+                // 2) символы "_" и "%" в email/логине не трактовались как wildcard-шаблоны LIKE.
                 var user = await _context.Users.FirstOrDefaultAsync(u =>
-                    u.Email.ToLower() == inputLower || u.Username.ToLower() == inputLower);
+                    (u.Email != null && u.Email.ToLower() == input) ||
+                    (u.Username != null && u.Username.ToLower() == input));
 
                 if (user == null)
                 {
+                    Console.WriteLine($"[LOGIN ERROR] Пользователь '{input}' не найден.");
                     return BadRequest(new { message = "Неверный логин/email или пароль" });
                 }
 
-        // Проверяем BCrypt пароль
-                if (string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                Console.WriteLine($"[LOGIN DEBUG] Найден юзер: ID={user.UserId}, Email='{user.Email}', Username='{user.Username}'");
+
+                if (string.IsNullOrEmpty(user.PasswordHash))
                 {
+                    Console.WriteLine($"[LOGIN ERROR] У пользователя ID={user.UserId} пустой PasswordHash.");
+                    return BadRequest(new { message = "Для этого аккаунта доступен только вход через Яндекс" });
+                }
+
+                bool isValidPassword = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+
+                if (!isValidPassword)
+                {
+                    Console.WriteLine($"[LOGIN ERROR] Неверный пароль для пользователя ID={user.UserId}.");
                     return BadRequest(new { message = "Неверный логин/email или пароль" });
                 }
+
+                Console.WriteLine($"[LOGIN SUCCESS] Пользователь {user.Username} успешно вошел!");
 
                 string token = GenerateJwtToken(user);
 
-                var response = new AuthResponseDto
+                return Ok(new AuthResponseDto
                 {
                     Token = token,
                     User = new UserResponseDto
@@ -262,14 +275,12 @@ namespace BeejaServer.Controllers
                         Level = user.Level,
                         CreatedAt = user.CreatedAt
                     }
-                };
-
-                return Ok(response);
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка входа: {ex}");
-                return StatusCode(500, new { message = "Ошибка при авторизации на сервере", error = ex.Message });
+                Console.WriteLine($"[LOGIN EXCEPTION] Ошибка входа: {ex}");
+                return StatusCode(500, new { message = "Ошибка авторизации на сервере", error = ex.Message });
             }
         }
 
@@ -337,7 +348,6 @@ namespace BeejaServer.Controllers
                     return NotFound(new { message = "Пользователь не найден" });
                 }
 
-                // 1. Расчёт уровня и прогресса
                 int currentLevel = LevelService.CalculateLevel(user.TotalPoints);
                 if (user.Level != currentLevel)
                 {
@@ -354,28 +364,24 @@ namespace BeejaServer.Controllers
 
                 double progressPercentage = LevelService.CalculateProgressPercentage(user.TotalPoints);
 
-                // 2. Считаем реальное количество пройденных сессий из event_checkins
                 int realSessionsCount = await _context.EventCheckins
                     .CountAsync(c => c.UserId == userId);
 
-                // 3. Загружаем последние 10 чекинов с именами игр/ивентов через JOIN с таблицей events
                 var recentCheckins = await _context.EventCheckins
                     .Where(c => c.UserId == userId)
                     .OrderByDescending(c => c.CheckedInAt)
                     .Take(10)
                     .Select(c => new UserCheckinHistoryDto
                     {
-                         // Берём название из связанной таблицы events
                         EventTitle = c.Event != null ? c.Event.Title : "Мероприятие",
                         CheckedInAt = c.CheckedInAt,
                         PointsAwarded = c.PointsAwarded
                     })
                     .ToListAsync();
 
-        // 4. Формируем итоговый ответ
                 var response = new UserProfileUiDto
                 {
-                    Username = user.Username, // если в модели поле называется UserName, замените на user.UserName
+                    Username = user.Username,
                     Level = currentLevel,
                     TotalPoints = user.TotalPoints,
                     PointsInCurrentLevel = pointsInCurrentLevel,
@@ -609,7 +615,6 @@ namespace BeejaServer.Controllers
         public double ProgressPercentage { get; set; }
         public int SessionsCount { get; set; }
 
-
         public List<UserCheckinHistoryDto> RecentCheckins { get; set; } = new();
     }
     
@@ -619,5 +624,6 @@ namespace BeejaServer.Controllers
         public DateTime CheckedInAt { get; set; }
         public int PointsAwarded { get; set; }
     }
+
     #endregion
 }
