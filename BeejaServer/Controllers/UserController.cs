@@ -33,22 +33,25 @@ namespace BeejaServer.Controllers
         #region Yandex OAuth
 
         [HttpGet("yandex-login")]
-        public IActionResult YandexLogin()
+        public IActionResult YandexLogin([FromQuery] string returnUrl = "/yandex_user.html")
         {
             var clientId = _configuration["Yandex:ClientId"];
             var redirectUri = Uri.EscapeDataString(_configuration["Yandex:RedirectUri"]!);
 
-            string yandexAuthUrl = $"https://oauth.yandex.ru/authorize?response_type=code&client_id={clientId}&redirect_uri={redirectUri}";
+    // Запоминаем URL, откуда пришел пользователь
+            string state = Uri.EscapeDataString(returnUrl);
+
+            string yandexAuthUrl = $"https://oauth.yandex.ru/authorize?response_type=code&client_id={clientId}&redirect_uri={redirectUri}&state={state}";
 
             return Redirect(yandexAuthUrl);
         }
 
         [HttpGet("yandex-callback")]
-        public async Task<IActionResult> YandexCallback([FromQuery] string code)
+        public async Task<IActionResult> YandexCallback([FromQuery] string code, [FromQuery] string? state)
         {
             if (string.IsNullOrEmpty(code))
             {
-                return BadRequest(new { message = "Код авторизации не получен" });
+               return BadRequest(new { message = "Код авторизации не получен" });
             }
 
             try
@@ -117,25 +120,17 @@ namespace BeejaServer.Controllers
                     }
                 }
 
+        // 1. Генерируем JWT-токен
                 string jwtToken = GenerateJwtToken(user);
 
-                var response = new AuthResponseDto
-                {
-                    Token = jwtToken,
-                    User = new UserResponseDto
-                    {
-                        UserId = user.UserId,
-                        Username = user.Username,
-                        Email = user.Email,
-                        Photo = user.Photo,
-                        IsEmailConfirmed = user.IsEmailConfirmed,
-                        TotalPoints = user.TotalPoints,
-                        Level = user.Level,
-                        CreatedAt = user.CreatedAt
-                    }
-                };
+        // 2. Определяем, на какую страницу вернуть пользователя (по умолчанию /yandex_user.html)
+                string targetPage = !string.IsNullOrEmpty(state) ? Uri.UnescapeDataString(state) : "/yandex_user.html";
 
-                return Ok(response);
+        // 3. Укажите адрес вашего фронтенд-сервера
+                string frontendBaseUrl = "http://127.0.0.1:5500"; 
+
+        // 4. Перенаправляем пользователя обратно с токеном в URL
+                return Redirect($"{frontendBaseUrl}{targetPage}?token={jwtToken}");
             }
             catch (Exception ex)
             {
@@ -259,7 +254,7 @@ namespace BeejaServer.Controllers
                 Console.WriteLine($"Ошибка загрузки аватара: {ex}");
                 return StatusCode(500, new { message = "Ошибка при обработке изображения", error = ex.Message });
             }
-        }
+}
 
         #endregion
 

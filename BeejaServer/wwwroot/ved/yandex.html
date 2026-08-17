@@ -430,7 +430,35 @@
   </main>
 
   <script>
-    // Показ всплывающих уведомлений (Toast)
+    // Вспомогательное определение базового URL API[cite: 5]
+    function getApiBase() {
+      return (window.location.port === '5500' || window.location.port === '3000' || window.location.port === '8080')
+        ? 'http://localhost:5234'
+        : '';
+    }
+
+    // Проверка редиректа от Яндекс OAuth при загрузке страницы[cite: 5]
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get('token') || urlParams.get('accessToken');
+
+      if (tokenFromUrl) {
+        // Сохраняем токен во все варианты ключей для максимальной совместимости[cite: 5]
+        localStorage.setItem('token', tokenFromUrl);
+        localStorage.setItem('authToken', tokenFromUrl);
+        localStorage.setItem('jwtToken', tokenFromUrl);
+
+        // Очищаем токен из URL строки браузера[cite: 5]
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        showToast('Успешный вход через Яндекс ID!', 'success');
+        setTimeout(() => {
+          window.location.href = '../ved.html';
+        }, 800);
+      }
+    });
+
+    // Показ всплывающих уведомлений (Toast)[cite: 5]
     function showToast(message, type = 'error') {
       const container = document.getElementById('toastContainer');
       if (!container) return;
@@ -451,7 +479,7 @@
       }, 3500);
     }
 
-    // Переключение табов
+    // Переключение табов[cite: 5]
     function switchTab(tabName, event) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -467,15 +495,21 @@
       }
     }
 
-    // Авторизация Яндекс
+    // Авторизация Яндекс[cite: 5]
     function handleYandexLogin() {
-      const API_BASE = (window.location.port === '5500' || window.location.port === '3000' || window.location.port === '8080')
-        ? 'http://localhost:5234' 
-        : '';
-      window.location.href = `${API_BASE}/api/v1/User/yandex-login`;
+      try {
+        const API_BASE = getApiBase();
+        // Передаем текущий путь страницы в returnUrl, чтобы бэкенд вернул организатора сюда же[cite: 5]
+        const returnUrl = encodeURIComponent(window.location.pathname);
+
+        window.location.href = `${API_BASE}/api/v1/User/yandex-login?returnUrl=${returnUrl}`;
+      } catch (err) {
+        console.error(err);
+        showToast('Ошибка при переходе на Яндекс ID', 'error');
+      }
     }
 
-    // Обработка обычного входа
+    // Обработка обычного входа[cite: 5]
     async function handleClassicLogin(e) {
       e.preventDefault();
 
@@ -488,9 +522,7 @@
       }
 
       try {
-        const API_BASE = (window.location.port === '5500' || window.location.port === '3000' || window.location.port === '8080')
-          ? 'http://localhost:5234' 
-          : '';
+        const API_BASE = getApiBase();
 
         const response = await fetch(`${API_BASE}/api/v1/User/login`, {
           method: 'POST',
@@ -508,22 +540,26 @@
         if (response.ok) {
           showToast('Успешный вход!', 'success');
 
-          // Сохраняем токен
-          if (data && data.token) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('authToken', data.token);
+          // Сохраняем токен и ID пользователя во все популярные ключи[cite: 5]
+          const token = data.token || data.accessToken;
+          if (token) {
+            localStorage.setItem('token', token);
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('jwtToken', token);
           }
           if (data && data.user && data.user.userId) {
             localStorage.setItem('userId', data.user.userId);
+          } else if (data && (data.user_id || data.userId)) {
+            localStorage.setItem('userId', data.user_id || data.userId);
           }
 
-          // Редирект в панель управления
+          // Редирект в панель управления[cite: 5]
           setTimeout(() => {
             window.location.href = '../ved.html';
           }, 800);
 
         } else {
-          // Выводим сообщение об ошибке от бэкенда
+          // Выводим сообщение об ошибке от бэкенда[cite: 5]
           let errorMsg = data.message || 'Неверный логин или пароль';
 
           if (data.errors) {

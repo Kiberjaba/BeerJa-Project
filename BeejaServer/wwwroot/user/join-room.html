@@ -191,7 +191,6 @@
 
   <div id="toastContainer"></div>
 
-  <!-- Карточка обернута правильно -->
   <div class="card">
     <div class="card-header">
       <div class="badge">РАУНД</div>
@@ -222,6 +221,19 @@
   </div>
 
   <script>
+    // 1. Проверяем наличие токена сразу при открытии страницы
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        showToast('Сначала необходимо войти в систему', 'error');
+        setTimeout(() => {
+          window.location.href = 'index.html'; // Ваша страница входа
+        }, 1500);
+      }
+    });
+
+    // 2. Отображение уведомлений
     function showToast(message, type = 'error') {
       const container = document.getElementById('toastContainer');
       if (!container) return;
@@ -242,6 +254,7 @@
       }, 3500);
     }
 
+    // 3. Логика отправки формы подключения
     async function handleJoinRoom(e) {
       e.preventDefault();
       
@@ -250,6 +263,13 @@
 
       if (!roomCode || roomCode.length < 3) {
         showToast('Введите корректный код комнаты (минимум 3 символа)', 'error');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showToast('Вы не авторизованы. Войдите снова', 'error');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
         return;
       }
 
@@ -262,7 +282,7 @@
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             roomCode: roomCode,
@@ -271,7 +291,14 @@
           })
         });
 
-        if (response.status === 404) {
+        if (response.status === 401) {
+          showToast('Сессия истекла. Войдите снова', 'error');
+          localStorage.removeItem('token');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        }
+        else if (response.status === 404) {
           showToast('Комната с таким кодом не найдена', 'error');
         } 
         else if (response.status === 400) {
