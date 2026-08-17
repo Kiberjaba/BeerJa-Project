@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Все механики</title>
+<style>
+  :root{
+    --bg:#0b0c0d; --card:#17181a; --card-2:#1e2021; --border:#2a2c2e;
+    --lime:#c6ff3d; --text:#f2f2f0; --text-dim:#9a9d9c; --text-faint:#6c6f6e;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 24px; }
+
+  header{ border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; background:rgba(11,12,13,0.9); backdrop-filter:blur(8px); }
+  .nav{ max-width:1180px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+  .nav-left{ font-weight:900; font-size:14px; letter-spacing:.06em; display:flex; align-items:center; gap:8px; }
+  .nav-left .dot{ width:8px; height:8px; border-radius:50%; background:var(--lime); box-shadow:0 0 8px var(--lime); }
+  .nav-right a{ font-size:13px; font-weight:700; color: var(--text-dim); }
+  .nav-right a:hover{ color: var(--lime); }
+
+  .hero{ padding:52px 0 36px; text-align:center; }
+  .eyebrow{ font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color: var(--lime); margin-bottom:10px; }
+  h1{ font-size:clamp(28px,5vw,42px); font-weight:900; line-height:1.15; margin-bottom:14px; }
+  .lead{ font-size:14px; color: var(--text-dim); line-height:1.6; max-width:600px; margin:0 auto; }
+
+  .level-group{ padding:36px 0; }
+  .level-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:20px; flex-wrap:wrap; }
+  .level-num{ width:38px; height:38px; border-radius:50%; background: var(--card); border:1px solid var(--border); color: var(--lime); font-weight:900; font-size:15px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .level-head h2{ font-size:19px; font-weight:800; }
+  .level-price{ font-size:13px; font-weight:800; color: var(--lime); background: rgba(198,255,61,0.1); padding:5px 12px; border-radius:999px; }
+  .level-sub{ font-size:12.5px; color: var(--text-dim); margin-top:6px; margin-bottom:18px; line-height:1.5; max-width:680px; }
+
+  .mgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .mgrid.two{ grid-template-columns:repeat(2,1fr); }
+
+  .mcard{ background: var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; display:flex; flex-direction:column; gap:12px; transition:border-color .15s, transform .15s; }
+  .mcard:hover{ border-color: var(--lime); transform:translateY(-2px); }
+  .mcard-title{ font-size:15px; font-weight:800; }
+  .mcard-desc{ font-size:12.5px; color: var(--text-dim); line-height:1.55; flex:1; }
+  .btn-outline{ background:transparent; border:1px solid var(--border); color: var(--text); padding:10px 0; border-radius:999px; font-weight:800; font-size:12.5px; cursor:pointer; text-align:center; transition:border-color .15s, color .15s; }
+  .btn-outline:hover{ border-color: var(--lime); color: var(--lime); }
+
+  .divider{ border-top:1px solid var(--border); }
+
+  footer{ border-top:1px solid var(--border); padding:36px 0; text-align:center; font-size:12px; color: var(--text-faint); }
+
+  @media (max-width:860px){
+    .mgrid, .mgrid.two{ grid-template-columns:repeat(2,1fr); }
+  }
+  .cta-band{
+    margin: 44px 0 8px;
+    background: linear-gradient(135deg, var(--card-2), var(--card));
+    border: 1px solid var(--border);
+    border-radius: 26px;
+    padding: 44px 32px;
+    text-align: center;
+  }
+  .cta-band .eyebrow{ justify-content:center; }
+  .cta-band h2{ font-size: clamp(22px,3.5vw,30px); font-weight:900; margin-bottom:10px; }
+  .cta-band p{ font-size:13.5px; color: var(--text-dim); max-width:480px; margin:0 auto 24px; line-height:1.55; }
+  .cta-btn{
+    background: var(--lime); color:#10130a; border:none;
+    padding:16px 36px; border-radius:999px; font-weight:900; font-size:14px; cursor:pointer;
+  }
+  .cta-btn:hover{ transform: translateY(-1px); }
+  .cta-note{ margin-top:14px; font-size:11.5px; color: var(--text-faint); }
+
+  .floating-order{
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 60;
+    background: var(--lime);
+    color: #10130a;
+    border: none;
+    padding: 14px 26px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 13.5px;
+    cursor: pointer;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .floating-order.show{
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .floating-order .dot{
+    width:7px; height:7px; border-radius:50%; background:#10130a;
+  }
+
+  @media (max-width:560px){
+    .cta-band{ padding:32px 22px; }
+  }
+
+  @media (max-width:560px){
+    .wrap{ padding:0 16px; }
+    .nav{ padding:14px 18px; }
+    .hero{ padding:40px 0 28px; }
+    .level-group{ padding:28px 0; }
+    .mgrid, .mgrid.two{ grid-template-columns:1fr; }
+    .floating-order{ padding:12px 20px; font-size:12.5px; bottom:14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="nav-left"><span class="dot"></span>БИРЖА</div>
+    <div class="nav-right"><a href="contacts.html">Задать вопрос</a></div>
+  </div>
+</header>
+
+<div class="hero wrap">
+  <div class="eyebrow">Каталог механик</div>
+  <h1>Все механики, которые мы можем сделать под ваше мероприятие</h1>
+  <p class="lead">От быстрого опроса на телефонах до игры с собственной математической моделью. У каждой механики — свой пример, чтобы сразу понять, как это выглядит вживую.</p>
+</div>
+
+<div class="wrap divider"></div>
+
+<div class="level-group wrap">
+  <div class="level-head">
+    <div class="level-num">1</div>
+    <h2>Опрос</h2>
+    <div class="level-price">1 500 ₽</div>
+  </div>
+  <p class="level-sub">Живые голосования во время мероприятия. Гости отвечают с телефона, результаты появляются на экране. Без раундов и без управления с аккаунта ведущего — только быстрый сбор мнений зала.</p>
+  <div class="mgrid two">
+    <div class="mcard">
+      <div class="mcard-title">Живое голосование</div>
+      <div class="mcard-desc">Мгновенный опрос зала на любую тему — от настроения до выбора между вариантами. Результат сразу на большом экране.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Серия опросов</div>
+      <div class="mcard-desc">Несколько голосований подряд как разогрев или интерактив между блоками программы, без сложной логики раундов.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap divider"></div>
+
+<div class="level-group wrap">
+  <div class="level-head">
+    <div class="level-num">2</div>
+    <h2>Квиз с раундами</h2>
+    <div class="level-price">3 000 ₽</div>
+  </div>
+  <p class="level-sub">Несколько тематических раундов, презентация выводится на большой экран с аккаунта ведущего. Гости отвечают со своих телефонов, рейтинг обновляется в реальном времени, ведущий управляет темпом игры.</p>
+  <div class="mgrid two">
+    <div class="mcard">
+      <div class="mcard-title">Классический квиз</div>
+      <div class="mcard-desc">Раунды на любую тематику — кино, музыка, общие знания. Синхронный таймер и живой рейтинг команд.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Тематический квиз под бренд</div>
+      <div class="mcard-desc">Вопросы и оформление адаптируются под продукт, компанию или праздник — с логикой ведущего под ваш сценарий.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap divider"></div>
+
+<div class="level-group wrap">
+  <div class="level-head">
+    <div class="level-num">3</div>
+    <h2>Командная игра</h2>
+    <div class="level-price">4 000 ₽</div>
+  </div>
+  <p class="level-sub">Всё из уровня «Квиз с раундами» плюс командная механика и усложнённые форматы.</p>
+  <div class="mgrid">
+    <div class="mcard">
+      <div class="mcard-title">Детектив</div>
+      <div class="mcard-desc">Команды собирают улики по ходу игры и в финале называют подозреваемого — с учётом верности версии в общем счёте.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Мафия</div>
+      <div class="mcard-desc">Классическая социальная игра с ролями, которые распределяются и отслеживаются через платформу.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Торги и аукцион</div>
+      <div class="mcard-desc">Команды получают ограниченный бюджет и соревнуются за лоты — ставки видны в реальном времени.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Квест с шифрами</div>
+      <div class="mcard-desc">Головоломки и шифры, которые команда разгадывает последовательно, продвигаясь по сюжету игры.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Своя игра</div>
+      <div class="mcard-desc">Команда сама выбирает категорию и ставит очки на кон перед тем, как ответить на вопрос.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Дегустационный поединок</div>
+      <div class="mcard-desc">Слепая дегустация с оценками, которые участники выставляют прямо через платформу.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap divider"></div>
+
+<div class="level-group wrap">
+  <div class="level-head">
+    <div class="level-num">4</div>
+    <h2>Сложная игра с математической моделью</h2>
+    <div class="level-price">7 500 ₽</div>
+  </div>
+  <p class="level-sub">Отдельная математическая модель под механику, которая считает всё в реальном времени в зависимости от действий участников.</p>
+  <div class="mgrid two">
+    <div class="mcard">
+      <div class="mcard-title">Биржа напитков</div>
+      <div class="mcard-desc">Цены на напитки меняются от спроса гостей в реальном времени. Механику легко адаптировать под другие тематики.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Экономический симулятор</div>
+      <div class="mcard-desc">Команды управляют ресурсами на протяжении нескольких раундов, принимая стратегические решения.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">ДнД-механика</div>
+      <div class="mcard-desc">Статы персонажей и броски кубиков считаются через платформу — ролевая игра с честным рандомом.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title">Финансовый трейдинг</div>
+      <div class="mcard-desc">Рынок реагирует на действия игроков в реальном времени — покупка, продажа, колебания курса.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="cta-band" id="cta-order">
+    <div class="eyebrow" style="display:flex;">Готовы начать</div>
+    <h2>Выбрали механику под своё мероприятие?</h2>
+    <p>Расскажите про формат, дату и количество гостей — подберём подходящий уровень сложности и обсудим все детали, чтобы сделать качественный продукт именно под вашу задачу.</p>
+    <button class="cta-btn" onclick="alert('Заглушка: переход к заказу / форме заявки')">Заказать игру</button>
+    <div class="cta-note">Для мероприятий с большой аудиторией — индивидуальные условия, процент от продаж</div>
+  </div>
+</div>
+
+<footer>Стоимость указана за реализацию механики под одно мероприятие. Для событий с большой аудиторией — индивидуальные условия.</footer>
+
+<a href="contacts.html" class="floating-order" id="floating-order">
+  <span class="dot"></span>Заказать игру
+</a>
+
+<script>
+  const floatBtn = document.getElementById('floating-order');
+  const ctaBand = document.getElementById('cta-order');
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY > 400;
+    const ctaVisible = ctaBand.getBoundingClientRect().top < window.innerHeight;
+    floatBtn.classList.toggle('show', scrolled && !ctaVisible);
+  });
+</script>
+
+</body>
+</html>
