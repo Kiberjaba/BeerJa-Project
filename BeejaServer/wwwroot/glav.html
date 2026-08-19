@@ -340,7 +340,7 @@
     z-index: -2;
   }
 
-  /* Та самая темная дымка с мягким размытием */
+  /* Тёмная дымка */
   .bg-overlay {
     position: fixed;
     top: 0;
@@ -464,28 +464,14 @@
 </footer>
 
 <script>
-  // Проверка сессии при загрузке страницы: если уже входил — отправить сразу в кабинет[cite: 6]
-  document.addEventListener("DOMContentLoaded", () => {
-    const isAuth = localStorage.getItem('isAuth');
-    const userRole = localStorage.getItem('userRole');
-
-    if (isAuth === 'true') {
-      if (userRole === 'player') {
-        window.location.href = 'user/yandex.html';
-      } else if (userRole === 'host') {
-        window.location.href = 'ved/yandex.html';
-      }
-    }
-  });
-
-  // Запоминание выбора роли при клике[cite: 6]
+  // Выбор роли и переход в нужный кабинет при клике
   function selectRole(role, targetUrl) {
     localStorage.setItem('userRole', role);
     localStorage.setItem('isAuth', 'true');
     window.location.href = targetUrl;
   }
 
-  // Слайдер[cite: 6]
+  // Слайдер
   let currentIndex = 0;
   const totalPhotos = 4;
 
