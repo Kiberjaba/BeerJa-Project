@@ -8,6 +8,7 @@
   :root{
     --bg:#0b0c0d; --card:#17181a; --card-2:#1e2021; --border:#2a2c2e;
     --lime:#c6ff3d; --text:#f2f2f0; --text-dim:#9a9d9c; --text-faint:#6c6f6e;
+    --tg-color:#24A1DE;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
@@ -36,13 +37,20 @@
   .field input, .field textarea{ width:100%; background:var(--card-2); border:1px solid var(--border); color:var(--text); padding:13px 14px; border-radius:12px; font-size:14px; font-family:inherit; }
   .field textarea{ resize:vertical; min-height:100px; }
   .field input:focus, .field textarea:focus{ outline:none; border-color:var(--lime); }
-  .btn-lime{ width:100%; background:var(--lime); color:#10130a; border:none; padding:14px 0; border-radius:12px; font-weight:900; font-size:14px; cursor:pointer; margin-top:6px; }
+  .btn-lime{ width:100%; background:var(--lime); color:#10130a; border:none; padding:14px 0; border-radius:12px; font-weight:900; font-size:14px; cursor:pointer; margin-top:6px; transition: opacity 0.2s; }
+  .btn-lime:hover{ opacity: 0.9; }
 
   .info-col{ display:flex; flex-direction:column; gap:14px; }
-  .info-card{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px 20px; display:flex; align-items:flex-start; gap:14px; }
+  .info-card{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px 20px; display:flex; align-items:center; gap:14px; }
   .info-icon{ width:38px; height:38px; border-radius:12px; background:rgba(198,255,61,0.12); color:var(--lime); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
   .info-title{ font-size:13px; font-weight:800; color:var(--text-dim); margin-bottom:3px; }
   .info-value{ font-size:14px; font-weight:700; }
+
+  /* Карточка Telegram */
+  .telegram-card{ transition: transform 0.2s ease, border-color 0.2s ease; cursor: pointer; }
+  .telegram-card:hover{ transform: translateY(-2px); border-color: var(--tg-color); }
+  .tg-icon-wrap{ background: rgba(36, 161, 222, 0.12); color: var(--tg-color); }
+  .tg-icon{ width:20px; height:20px; fill: currentColor; }
 
   .map{ height:200px; border-radius:18px; background:linear-gradient(135deg,var(--card-2),#232520); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-size:12px; font-weight:700; }
 
@@ -61,13 +69,35 @@
     .wrap{ padding:0 18px; }
     .form-card{ padding:22px; }
   }
+    /* Обновлённые стили для логотипа в футере */
+  .footer-logo {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .footer-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .footer-logo:hover {
+    transform: scale(1.05);
+ }
+ 
 </style>
 </head>
 <body>
 
 <header>
   <div class="nav">
-    <div class="nav-left"><span class="dot"></span>БИРЖА</div>
+    <a href="glav.html" class="nav-left"><span class="dot"></span>БИРЖА</a>
     <button class="nav-toggle" onclick="document.querySelector('.nav-right').classList.toggle('open')">☰</button>
     <nav class="nav-right">
       <a href="games.html">Игры</a>
@@ -97,20 +127,31 @@
       <div class="info-col">
         <div class="info-card">
           <div class="info-icon">@</div>
-          <div><div class="info-title">Email</div><div class="info-value">hello@birzha.games</div></div>
+          <div><div class="info-title">Email</div><div class="info-value">beerjaproject@yandex.com</div></div>
         </div>
-        <div class="info-card">
-          <div class="info-icon">☎</div>
-          <div><div class="info-title">Телефон</div><div class="info-value">+7 (999) 123-45-67</div></div>
-        </div>
+
+        <a href="https://t.me/beerjaP" target="_blank" class="info-card telegram-card">
+          <div class="info-icon tg-icon-wrap">
+            <svg class="tg-icon" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.37-.49 1.02-.75 3.98-1.73 6.64-2.87 7.97-3.44 3.8-1.6 4.59-1.88 5.1-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="info-title">Telegram</div>
+            <div class="info-value">Написать в чат</div>
+          </div>
+        </a>
+
         <div class="info-card">
           <div class="info-icon">✎</div>
           <div><div class="info-title">Чат поддержки</div><div class="info-value">отвечаем за 15 минут</div></div>
         </div>
+
         <div class="info-card">
           <div class="info-icon">◎</div>
           <div><div class="info-title">Город</div><div class="info-value">Москва, работаем по всей РФ</div></div>
         </div>
+
         <div class="map">КАРТА / ЛОКАЦИЯ ОФИСА</div>
       </div>
     </div>
@@ -118,9 +159,17 @@
 </section>
 
 <footer>
-  <div class="footer-row">
-    <div class="footer-logo">НАШЕ<br>ЛОГО</div>
-    <div class="footer-links"><a href="#">Чатик</a><a href="blog.html">Блог</a></div>
+  <div class="wrap footer-row">
+    <!-- Вместо текста теперь картинка логотипа -->
+    <a href="/" class="footer-logo">
+      <img src="Code_Generated_Image.png" alt="БИРЖА Логотип">
+    </a>
+
+    <div class="footer-links">
+      <!-- Подставляй сюда свои ссылки на Telegram -->
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Чатик</a>
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Блог</a>
+    </div>
   </div>
 </footer>
 

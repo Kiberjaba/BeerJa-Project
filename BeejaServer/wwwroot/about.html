@@ -83,7 +83,7 @@
 
 <header>
   <div class="nav">
-    <div class="nav-left"><span class="dot"></span>БИРЖА</div>
+    <a href="glav.html" class="nav-left"><span class="dot"></span>БИРЖА</a>
     <button class="nav-toggle" onclick="document.querySelector('.nav-right').classList.toggle('open')">☰</button>
     <nav class="nav-right">
       <a href="games.html">Игры</a>
@@ -154,9 +154,17 @@
 </section>
 
 <footer>
-  <div class="footer-row">
-    <div class="footer-logo">НАШЕ<br>ЛОГО</div>
-    <div class="footer-links"><a href="#">Чатик</a><a href="blog.html">Блог</a></div>
+  <div class="wrap footer-row">
+    <!-- Вместо текста теперь картинка логотипа -->
+    <a href="/" class="footer-logo">
+      <img src="Code_Generated_Image.png" alt="БИРЖА Логотип">
+    </a>
+
+    <div class="footer-links">
+      <!-- Подставляй сюда свои ссылки на Telegram -->
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Чатик</a>
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Блог</a>
+    </div>
   </div>
 </footer>
 

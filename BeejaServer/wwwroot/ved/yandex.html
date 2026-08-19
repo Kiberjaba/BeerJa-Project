@@ -149,6 +149,21 @@
       border-radius: 50%;
     }
 
+    .switch-role-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--cloud);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .switch-role-btn:hover {
+      background: rgba(244, 242, 236, 0.1);
+    }
+
     .info-banner {
       background: rgba(112, 92, 255, 0.12);
       border: 1px solid rgba(112, 92, 255, 0.3);
@@ -369,6 +384,8 @@
             <span class="badge-dot"></span>
             <span>Организатор</span>
           </div>
+          <!-- Кнопка переключения на игрока -->
+          <button class="switch-role-btn" onclick="switchToPlayer()">Я Игрок ➔</button>
         </div>
 
         <div class="info-banner">
@@ -430,25 +447,42 @@
   </main>
 
   <script>
-    // Вспомогательное определение базового URL API[cite: 5]
+    // 1. Управление ролями и сессией ведущего
+    function logout() {
+      localStorage.clear();
+      window.location.href = '../glav.html';
+    }
+
+    function switchToPlayer() {
+      localStorage.setItem('userRole', 'player');
+      window.location.href = '../user/yandex.html';
+    }
+
+    function saveHostSession() {
+      localStorage.setItem('userRole', 'host');
+      localStorage.setItem('isAuth', 'true');
+    }
+
+    // 2. Вспомогательное определение базового URL API[cite: 5]
     function getApiBase() {
       return (window.location.port === '5500' || window.location.port === '3000' || window.location.port === '8080')
         ? 'http://localhost:5234'
         : '';
     }
 
-    // Проверка редиректа от Яндекс OAuth при загрузке страницы[cite: 5]
+    // 3. Проверка редиректа от Яндекс OAuth[cite: 5]
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const tokenFromUrl = urlParams.get('token') || urlParams.get('accessToken');
 
       if (tokenFromUrl) {
-        // Сохраняем токен во все варианты ключей для максимальной совместимости[cite: 5]
+        // Сохраняем токен и статус авторизации ведущего[cite: 5]
         localStorage.setItem('token', tokenFromUrl);
         localStorage.setItem('authToken', tokenFromUrl);
         localStorage.setItem('jwtToken', tokenFromUrl);
 
-        // Очищаем токен из URL строки браузера[cite: 5]
+        saveHostSession(); // <--- Запоминаем вход для ведущего
+
         window.history.replaceState({}, document.title, window.location.pathname);
 
         showToast('Успешный вход через Яндекс ID!', 'success');
@@ -458,7 +492,7 @@
       }
     });
 
-    // Показ всплывающих уведомлений (Toast)[cite: 5]
+    // 4. Показ всплывающих уведомлений (Toast)[cite: 5]
     function showToast(message, type = 'error') {
       const container = document.getElementById('toastContainer');
       if (!container) return;
@@ -479,7 +513,7 @@
       }, 3500);
     }
 
-    // Переключение табов[cite: 5]
+    // 5. Переключение табов[cite: 5]
     function switchTab(tabName, event) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -495,11 +529,10 @@
       }
     }
 
-    // Авторизация Яндекс[cite: 5]
+    // 6. Авторизация Яндекс[cite: 5]
     function handleYandexLogin() {
       try {
         const API_BASE = getApiBase();
-        // Передаем текущий путь страницы в returnUrl, чтобы бэкенд вернул организатора сюда же[cite: 5]
         const returnUrl = encodeURIComponent(window.location.pathname);
 
         window.location.href = `${API_BASE}/api/v1/User/yandex-login?returnUrl=${returnUrl}`;
@@ -509,7 +542,7 @@
       }
     }
 
-    // Обработка обычного входа[cite: 5]
+    // 7. Обработка обычного входа[cite: 5]
     async function handleClassicLogin(e) {
       e.preventDefault();
 
@@ -540,7 +573,6 @@
         if (response.ok) {
           showToast('Успешный вход!', 'success');
 
-          // Сохраняем токен и ID пользователя во все популярные ключи[cite: 5]
           const token = data.token || data.accessToken;
           if (token) {
             localStorage.setItem('token', token);
@@ -553,13 +585,13 @@
             localStorage.setItem('userId', data.user_id || data.userId);
           }
 
-          // Редирект в панель управления[cite: 5]
+          saveHostSession(); // <--- Запоминаем вход для ведущего
+
           setTimeout(() => {
             window.location.href = '../ved.html';
           }, 800);
 
         } else {
-          // Выводим сообщение об ошибке от бэкенда[cite: 5]
           let errorMsg = data.message || 'Неверный логин или пароль';
 
           if (data.errors) {

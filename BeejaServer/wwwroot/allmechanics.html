@@ -68,6 +68,29 @@
   .cta-btn:hover{ transform: translateY(-1px); }
   .cta-note{ margin-top:14px; font-size:11.5px; color: var(--text-faint); }
 
+  .info-section{ padding:52px 0 20px; }
+  .section-eyebrow{ font-size:11px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--lime); margin-bottom:8px; }
+  .info-title{ font-size:clamp(22px,3.5vw,30px); font-weight:900; margin-bottom:8px; }
+  .info-lead{ font-size:13px; color:var(--text-dim); line-height:1.55; max-width:620px; margin-bottom:22px; }
+  .compare-wrap{ overflow-x:auto; border:1px solid var(--border); border-radius:18px; background:var(--card); }
+  .compare{ width:100%; border-collapse:collapse; min-width:760px; }
+  .compare th,.compare td{ padding:13px 14px; border-bottom:1px solid var(--border); text-align:center; font-size:12px; }
+  .compare th{ color:var(--text-dim); font-weight:800; background:var(--card-2); }
+  .compare th:first-child,.compare td:first-child{ text-align:left; }
+  .compare td:first-child{ color:var(--text); font-weight:700; }
+  .compare td:not(:first-child){ color:var(--lime); font-weight:900; }
+  .compare tr:last-child td{ border-bottom:none; }
+
+  .extra-section{ display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:32px 0 44px; }
+  .extra-card{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:24px; display:flex; flex-direction:column; align-items:flex-start; }
+  .extra-card h2{ font-size:19px; font-weight:900; margin-bottom:10px; }
+  .extra-card p{ font-size:12.5px; color:var(--text-dim); line-height:1.6; margin-bottom:18px; }
+  .extra-price{ color:var(--lime); font-size:20px; font-weight:900; margin-top:auto; }
+  .extra-note{ color:var(--text-faint); font-size:11px; margin-top:5px; }
+  .extra-btn{ width:100%; margin-top:auto; padding:11px 0; }
+
+  .cta-btn{ display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
+
   .floating-order{
     position: fixed;
     left: 50%;
@@ -103,6 +126,9 @@
   }
 
   @media (max-width:560px){
+    .extra-section{ grid-template-columns:1fr; padding-bottom:32px; }
+    .info-section{ padding-top:36px; }
+    .compare-wrap{ border-radius:14px; }
     .wrap{ padding:0 16px; }
     .nav{ padding:14px 18px; }
     .hero{ padding:40px 0 28px; }
@@ -124,7 +150,7 @@
 <div class="hero wrap">
   <div class="eyebrow">Каталог механик</div>
   <h1>Все механики, которые мы можем сделать под ваше мероприятие</h1>
-  <p class="lead">От быстрого опроса на телефонах до игры с собственной математической моделью. У каждой механики — свой пример, чтобы сразу понять, как это выглядит вживую.</p>
+  <p class="lead">От быстрого опроса на телефонах до полноценной игры с собственной игровой логикой. Выбирайте готовую механику или расскажите о своей идее — адаптируем формат под ваше мероприятие.</p>
 </div>
 
 <div class="wrap divider"></div>
@@ -213,6 +239,11 @@
       <div class="mcard-desc">Слепая дегустация с оценками, которые участники выставляют прямо через платформу.</div>
       <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
     </div>
+    <div class="mcard">
+      <div class="mcard-title">Ставка и риск</div>
+      <div class="mcard-desc">Команда ставит часть заработанных очков перед вопросом: правильный ответ увеличивает ставку, ошибка уменьшает счёт.</div>
+      <button class="btn-outline" onclick="alert('Пример скоро будет добавлен')">Посмотреть пример</button>
+    </div>
   </div>
 </div>
 
@@ -221,10 +252,10 @@
 <div class="level-group wrap">
   <div class="level-head">
     <div class="level-num">4</div>
-    <h2>Сложная игра с математической моделью</h2>
+    <h2>Сложная игровая механика</h2>
     <div class="level-price">7 500 ₽</div>
   </div>
-  <p class="level-sub">Отдельная математическая модель под механику, которая считает всё в реальном времени в зависимости от действий участников.</p>
+  <p class="level-sub">Отдельная игровая логика, которая считает состояние игры в реальном времени и меняет её ход в зависимости от действий участников.</p>
   <div class="mgrid two">
     <div class="mcard">
       <div class="mcard-title">Биржа напитков</div>
@@ -250,16 +281,64 @@
 </div>
 
 <div class="wrap">
+  <section class="info-section">
+    <div class="section-eyebrow">Что входит</div>
+    <h2 class="info-title">Чем выше уровень — тем больше игровой логики</h2>
+    <p class="info-lead">Каждый следующий уровень включает возможности предыдущего и добавляет новые элементы управления игрой.</p>
+
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Возможность</th>
+            <th>Опрос</th>
+            <th>Квиз</th>
+            <th>Командная игра</th>
+            <th>Сложная игра</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Ответы с телефона</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Результаты в реальном времени</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Ведущий управляет игрой</td><td>—</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Раунды и таймер</td><td>—</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Команды и общий рейтинг</td><td>—</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Сложная игровая логика</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Динамическая модель игры</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="extra-section">
+    <div class="extra-card">
+      <div class="section-eyebrow">Дополнительно</div>
+      <h2>Не хотите готовить контент самостоятельно?</h2>
+      <p>Мы можем сами разработать вопросы и задания под тему, аудиторию и формат мероприятия и подготовить их для загрузки в игру.</p>
+      <div class="extra-price">от 1 000 ₽</div>
+      <div class="extra-note">Стоимость зависит от объёма и количества контента.</div>
+    </div>
+
+    <div class="extra-card">
+      <div class="section-eyebrow">Своя идея</div>
+      <h2>Механики, которой нет в каталоге?</h2>
+      <p>Расскажите, что вы хотите сделать. Разработаем механику с нуля под сценарий, бренд, количество участников и задачи мероприятия.</p>
+      <a class="btn-outline extra-btn" href="contacts.html">Обсудить идею</a>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
   <div class="cta-band" id="cta-order">
     <div class="eyebrow" style="display:flex;">Готовы начать</div>
-    <h2>Выбрали механику под своё мероприятие?</h2>
-    <p>Расскажите про формат, дату и количество гостей — подберём подходящий уровень сложности и обсудим все детали, чтобы сделать качественный продукт именно под вашу задачу.</p>
-    <button class="cta-btn" onclick="alert('Заглушка: переход к заказу / форме заявки')">Заказать игру</button>
+    <h2>Есть идея для мероприятия?</h2>
+    <p>Расскажите про формат, дату и количество гостей. Если готовой механики нет — предложите свою идею, а мы подберём решение и оценим стоимость.</p>
+    <a class="cta-btn" href="contacts.html">Обсудить мероприятие</a>
     <div class="cta-note">Для мероприятий с большой аудиторией — индивидуальные условия, процент от продаж</div>
   </div>
 </div>
 
-<footer>Стоимость указана за реализацию механики под одно мероприятие. Для событий с большой аудиторией — индивидуальные условия.</footer>
+<footer>Стоимость указана за реализацию механики под одно мероприятие. Подготовка вопросов и контента — дополнительная услуга от 1 000 ₽. Для событий с большой аудиторией — индивидуальные условия.</footer>
 
 <a href="contacts.html" class="floating-order" id="floating-order">
   <span class="dot"></span>Заказать игру

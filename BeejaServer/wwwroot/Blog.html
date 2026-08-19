@@ -71,6 +71,27 @@
     .footer-row{ flex-direction:column; gap:20px; }
     .featured .body{ padding:24px; }
   }
+    /* Обновлённые стили для логотипа в футере */
+  .footer-logo {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .footer-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .footer-logo:hover {
+    transform: scale(1.05);
+ }
 </style>
 </head>
 <body>
@@ -170,8 +191,16 @@
 
 <footer>
   <div class="wrap footer-row">
-    <div class="footer-logo">НАШЕ<br>ЛОГО</div>
-    <div class="footer-links"><a href="#">Чатик</a><a href="#" class="active">Блог</a></div>
+    <!-- Вместо текста теперь картинка логотипа -->
+    <a href="/" class="footer-logo">
+      <img src="Code_Generated_Image.png" alt="БИРЖА Логотип">
+    </a>
+
+    <div class="footer-links">
+      <!-- Подставляй сюда свои ссылки на Telegram -->
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Чатик</a>
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Блог</a>
+    </div>
   </div>
 </footer>
 

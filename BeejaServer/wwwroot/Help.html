@@ -62,13 +62,34 @@
     .nav-toggle{ display:block; background:none; border:1px solid var(--border); color:var(--text); width:34px; height:34px; border-radius:8px; font-size:16px; cursor:pointer; }
     .wrap{ padding:0 18px; }
   }
+    /* Обновлённые стили для логотипа в футере */
+  .footer-logo {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .footer-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .footer-logo:hover {
+    transform: scale(1.05);
+ }
 </style>
 </head>
 <body>
 
 <header>
   <div class="nav">
-    <div class="nav-left"><span class="dot"></span>БИРЖА</div>
+    <a href="glav.html" class="nav-left"><span class="dot"></span>БИРЖА</a>
     <button class="nav-toggle" onclick="document.querySelector('.nav-right').classList.toggle('open')">☰</button>
     <nav class="nav-right">
       <a href="games.html">Игры</a>
@@ -135,9 +156,17 @@
 </section>
 
 <footer>
-  <div class="footer-row">
-    <div class="footer-logo">НАШЕ<br>ЛОГО</div>
-    <div class="footer-links"><a href="#">Чатик</a><a href="blog.html">Блог</a></div>
+  <div class="wrap footer-row">
+    <!-- Вместо текста теперь картинка логотипа -->
+    <a href="/" class="footer-logo">
+      <img src="Code_Generated_Image.png" alt="БИРЖА Логотип">
+    </a>
+
+    <div class="footer-links">
+      <!-- Подставляй сюда свои ссылки на Telegram -->
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Чатик</a>
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Блог</a>
+    </div>
   </div>
 </footer>
 

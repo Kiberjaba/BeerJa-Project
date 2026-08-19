@@ -100,14 +100,12 @@
       transform: translateY(0) scale(1);
     }
 
-    /* Ошибка */
     .toast.error {
       background: rgba(255, 107, 97, 0.95);
       color: #ffffff;
       border: 1px solid var(--coral);
     }
 
-    /* Успех */
     .toast.success {
       background: rgba(201, 255, 71, 0.95);
       color: var(--ink);
@@ -149,6 +147,21 @@
       height: 8px;
       background: var(--signal);
       border-radius: 50%;
+    }
+
+    .switch-role-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--cloud);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .switch-role-btn:hover {
+      background: rgba(244, 242, 236, 0.1);
     }
 
     .info-banner {
@@ -371,6 +384,8 @@
             <span class="badge-dot"></span>
             <span>Игрок</span>
           </div>
+          <!-- Кнопка переключения на ведущего -->
+          <button class="switch-role-btn" onclick="switchToHost()">Я Ведущий ➔</button>
         </div>
 
         <div class="info-banner">
@@ -432,23 +447,40 @@
   </main>
 
   <script>
-    // Вспомогательное определение базового URL API
+    // 1. Управление ролями и сессией
+    function logout() {
+      localStorage.clear();
+      window.location.href = '../glav.html';
+    }
+
+    function switchToHost() {
+      localStorage.setItem('userRole', 'host');
+      window.location.href = '../ved/yandex.html';
+    }
+
+    function savePlayerSession() {
+      localStorage.setItem('userRole', 'player');
+      localStorage.setItem('isAuth', 'true');
+    }
+
+    // 2. Вспомогательное определение базового URL API
     function getApiBase() {
       return window.location.port === '5500' ? 'http://localhost:5234' : '';
     }
 
-    // Проверка редиректа от Яндекс OAuth (когда бэкенд возвращает токен в URL)
+    // 3. Проверка редиректа от Яндекс OAuth
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const tokenFromUrl = urlParams.get('token') || urlParams.get('accessToken');
 
       if (tokenFromUrl) {
-        // Сохраняем токен во все варианты ключей для полной совместимости
+        // Сохраняем токены и статус авторизации игрока
         localStorage.setItem('token', tokenFromUrl);
         localStorage.setItem('authToken', tokenFromUrl);
         localStorage.setItem('jwtToken', tokenFromUrl);
+        
+        savePlayerSession(); // <--- Запоминаем вход для игрока
 
-        // Очищаем токен из URL строки браузера для чистоты ссылки
         window.history.replaceState({}, document.title, window.location.pathname);
 
         showToast('Успешный вход через Яндекс ID!', 'success');
@@ -458,7 +490,7 @@
       }
     });
 
-    // Функция для всплывающих уведомлений (Toast)
+    // 4. Всплывающие уведомления (Toast)
     function showToast(message, type = 'error') {
       const container = document.getElementById('toastContainer');
       if (!container) return;
@@ -483,7 +515,7 @@
       }, 3500);
     }
 
-    // Переключение между вкладками
+    // 5. Переключение табов
     function switchTab(tabName, event) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -499,11 +531,10 @@
       }
     }
 
-    // Вход через Яндекс ID
+    // 6. Вход через Яндекс ID
     function handleYandexLogin() {
       try {
         const API_BASE = getApiBase();
-        // Передаем текущий путь страницы в returnUrl, чтобы бэкенд вернул пользователя сюда же
         const returnUrl = encodeURIComponent(window.location.pathname);
 
         window.location.href = `${API_BASE}/api/v1/User/yandex-login?returnUrl=${returnUrl}`;
@@ -513,7 +544,7 @@
       }
     }
 
-    // Классический вход по логину/паролю
+    // 7. Вход по логину/паролю
     async function handleClassicLogin(e) {
       e.preventDefault();
 
@@ -558,6 +589,8 @@
           } catch (e) {
             console.log('Ответ сервера без JSON структуры');
           }
+
+          savePlayerSession(); // <--- Запоминаем вход для игрока
 
           setTimeout(() => {
             window.location.href = 'join-room.html';
