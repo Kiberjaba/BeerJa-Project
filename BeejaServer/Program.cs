@@ -73,3 +73,7 @@ app.UseAuthorization();
 app.MapControllers(); // Маппинг контроллеров
 
 app.Run();
+
+public partial class Program
+{
+}

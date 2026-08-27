@@ -9,7 +9,6 @@ on:
     branches:
       - main
       - ci_branch
-
   pull_request:
     branches:
       - main
@@ -20,15 +19,13 @@ permissions:
 
 jobs:
   # build and test in one job, if u don't like it, text me
-  build-and-test:
-    name: Build and test
+  build:
+    name: Build solution
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # perhaps, we can add more dependency checks sooner
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -40,5 +37,135 @@ jobs:
       - name: Build
         run: dotnet build Beerja.slnx --configuration Release --no-restore
 
-      - name: Run tests
-        run: dotnet test Beerja.slnx --configuration Release --no-build
+  frontend-tests:
+    name: Static frontend tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Beerja.slnx
+
+      - name: Run static frontend tests
+        run: >-
+          dotnet test tests/BeejaServer.Tests/BeejaServer.Tests.csproj
+          --configuration Release
+          --no-restore
+          --filter "FullyQualifiedName~StaticFrontendTests"
+          --logger "trx;LogFileName=frontend-tests.trx"
+          --results-directory TestResults/frontend
+
+      - name: Upload frontend test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-results
+          path: TestResults/frontend
+          if-no-files-found: warn
+          retention-days: 14
+
+  backend-regression-tests:
+    name: Backend regression tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Beerja.slnx
+
+      - name: Run backend regression tests
+        run: >-
+          dotnet test tests/BeejaServer.Tests/BeejaServer.Tests.csproj
+          --configuration Release
+          --no-restore
+          --filter "FullyQualifiedName~BeejaServer.Tests.Backend&Category=Regression"
+          --collect "XPlat Code Coverage"
+          --logger "trx;LogFileName=backend-regression-tests.trx"
+          --results-directory TestResults/backend-regression
+
+      - name: Upload backend regression results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-regression-test-results
+          path: TestResults/backend-regression
+          if-no-files-found: warn
+          retention-days: 14
+
+  backend-security-contract:
+    name: Backend security contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Beerja.slnx
+
+      - name: Run backend security contract tests
+        run: >-
+          dotnet test tests/BeejaServer.Tests/BeejaServer.Tests.csproj
+          --configuration Release
+          --no-restore
+          --filter "FullyQualifiedName~BeejaServer.Tests.Backend&Category=SecurityContract"
+          --logger "trx;LogFileName=backend-security-contract.trx"
+          --results-directory TestResults/backend-security
+
+      - name: Upload backend security results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-security-test-results
+          path: TestResults/backend-security
+          if-no-files-found: warn
+          retention-days: 14
+
+  backend-database-contract:
+    name: Backend database contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore Beerja.slnx
+
+      - name: Run backend database contract tests
+        run: >-
+          dotnet test tests/BeejaServer.Tests/BeejaServer.Tests.csproj
+          --configuration Release
+          --no-restore
+          --filter "FullyQualifiedName~BeejaServer.Tests.Backend&Category=DatabaseContract"
+          --logger "trx;LogFileName=backend-database-contract.trx"
+          --results-directory TestResults/backend-database
+
+      - name: Upload backend database results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-database-test-results
+          path: TestResults/backend-database
+          if-no-files-found: warn
+          retention-days: 14
