@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Управление командами</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+    --danger: #ff5c5c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+    overflow:hidden;
+  }
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 440px;
+      height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 18px 18px 8px;
+  }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--border); background: var(--card);
+    color: var(--text); font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .top-title{
+    font-size: 17px;
+    font-weight: 800;
+  }
+  .top-sub{
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    margin-top: 1px;
+  }
+
+  /* ===== STATUS BOX ===== */
+  .status-box {
+    margin: 8px 18px 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .status-box input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .status-box input[type="checkbox"]:checked {
+    background: var(--lime);
+    border-color: var(--lime);
+  }
+  .status-box input[type="checkbox"]:checked::after {
+    content: "✔";
+    font-size: 11px;
+    font-weight: 900;
+    color: #10130a;
+  }
+  .status-box label {
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text);
+  }
+
+  /* ===== SCROLL AREA ===== */
+  .content{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding: 14px 18px 24px;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .content::-webkit-scrollbar{ width:0; }
+
+  .empty-state{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    padding: 60px 20px;
+    text-align:center;
+  }
+  .empty-state-icon{ font-size: 34px; opacity: 0.5; }
+  .empty-state-text{ font-size: 13px; color: var(--text-dim); font-weight:600; }
+
+  /* ===== TEAM ACCORDION ===== */
+  .team-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .team-header {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    gap: 10px;
+  }
+  .team-header-left{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .team-avatar{
+    width: 38px; height: 38px; border-radius: 12px;
+    background: linear-gradient(135deg, #3a3f2a, #1c1e16);
+    border: 1px solid rgba(198,255,61,0.3);
+    color: var(--lime);
+    font-weight: 800;
+    font-size: 14px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .team-header-info{ min-width:0; }
+  .team-title-row{
+    display:flex; align-items:center; gap:6px;
+  }
+  .team-title{
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .creator-badge{
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #10130a;
+    background: var(--lime);
+    padding: 2px 6px;
+    border-radius: 999px;
+    flex-shrink:0;
+  }
+  .team-sub{
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .status-pending { color: #f39c12; }
+  .status-accepted { color: var(--text-dim); }
+  .team-arrow {
+    font-size: 13px;
+    color: var(--text-dim);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+    flex-shrink:0;
+  }
+
+  .team-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    padding: 0 16px;
+    transition:
+      grid-template-rows 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+      padding 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .team-body-inner{
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .team-section.active {
+    border-color: rgba(198,255,61,0.4);
+    background: var(--card-2);
+  }
+  .team-section.active .team-header {
+    border-bottom: 1px solid var(--border);
+  }
+  .team-section.active .team-arrow {
+    transform: rotate(180deg);
+    color: var(--lime);
+  }
+  .team-section.active .team-body {
+    grid-template-rows: 1fr;
+    padding: 14px 16px;
+  }
+
+  .invite-actions{ display:flex; gap:8px; padding-top: 2px; }
+
+  .members-list{
+    display:flex; flex-direction:column; gap:8px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .members-list::-webkit-scrollbar{ width:4px; }
+  .members-list::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 999px; }
+  .members-label{
+    font-size: 10px;
+    color: var(--text-faint);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 2px;
+  }
+  .member-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+  }
+  .member-left{
+    display:flex; align-items:center; gap:10px; min-width:0;
+  }
+  .member-avatar{
+    width: 30px; height:30px; border-radius:50%;
+    background: #2a2c2e;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px; font-weight:800; color: var(--text-dim);
+    flex-shrink:0;
+  }
+  .member-name{
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .member-remove-btn{
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .member-remove-btn:hover{
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .team-loading{
+    color: var(--text-faint);
+    font-size: 12.5px;
+    padding: 4px 2px;
+  }
+
+  .danger-zone{
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-danger{
+    width: 100%;
+    background: rgba(255,92,92,0.08);
+    color: var(--danger);
+    border: 1px solid rgba(255,92,92,0.35);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .btn-danger:hover{
+    background: rgba(255,92,92,0.16);
+  }
+
+  .btn-lime {
+    background: var(--lime);
+    color: #10130a;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <button class="icon-btn" onclick="window.location.href='lichuser.html'">←</button>
+    <div>
+      <div class="top-title">Управление командами</div>
+      <div class="top-sub" id="teamsCountSub">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- Кнопка "Ищу команду" -->
+  <div class="status-box">
+    <input type="checkbox" id="lookingToggle" onchange="toggleLookingStatus(this)">
+    <label for="lookingToggle">Ищу команду (отображаться в поиске)</label>
+  </div>
+
+  <div class="content" id="teamsContent">
+    <div class="team-loading">Загрузка команд...</div>
+  </div>
+</div>
+
+<script>
+  let currentUserId = null;
+
+  function getToken() {
+    return localStorage.getItem('token') || localStorage.getItem('authToken');
+  }
+
+  function initials(name) {
+    return (name || '?').trim().charAt(0).toUpperCase();
+  }
+
+  async function loadUserProfile() {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await fetch('/api/v1/User/profile-data', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      currentUserId = data.userId ?? data.id ?? null;
+      
+      const lookingCheckbox = document.getElementById('lookingToggle');
+      if (lookingCheckbox && data.isLookingForTeam !== undefined) {
+        lookingCheckbox.checked = data.isLookingForTeam;
+      }
+    } catch (e) {
+      console.error('Не удалось загрузить данные профиля', e);
+    }
+  }
+
+  async function toggleLookingStatus(checkbox) {
+    const token = getToken();
+    try {
+      const response = await fetch('/api/v1/User/update-looking-status', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isLookingForTeam: checkbox.checked })
+      });
+      if (!response.ok) {
+        alert('Не удалось обновить статус');
+        checkbox.checked = !checkbox.checked;
+      }
+    } catch (e) {
+      console.error('Ошибка при обновлении статуса поиска', e);
+      checkbox.checked = !checkbox.checked;
+    }
+  }
+
+  function toggleTeam(teamId) {
+    const sections = document.querySelectorAll('.team-section');
+    sections.forEach(sec => {
+      if (sec.dataset.teamId === String(teamId)) {
+        const wasActive = sec.classList.contains('active');
+        sec.classList.toggle('active');
+        // Загружаем участников для ВСЕХ принятых команд (и для создателей, и для участников)
+        if (!wasActive && sec.dataset.status === 'accepted' && !sec.dataset.loaded) {
+          loadTeamMembers(teamId);
+        }
+      } else {
+        sec.classList.remove('active');
+      }
+    });
+  }
+
+  async function loadTeams() {
+    const token = getToken();
+    if (!token) return;
+
+    const content = document.getElementById('teamsContent');
+
+    try {
+      const response = await fetch('/api/teams/my-teams', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+
+      const teams = await response.json();
+      content.innerHTML = '';
+
+      if (!teams || teams.length === 0) {
+        document.getElementById('teamsCountSub').innerText = 'Нет команд';
+        content.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <div class="empty-state-text">Вы пока не состоите ни в одной команде.<br>Создайте свою на странице профиля.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const acceptedCount = teams.filter(t => t.status === 'accepted').length;
+      document.getElementById('teamsCountSub').innerText =
+        `${acceptedCount} ${pluralizeTeams(acceptedCount)}`;
+
+      teams.forEach(t => {
+        const isPending = t.status === 'pending';
+        const statusText = isPending ? 'Ожидает подтверждения' : (t.isCreator ? 'Вы создатель' : 'Участник');
+        const statusClass = isPending ? 'status-pending' : 'status-accepted';
+
+        const section = document.createElement('div');
+        section.className = 'team-section';
+        section.dataset.teamId = t.teamId;
+        section.dataset.status = t.status;
+        section.dataset.isCreator = t.isCreator ? '1' : '0';
+
+        section.innerHTML = `
+          <div class="team-header" onclick="toggleTeam(${t.teamId})">
+            <div class="team-header-left">
+              <div class="team-avatar">${initials(t.teamName)}</div>
+              <div class="team-header-info">
+                <div class="team-title-row">
+                  <div class="team-title">${t.teamName}</div>
+                  ${t.isCreator ? '<span class="creator-badge">Создатель</span>' : ''}
+                </div>
+                <div class="team-sub ${statusClass}">${statusText}</div>
+              </div>
+            </div>
+            <div class="team-arrow">▼</div>
+          </div>
+          <div class="team-body">
+            <div class="team-body-inner">
+              ${isPending ? `
+                <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 10px;">Вас пригласили в эту команду. Хотите присоединиться?</div>
+                <div class="invite-actions">
+                  <button class="btn-lime" onclick="respondInvite(${t.teamId}, true)">Принять</button>
+                  <button class="btn-outline" onclick="respondInvite(${t.teamId}, false)">Отклонить</button>
+                </div>
+              ` : `
+                <div class="members-label">Участники</div>
+                <div class="members-list" id="members-${t.teamId}">
+                  <div class="team-loading">Загрузка участников...</div>
+                </div>
+                ${t.isCreator ? `
+                  <div class="danger-zone">
+                    <button class="btn-danger" onclick="deleteTeam(${t.teamId}, '${t.teamName.replace(/'/g, "\\'")}')">Удалить команду</button>
+                  </div>
+                ` : ''}
+              `}
+            </div>
+          </div>
+        `;
+
+        content.appendChild(section);
+      });
+    } catch (e) {
+      console.error('Ошибка загрузки команд', e);
+      content.innerHTML = '<div class="team-loading">Не удалось загрузить команды</div>';
+    }
+  }
+
+  function pluralizeTeams(n) {
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return 'команда';
+    if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return 'команды';
+    return 'команд';
+  }
+
+  async function loadTeamMembers(teamId) {
+    const token = getToken();
+    const container = document.getElementById(`members-${teamId}`);
+    const section = document.querySelector(`.team-section[data-team-id="${teamId}"]`);
+    const isCreator = section?.dataset.isCreator === '1';
+
+    try {
+      const response = await fetch(`/api/teams/${teamId}/members`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+
+      const members = await response.json();
+      section.dataset.loaded = '1';
+      container.innerHTML = '';
+
+      if (!members || members.length === 0) {
+        container.innerHTML = '<div class="team-loading">Участников пока нет</div>';
+        return;
+      }
+
+      members.forEach(m => {
+        const canRemove = isCreator && !m.isCreator;
+        container.insertAdjacentHTML('beforeend', `
+          <div class="member-row">
+            <div class="member-left">
+              <div class="member-avatar">${initials(m.username)}</div>
+              <div class="member-name">${m.username}${m.isCreator ? ' (создатель)' : ''}</div>
+            </div>
+            ${canRemove ? `
+              <button class="member-remove-btn" title="Удалить участника" onclick="removeMember(${teamId}, ${m.userId}, '${m.username.replace(/'/g, "\\'")}')">✕</button>
+            ` : ''}
+          </div>
+        `);
+      });
+    } catch (e) {
+      console.error('Ошибка загрузки участников', e);
+      container.innerHTML = '<div class="team-loading">Не удалось загрузить участников</div>';
+    }
+  }
+
+  async function respondInvite(teamId, accept) {
+    const token = getToken();
+    try {
+      const response = await fetch('/api/teams/respond-invite', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ teamId, accept })
+      });
+      if (response.ok) {
+        loadTeams();
+      } else {
+        const data = await response.json().catch(() => ({}));
+        alert(data.message || 'Не удалось обработать приглашение');
+      }
+    } catch (e) {
+      console.error('Ошибка ответа на приглашение', e);
+    }
+  }
+
+  async function removeMember(teamId, userId, username) {
+    if (!confirm(`Удалить ${username} из команды?`)) return;
+
+    const token = getToken();
+    try {
+      const response = await fetch('/api/teams/remove-member', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ teamId, userId })
+      });
+
+      if (response.ok) {
+        loadTeamMembers(teamId);
+      } else {
+        const data = await response.json().catch(() => ({}));
+        alert(data.message || 'Не удалось удалить участника');
+      }
+    } catch (e) {
+      console.error('Ошибка удаления участника', e);
+    }
+  }
+
+  async function deleteTeam(teamId, teamName) {
+    if (!confirm(`Удалить команду «${teamName}» полностью? Это действие необратимо.`)) return;
+
+    const token = getToken();
+    try {
+      const response = await fetch('/api/teams/delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ teamId })
+      });
+
+      if (response.ok) {
+        loadTeams();
+      } else {
+        const data = await response.json().catch(() => ({}));
+        alert(data.message || 'Не удалось удалить команду');
+      }
+    } catch (e) {
+      console.error('Ошибка удаления команды', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadUserProfile();
+    loadTeams();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Настройки профиля</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+    --coral: #ff6b61;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+    overflow:hidden;
+  }
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 440px;
+      height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 18px 18px 8px;
+  }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--border); background: var(--card);
+    color: var(--text); font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    text-decoration:none;
+    flex-shrink:0;
+  }
+  .top-title{
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  /* ===== MAIN CONTAINER (Flex column) ===== */
+  .content{
+    flex:1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px 20px;
+    overflow: hidden;
+  }
+
+  /* ===== SCROLLABLE FORM AREA ===== */
+  .form-scroll-area{
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+  }
+  .form-scroll-area::-webkit-scrollbar{ width:0; }
+
+  /* ===== AVATAR SECTION ===== */
+  .avatar-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .avatar-big{
+    width: 96px; height:96px; border-radius: 50%;
+    background: linear-gradient(135deg, #3a3f2a, #1c1e16);
+    border: 3px solid var(--lime);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 32px; font-weight:800; color:var(--lime);
+    position: relative;
+    flex-shrink:0;
+    cursor:pointer;
+    overflow: hidden;
+  }
+  .avatar-big img{
+    width:100%; height:100%; object-fit:cover;
+  }
+  .avatar-edit{
+    position:absolute; bottom:0px; right:0px;
+    width:28px; height:28px; border-radius:50%;
+    background: var(--lime); color:#10130a;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13px; font-weight:900;
+    border: 2px solid var(--bg);
+  }
+  .change-avatar-btn{
+    font-size: 13px; color: var(--lime); font-weight:700;
+    background:none; border:none; cursor:pointer; padding:0;
+  }
+  .avatar-hint{
+    font-size: 11px; color: var(--text-faint); text-align:center;
+  }
+
+  /* ===== FORM ===== */
+  .field-group{
+    margin-bottom: 18px;
+  }
+  .field-label{
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .field-input{
+    width: 100%;
+    height: 48px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .field-input:focus{
+    border-color: var(--lime);
+  }
+  .field-error{
+    font-size: 12px;
+    color: var(--coral);
+    margin-top: 6px;
+    min-height: 14px;
+  }
+  .field-success{
+    font-size: 12px;
+    color: var(--lime);
+    margin-top: 6px;
+    min-height: 14px;
+  }
+
+  .save-btn{
+    width: 100%;
+    height: 50px;
+    border-radius: 999px;
+    border: none;
+    background: var(--lime);
+    color: #10130a;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 8px;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+  .save-btn:active{
+    transform: scale(0.98);
+  }
+  .save-btn:disabled{
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /* ===== BOTTOM ACTIONS (Кнопки снизу, прижаты к низу) ===== */
+  .bottom-actions{
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .action-link-btn{
+    width: 100%;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .action-link-btn:hover{
+    background: var(--card-2);
+  }
+  .danger-btn{
+    border-color: rgba(255, 107, 97, 0.3);
+    color: var(--coral);
+  }
+  .danger-btn:hover{
+    background: rgba(255, 107, 97, 0.08);
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <a href="../lichved.html" class="icon-btn">←</a>
+    <div class="top-title">Настройки профиля</div>
+  </div>
+
+  <div class="content">
+    <!-- ПРОКРУЧИВАЕМАЯ ОБЛАСТЬ (Аватар + Поля ввода) -->
+    <div class="form-scroll-area">
+      <!-- ===== АВАТАР ===== -->
+      <div class="avatar-section">
+        <div class="avatar-big" id="avatarPreview" onclick="document.getElementById('avatarFile').click()">
+          <span id="avatarLetter">-</span>
+          <div class="avatar-edit">✎</div>
+        </div>
+        <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarSelect(event)">
+        <button class="change-avatar-btn" onclick="document.getElementById('avatarFile').click()">Сменить аватар</button>
+        <div class="avatar-hint">Автоматическое сжатие изображения</div>
+      </div>
+
+      <!-- ===== ИМЯ ПОЛЬЗОВАТЕЛЯ ===== -->
+      <div class="field-group">
+        <label class="field-label" for="usernameInput">Имя пользователя</label>
+        <input class="field-input" id="usernameInput" type="text" maxlength="32" placeholder="Введите имя">
+        <div class="field-error" id="usernameError"></div>
+      </div>
+
+      <button class="save-btn" id="saveBtn" onclick="saveProfile()">Сохранить изменения</button>
+      <div class="field-success" id="saveSuccess" style="text-align:center; margin-top:12px;"></div>
+    </div>
+
+    <!-- ===== НИЖНИЕ КНОПКИ (ВСЕГДА ВНИЗУ) ===== -->
+    <div class="bottom-actions">
+      <a href="../ved.html" class="action-link-btn">Вернуться в кабинет ведущего</a>
+      <a href="../glav.html" class="action-link-btn">Выйти на главную страницу</a>
+      <button class="action-link-btn danger-btn" onclick="deleteAccount()">Удалить аккаунт</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_HOST = '';
+  const API_BASE_URL = `${API_HOST}/api/v1/User`;
+
+  let currentUsername = '';
+  let selectedAvatarFile = null;
+
+  // ===== ОБРАБОТКА КНОПКИ "НАЗАД" В БРАУЗЕРЕ =====
+  history.pushState(null, null, location.href);
+  window.addEventListener('popstate', function () {
+    window.location.href = '../glav.html';
+  });
+
+  function getToken() {
+    return localStorage.getItem('token') || localStorage.getItem('authToken');
+  }
+
+  // ===== ЗАГРУЗКА ТЕКУЩЕГО ПРОФИЛЯ =====
+  async function loadProfile() {
+    const token = getToken();
+    if (!token) {
+      console.warn('Токен не найден. Войдите заново.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/profile-data`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+
+      const data = await response.json();
+      currentUsername = data.username || '';
+
+      document.getElementById('usernameInput').value = currentUsername;
+
+      if (data.photo) {
+        setAvatarPreview(`${API_HOST}${data.photo}?t=${Date.now()}`);
+      } else if (currentUsername) {
+        document.getElementById('avatarLetter').textContent = currentUsername.charAt(0).toUpperCase();
+      }
+    } catch (error) {
+      console.error('Не удалось загрузить профиль:', error);
+    }
+  }
+
+  // ===== ВЫБОР И СЖАТИЕ АВАТАРА (CANVAS CROP 400x400) =====
+  function handleAvatarSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const targetSize = 400;
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+
+        let srcX = 0, srcY = 0, srcWidth = img.width, srcHeight = img.height;
+        if (img.width > img.height) {
+          srcWidth = img.height;
+          srcX = (img.width - img.height) / 2;
+        } else {
+          srcHeight = img.width;
+          srcY = (img.height - img.width) / 2;
+        }
+
+        ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, targetSize, targetSize);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          selectedAvatarFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+          setAvatarPreview(canvas.toDataURL("image/jpeg", 0.8));
+        }, 'image/jpeg', 0.8);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function setAvatarPreview(src) {
+    const preview = document.getElementById('avatarPreview');
+    preview.innerHTML = `<img src="${src}" alt="Аватар"><div class="avatar-edit">✎</div>`;
+  }
+
+  // ===== СОХРАНЕНИЕ ИЗМЕНЕНИЙ =====
+  async function saveProfile() {
+    const usernameInput = document.getElementById('usernameInput');
+    const error = document.getElementById('usernameError');
+    const success = document.getElementById('saveSuccess');
+    const saveBtn = document.getElementById('saveBtn');
+
+    const newUsername = usernameInput.value.trim();
+    error.textContent = '';
+    success.textContent = '';
+
+    if (!newUsername) {
+      error.textContent = 'Введите имя пользователя';
+      return;
+    }
+
+    const token = getToken();
+    if (!token) {
+      error.textContent = 'Сессия истекла, войдите заново';
+      return;
+    }
+
+    if (!selectedAvatarFile && newUsername === currentUsername) {
+      success.textContent = 'Изменений нет';
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Сохранение...';
+
+    try {
+      if (newUsername !== currentUsername) {
+        const usernameResponse = await fetch(`${API_BASE_URL}/update-username`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username: newUsername })
+        });
+
+        const usernameData = await usernameResponse.json().catch(() => ({}));
+
+        if (!usernameResponse.ok) {
+          error.textContent = usernameData.message || 'Не удалось сохранить имя';
+          return;
+        }
+
+        currentUsername = newUsername;
+      }
+
+      if (selectedAvatarFile) {
+        const formData = new FormData();
+        formData.append('file', selectedAvatarFile);
+
+        const avatarResponse = await fetch(`${API_BASE_URL}/upload-avatar`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const avatarData = await avatarResponse.json().catch(() => ({}));
+
+        if (!avatarResponse.ok) {
+          error.textContent = avatarData.message || 'Не удалось сохранить аватар';
+          return;
+        }
+
+        if (avatarData.photo) {
+          setAvatarPreview(`${API_HOST}${avatarData.photo}?t=${Date.now()}`);
+        }
+        selectedAvatarFile = null;
+      }
+
+      success.textContent = 'Профиль обновлён';
+
+    } catch (err) {
+      console.error('Ошибка сохранения профиля:', err);
+      error.textContent = 'Не удалось связаться с сервером';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Сохранить изменения';
+    }
+  }
+
+  // ===== УДАЛЕНИЕ АККАУНТА =====
+  async function deleteAccount() {
+    if (!confirm('Вы действительно хотите удалить аккаунт? Это действие необратимо.')) {
+      return;
+    }
+
+    const token = getToken();
+    if (!token) {
+      localStorage.clear();
+      window.location.href = '../login.html';
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok || response.status === 204) {
+        localStorage.clear();
+        window.location.href = '../glav.html';
+      } else {
+        const data = await response.json().catch(() => ({}));
+        alert(data.message || 'Не удалось удалить аккаунт');
+      }
+    } catch (err) {
+      console.error('Ошибка при удалении аккаунта:', err);
+      alert('Ошибка связи с сервером');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+
+</body>
+</html>

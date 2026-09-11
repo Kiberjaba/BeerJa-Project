@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>whoami // резюме</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   ROOT
+========================================================= */
+:root{
+  --bg:#030502;
+  --panel:#06130a;
+  --panel-2:#081c0e;
+  --border:#1d4d29;
+  --border-soft:#123a1c;
+  --green:#3dff6e;
+  --green-soft:#9be8ab;
+  --green-dim:#145c2a;
+  --cyan:#6fe8ff;
+  --alert:#ff5c5c;
+  --text:#cdf5d8;
+  --text-dim:#6f9c7d;
+  --text-faint:#3d5a46;
+}
+/* =========================================================
+   RESET
+========================================================= */
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+html{
+  scroll-snap-type:y mandatory;
+  scroll-behavior:smooth;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  font-size:15px;
+  line-height:1.65;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.018) 0,
+    rgba(255,255,255,.018) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events:none;
+  z-index:200;
+  mix-blend-mode:overlay;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:radial-gradient(
+    ellipse at 50% 40%,
+    transparent 55%,
+    rgba(0,0,0,.65) 100%
+  );
+  pointer-events:none;
+  z-index:199;
+}
+a{
+  color:inherit;
+}
+::selection{
+  background:var(--green);
+  color:#02140a;
+}
+.wrap{
+  width:100%;
+  max-width:860px;
+  margin:0 auto;
+  padding-left:clamp(16px,4vw,32px);
+  padding-right:clamp(16px,4vw,32px);
+}
+code,
+.mono{
+  font-family:'Share Tech Mono',monospace;
+}
+/* =========================================================
+   TITLEBAR
+========================================================= */
+.titlebar{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(3,5,2,.92);
+  border-bottom:1px solid var(--border-soft);
+  backdrop-filter:blur(3px);
+}
+.titlebar-inner{
+  max-width:860px;
+  margin:0 auto;
+  padding:12px clamp(16px,4vw,32px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.dots{
+  display:flex;
+  gap:7px;
+}
+.dots span{
+  width:10px;
+  height:10px;
+  border-radius:2px;
+  background:var(--border);
+  box-shadow:0 0 6px rgba(61,255,110,.15);
+}
+.dots span:nth-child(1){
+  background:var(--alert);
+  box-shadow:0 0 6px rgba(255,92,92,.5);
+}
+.dots span:nth-child(2){
+  background:#ffcf5c;
+  box-shadow:0 0 6px rgba(255,207,92,.4);
+}
+.dots span:nth-child(3){
+  background:var(--green);
+  box-shadow:0 0 6px rgba(61,255,110,.6);
+}
+.titlebar-name{
+  font-size:12px;
+  color:var(--text-dim);
+  letter-spacing:.04em;
+}
+.titlebar-nav{
+  display:flex;
+  gap:18px;
+  font-size:12px;
+  flex-wrap:wrap;
+}
+.titlebar-nav a{
+  color:var(--text-dim);
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:color .2s ease,border-color .2s ease;
+}
+.titlebar-nav a:hover{
+  color:var(--green);
+  border-color:var(--green);
+}
+/* =========================================================
+   BOOT
+========================================================= */
+.boot{
+  position:absolute;
+  top:clamp(64px,11vh,104px);
+  left:clamp(16px,4vw,40px);
+  max-width:min(300px,42vw);
+  font-size:12px;
+  line-height:1.7;
+  color:var(--text-faint);
+  text-align:left;
+  pointer-events:none;
+}
+.boot-line{
+  min-height:1.4em;
+  visibility:hidden;
+}
+.boot-line.typing,
+.boot-line.done{
+  visibility:visible;
+}
+.boot-line b{
+  color:var(--green-soft);
+  font-weight:400;
+}
+.boot .ok{
+  color:var(--green);
+}
+.type-cursor{
+  display:inline-block;
+  width:7px;
+  height:1em;
+  background:var(--green);
+  margin-left:2px;
+  vertical-align:-2px;
+  animation:blink .9s steps(1) infinite;
+}
+/* =========================================================
+   HERO
+========================================================= */
+.screen-hero{
+  position:relative;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+.hero{
+  padding:clamp(28px,6vw,56px) 0 clamp(40px,8vw,64px);
+  text-align:center;
+  border-bottom:1px solid var(--border-soft);
+}
+.hero-role,
+.hero-about,
+.hero-fingerprint{
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity .5s ease,transform .5s ease;
+}
+.hero.revealed .hero-role,
+.hero.revealed .hero-about,
+.hero.revealed .hero-fingerprint{
+  opacity:1;
+  transform:translateY(0);
+}
+.hero.revealed .hero-about{
+  transition-delay:.08s;
+}
+.hero.revealed .hero-fingerprint{
+  transition-delay:.16s;
+}
+.hero-tag{
+  font-size:11px;
+  letter-spacing:.18em;
+  color:var(--text-dim);
+  margin-bottom:18px;
+}
+.hero-tag .cursor{
+  display:inline-block;
+  width:8px;
+  height:12px;
+  background:var(--green);
+  margin-left:4px;
+  animation:blink 1s steps(1) infinite;
+  vertical-align:-2px;
+}
+@keyframes blink{
+  50%{
+    opacity:0;
+  }
+}
+.hero h1{
+  font-family:'VT323',monospace;
+  font-weight:400;
+  font-size:clamp(2.4rem,8vw,4.4rem);
+  line-height:1;
+  letter-spacing:.01em;
+  color:var(--green-soft);
+  text-shadow:0 0 18px rgba(61,255,110,.35),0 0 2px rgba(61,255,110,.6);
+  margin-bottom:14px;
+}
+.hero-role{
+  font-size:clamp(1rem,2.6vw,1.3rem);
+  color:var(--text);
+  font-weight:400;
+  margin-bottom:24px;
+}
+.hero-role .hl{
+  color:var(--cyan);
+  text-shadow:0 0 10px rgba(111,232,255,.4);
+}
+.hero-role .hl2{
+  color:var(--green);
+  text-shadow:0 0 10px rgba(61,255,110,.4);
+}
+.hero-about{
+  max-width:620px;
+  margin:0 auto;
+  color:var(--text-dim);
+  font-size:13.5px;
+  line-height:1.7;
+}
+.hero-fingerprint{
+  margin-top:30px;
+  display:inline-flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:6px 10px;
+  font-size:11px;
+  color:var(--text-faint);
+}
+.hero-fingerprint span{
+  color:var(--green-dim);
+}
+/* =========================================================
+   PANELS
+========================================================= */
+section.panel{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:clamp(36px,7vw,56px) 0;
+  border-bottom:1px solid var(--border-soft);
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+section.panel:last-of-type{
+  border-bottom:none;
+}
+.panel-head{
+  width:100%;
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.panel-head .path{
+  font-family:'VT323',monospace;
+  font-size:clamp(1.5rem,4vw,1.9rem);
+  color:var(--green);
+  text-shadow:0 0 10px rgba(61,255,110,.25);
+}
+.panel-head .path::before{
+  content:"~/";
+  color:var(--text-faint);
+}
+.panel-head .rule{
+  flex:1;
+  height:1px;
+  background:repeating-linear-gradient(
+    to right,
+    var(--border) 0 4px,
+    transparent 4px 8px
+  );
+  min-width:40px;
+}
+.panel-head .tag{
+  font-size:10.5px;
+  color:var(--text-faint);
+  border:1px solid var(--border-soft);
+  padding:3px 8px;
+  border-radius:3px;
+}
+/* =========================================================
+   ABOUT
+========================================================= */
+.about-grid{
+  display:grid;
+  grid-template-columns:200px minmax(0,1fr);
+  gap:26px;
+  align-items:start;
+}
+.id-card{
+  position:relative;
+  width:200px;
+  height:max-content;
+  align-self:start;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:6px;
+  padding:14px;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .3s cubic-bezier(.25,.46,.45,.94),box-shadow .3s ease,border-color .3s ease;
+}
+.id-card:hover{
+  transform:translateY(-5px) scale(1.01);
+  box-shadow:0 10px 20px rgba(61,255,110,.2);
+  border-color:var(--green);
+}
+.id-scan{
+  aspect-ratio:1/1;
+  border:1px solid var(--border-soft);
+  border-radius:4px;
+  background:repeating-linear-gradient(
+      0deg,
+      rgba(61,255,110,.06) 0 2px,
+      transparent 2px 4px
+    ),
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(61,255,110,.12),
+      transparent 60%
+    ),
+    #020701;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text-faint);
+  font-size:10px;
+  letter-spacing:.08em;
+  position:relative;
+  overflow:hidden;
+}
+.id-scan img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:12px;
+}
+.id-scan .noise-label{
+  position:absolute;
+  bottom:8px;
+  left:0;
+  right:0;
+  text-align:center;
+  color:var(--green-dim);
+}
+.id-meta{
+  margin-top:12px;
+  font-size:11px;
+}
+.id-meta div{
+  display:flex;
+  justify-content:space-between;
+  padding:4px 0;
+  border-bottom:1px dashed var(--border-soft);
+  color:var(--text-dim);
+}
+.id-meta div:last-child{
+  border-bottom:none;
+}
+.id-meta span:last-child{
+  color:var(--green-soft);
+}
+.id-details{
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  transform:translateY(-10px);
+  transition:max-height .55s cubic-bezier(.4,0,.2,1),opacity .35s ease,transform .35s ease;
+}
+.id-card.active .id-details{
+  max-height:350px;
+  opacity:1;
+  transform:translateY(0);
+}
+.details-content{
+  padding-top:12px;
+  border-top:1px dashed var(--border-soft);
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.details-content div{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-family:'Share Tech Mono',monospace;
+  color:var(--text-dim);
+}
+.details-content span:last-child{
+  color:var(--green-soft);
+  text-align:right;
+}
+.card-hint{
+  margin-top:12px;
+  text-align:center;
+  font-size:10px;
+  font-family:'Share Tech Mono',monospace;
+  color:var(--text-faint);
+  letter-spacing:1px;
+  transition:color .3s ease;
+}
+.id-card:hover .card-hint{
+  color:var(--green-dim);
+}
+/* =========================================================
+   ABOUT TEXT
+========================================================= */
+.about-text{
+  min-width:0;
+}
+.about-text p{
+  color:var(--text);
+  font-size:14px;
+  line-height:1.8;
+  margin-bottom:14px;
+}
+.about-text p:last-of-type{
+  margin-bottom:0;
+}
+.about-highlight{
+  color:#02140a;
+  background:var(--green);
+  padding:2px 6px;
+  border-radius:2px;
+  box-shadow:0 0 10px rgba(61,255,110,.12);
+  white-space:nowrap;
+}
+.about-highlight-soft{
+  color:var(--green);
+  background:rgba(61,255,110,.07);
+  border:1px solid var(--green-dim);
+  padding:1px 5px;
+  border-radius:2px;
+  box-shadow:inset 0 0 8px rgba(61,255,110,.04);
+}
+.status-row{
+  margin-top:18px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.status-pill{
+  font-size:10.5px;
+  border:1px solid var(--green-dim);
+  color:var(--green-soft);
+  padding:5px 10px;
+  border-radius:3px;
+  background:rgba(61,255,110,.05);
+}
+.status-pill.cyan{
+  border-color:rgba(111,232,255,.4);
+  color:var(--cyan);
+  background:rgba(111,232,255,.05);
+}
+/* =========================================================
+   EXPERIENCE
+========================================================= */
+.case-file{
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:6px;
+  overflow:hidden;
+}
+.case-head{
+  padding:16px 18px;
+  border-bottom:1px solid var(--border-soft);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+  background:linear-gradient(180deg,rgba(61,255,110,.05),transparent);
+}
+.case-title{
+  font-size:15px;
+  color:var(--green-soft);
+  font-weight:400;
+}
+.case-status{
+  font-size:10.5px;
+  color:var(--alert);
+  border:1px solid rgba(255,92,92,.4);
+  padding:3px 8px;
+  border-radius:3px;
+  white-space:nowrap;
+}
+.case-body{
+  padding:18px;
+}
+.stack-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:18px;
+}
+.stack-chip{
+  font-size:11px;
+  color:var(--green);
+  border:1px solid var(--border);
+  padding:5px 10px;
+  border-radius:3px;
+}
+.case-list{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.case-list li{
+  padding-left:20px;
+  position:relative;
+  font-size:13.5px;
+  color:var(--text);
+  line-height:1.7;
+}
+.case-list li::before{
+  content:">";
+  position:absolute;
+  left:0;
+  top:0;
+  color:var(--green);
+}
+/* =========================================================
+   EDUCATION
+========================================================= */
+.edu-card{
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:6px;
+  padding:20px;
+}
+.edu-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  padding:10px 0;
+  border-bottom:1px dashed var(--border-soft);
+  font-size:13px;
+}
+.edu-row:last-child{
+  border-bottom:none;
+}
+.edu-row .k{
+  color:var(--text-faint);
+  min-width:140px;
+}
+.edu-row .v{
+  color:var(--text);
+  flex:1;
+  text-align:right;
+}
+.edu-thesis{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border-soft);
+  font-size:12.5px;
+  color:var(--text-dim);
+}
+.edu-thesis b{
+  color:var(--green-soft);
+  font-weight:400;
+}
+/* =========================================================
+   SKILLS
+========================================================= */
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+.skill-group{
+  border:1px solid var(--border-soft);
+  border-radius:6px;
+  padding:14px 16px;
+  background:var(--panel);
+}
+.skill-group h3{
+  font-size:11px;
+  letter-spacing:.06em;
+  color:var(--text-faint);
+  margin-bottom:10px;
+  font-weight:400;
+}
+.skill-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.skill-tags span{
+  font-size:11.5px;
+  color:var(--green-soft);
+  border:1px solid var(--border);
+  padding:4px 9px;
+  border-radius:3px;
+}
+/* =========================================================
+   TRAITS
+========================================================= */
+.log{
+  display:flex;
+  flex-direction:column;
+  border:1px solid var(--border-soft);
+  border-radius:6px;
+  overflow:hidden;
+}
+.log-line{
+  display:flex;
+  gap:12px;
+  padding:12px 16px;
+  font-size:13px;
+  border-bottom:1px solid var(--border-soft);
+  background:var(--panel);
+}
+.log-line:last-child{
+  border-bottom:none;
+}
+.log-line .ts{
+  color:var(--text-faint);
+  white-space:nowrap;
+  font-size:11px;
+  padding-top:2px;
+}
+.log-line .msg{
+  color:var(--text);
+  line-height:1.6;
+}
+/* =========================================================
+   CONTACT
+========================================================= */
+.contact-panel{
+  position:relative;
+  justify-content:center;
+  padding-top:clamp(36px,7vw,56px);
+  padding-bottom:clamp(36px,7vw,56px);
+}
+.contact-panel .panel-head{
+  width:100%;
+  max-width:720px;
+  margin-left:auto;
+  margin-right:auto;
+  margin-bottom:22px;
+}
+.contact-box{
+  width:100%;
+  max-width:720px;
+  margin:0 auto;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:6px;
+  padding:22px;
+}
+.contact-prompt{
+  font-size:13px;
+  color:var(--text-dim);
+  margin-bottom:16px;
+}
+.contact-prompt b{
+  color:var(--green);
+  font-weight:400;
+}
+.contact-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px 20px;
+}
+.cfield{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  padding:8px 0;
+  border-bottom:1px dashed var(--border-soft);
+}
+.cfield .k{
+  color:var(--text-faint);
+}
+.cfield .v{
+  color:var(--green-soft);
+}
+.cfield .v.edit{
+  color:var(--alert);
+  font-size:11px;
+}
+.contact-eof{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:18px;
+  margin:0;
+  padding:0;
+  text-align:center;
+  color:var(--text-faint);
+  font-size:11px;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.contact-eof .cursor{
+  display:inline-block;
+  width:7px;
+  height:11px;
+  background:var(--green);
+  margin-left:4px;
+  vertical-align:-1px;
+  animation:blink 1s steps(1) infinite;
+}
+.eof-text{
+  white-space:pre-wrap;
+}
+/* =========================================================
+   ASSISTANT
+========================================================= */
+.assistant-stage{
+  position:fixed;
+  right:clamp(18px,3vw,46px);
+  bottom:18px;
+  width:300px;
+  height:390px;
+  z-index:150;
+  pointer-events:none;
+}
+.assistant-wrap{
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:270px;
+  display:flex;
+  justify-content:flex-end;
+  align-items:flex-end;
+  animation:assistantFloat 4s ease-in-out infinite;
+  pointer-events:auto;
+  cursor:pointer;
+}
+.assistant-img{
+  width:270px;
+  height:270px;
+  object-fit:contain;
+  image-rendering:pixelated;
+  filter:drop-shadow(0 0 12px rgba(61,255,110,.12));
+  user-select:none;
+}
+@keyframes assistantFloat{
+  0%,100%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-5px);
+  }
+}
+.assistant-bubble{
+  position:absolute;
+  right:220px;
+  bottom:210px;
+  width:250px;
+  padding:14px 16px;
+  border:1px solid var(--green-dim);
+  background:rgba(3,8,4,.96);
+  color:var(--green-soft);
+  font-size:11.5px;
+  line-height:1.5;
+  box-shadow:0 0 18px rgba(61,255,110,.08);
+  opacity:0;
+  transform:translateY(8px) scale(.98);
+  transform-origin:bottom right;
+  transition:opacity .22s ease,transform .22s ease;
+}
+.assistant-bubble.show{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+.assistant-bubble::after{
+  content:"";
+  position:absolute;
+  right:-7px;
+  bottom:18px;
+  width:12px;
+  height:12px;
+  background:rgba(3,8,4,.96);
+  border-top:1px solid var(--green-dim);
+  border-right:1px solid var(--green-dim);
+  transform:rotate(45deg);
+}
+.assistant-label{
+  position:absolute;
+  right:0;
+  bottom:-2px;
+  font-size:9px;
+  color:var(--text-faint);
+  white-space:nowrap;
+}
+section.panel.assistant-target{
+  border-bottom-color:var(--green-dim);
+}
+section.panel.assistant-target .panel-head .path{
+  color:var(--green-soft);
+  text-shadow:0 0 14px rgba(61,255,110,.45);
+}
+.assistant-wrap:hover .assistant-img{
+  filter:drop-shadow(0 0 18px rgba(61,255,110,.28));
+}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media(max-width:900px){
+  .assistant-stage{
+    right:10px;
+    bottom:10px;
+    transform:scale(.78);
+    transform-origin:bottom right;
+  }
+  .assistant-bubble{
+    right:125px;
+  }
+}
+@media(max-width:780px){
+  .boot{
+    position:static;
+    max-width:none;
+    margin:0 auto;
+    padding:clamp(20px,6vw,32px) clamp(16px,5vw,28px) 0;
+    text-align:left;
+  }
+  .about-grid{
+    grid-template-columns:1fr;
+    gap:24px;
+  }
+  .id-card{
+    width:200px;
+    max-width:100%;
+    margin:0 auto;
+  }
+  .about-text{
+    width:100%;
+  }
+}
+@media(max-width:640px){
+  .assistant-stage{
+    transform:scale(.62);
+    right:4px;
+    bottom:2px;
+  }
+  .titlebar-nav{
+    display:none;
+  }
+  .skills-grid{
+    grid-template-columns:1fr;
+  }
+  .contact-fields{
+    grid-template-columns:1fr;
+  }
+  .edu-row{
+    flex-direction:column;
+    gap:2px;
+  }
+  .edu-row .v{
+    text-align:left;
+  }
+  .contact-panel .panel-head{
+    align-items:center;
+  }
+  .contact-box{
+    padding:16px;
+  }
+  .contact-eof{
+    bottom:8px;
+  }
+  .about-text p{
+    font-size:13.5px;
+  }
+  .about-highlight,
+  .about-highlight-soft{
+    white-space:normal;
+  }
+}
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+@media(prefers-reduced-motion:reduce){
+  html{
+    scroll-behavior:auto;
+  }
+  .boot-line{
+    visibility:visible;
+  }
+  .cursor,
+  .type-cursor,
+  .assistant-wrap,
+  .contact-eof .cursor{
+    animation:none;
+  }
+  .cursor,
+  .type-cursor,
+  .contact-eof .cursor{
+    opacity:1;
+  }
+  .id-card,
+  .assistant-bubble{
+    transition:none;
+  }
+}
+</style>
+</head>
+<body>
+<div class="titlebar">
+  <div class="titlebar-inner">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="titlebar-name">
+        root@resume: ~
+      </div>
+    </div>
+    <nav class="titlebar-nav">
+      <a href="#about">about.log</a>
+      <a href="#experience">experience.json</a>
+      <a href="#education">education.cfg</a>
+      <a href="#skills">skills.map</a>
+      <a href="#contact">contact.sh</a>
+    </nav>
+  </div>
+</div>
+<div class="screen-hero" id="screen-hero">
+  <div class="boot" id="bootSequence" aria-hidden="true">
+    <div class="boot-line">&gt; инициализация_сессии...</div>
+    <div class="boot-line">&gt; проверка_доступа... <b>OK</b></div>
+    <div class="boot-line">&gt; загрузка_профиля: <b>резюме.dat</b></div>
+    <div class="boot-line">&gt; статус: <span class="ok">ДОСТУП РАЗРЕШЁН</span></div>
+  </div>
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero-tag">
+        СЕССИЯ АКТИВНА
+        <span class="cursor"></span>
+      </div>
+      <h1 id="resume-name">Небасова Маргарита</h1>
+      <div class="hero-role">
+        <span class="hl">Full-Stack</span> разработчик &nbsp;|&nbsp; <span class="hl2">от архитектуры до деплоя</span>
+      </div>
+      <p class="hero-about">
+        Самостоятельно проектирую и запускаю продукты с нуля — от базы данных и бэкенда до безопасного деплоя и переговоров о партнёрствах. Довожу идею до рабочего релиза без посредников.
+      </p>
+      <div class="hero-fingerprint">
+        <span>стек:</span> C# · Node.js · Python · PostgreSQL · MySQL · Docker · Git
+      </div>
+    </header>
+  </div>
+</div>
+<div class="wrap">
+  <section class="panel" id="about">
+    <div class="panel-head">
+      <span class="path">about.log</span>
+      <span class="rule"></span>
+      <span class="tag">о себе</span>
+    </div>
+    <div class="about-grid">
+      <div class="id-card" id="idCard">
+        <div class="id-scan">
+          <img src="assistant/основа.png" alt="Небасова Маргарита">
+          <div class="noise-label">ID_VERIFIED // MARGARITA</div>
+        </div>
+        <div class="details-content">
+          <div>
+            <span>роль</span>
+            <span>developer</span>
+          </div>
+          <div>
+            <span>уровень</span>
+            <span>full-stack</span>
+          </div>
+          <div>
+            <span>статус</span>
+            <span>online</span>
+          </div>
+        </div>
+        <div class="id-details">
+          <div class="details-content">
+            <div>
+              <span>возраст</span>
+              <span>24 года</span>
+            </div>
+            <div>
+              <span>пол</span>
+              <span>женский</span>
+            </div>
+            <div>
+              <span>город</span>
+              <span>Санкт-Петербург / Москва</span>
+            </div>
+            <div>
+              <span>образование</span>
+              <span>СПбПУ Петра Великого</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-hint" id="cardHint">
+          // CLICK TO EXPAND
+        </div>
+      </div>
+      <div class="about-text">
+        <p>
+          Я Full-Stack разработчик и основатель собственного B2B-проекта BeerJa Project. Самостоятельно прошла путь от идеи и проектирования продукта до разработки, запуска и управления командой.
+
+          В рамках проекта разработала концепцию сервиса для автоматизации процессов в сфере общепита, организации мероприятий и сбора аналитики спроса. Спроектировала UX/UI, опираясь на опыт в дизайне, реализовала веб-приложение и игровые механики для повышения вовлечённости пользователей, настроила деплой и уделила особое внимание безопасности платформы.
+
+          Помимо разработки, выполняю роль тимлида и продуктового менеджера: формирую команду под задачи проекта, распределяю работу и выстраиваю процессы. Умею смотреть на продукт одновременно с технической, пользовательской и бизнес-стороны.
+
+          Опыт работы в сфере общепита — администратором, барменом и официантом — дал мне понимание индустрии изнутри. Благодаря этому я хорошо понимаю реальные потребности бизнеса, умею эффективно взаимодействовать с людьми и сохранять системность даже в стрессовых ситуациях.
+        </p>
+        <p>
+          Ключевые компетенции: <span class="about-highlight">Full-Stack разработка</span>, <span class="about-highlight">UX/UI</span>, <span class="about-highlight">Product Management</span>, <span class="about-highlight">архитектура веб-приложений</span>, <span class="about-highlight">деплой и безопасность</span>, <span class="about-highlight">геймификация</span>, <span class="about-highlight">командное управление</span>.
+        </p>
+        <p>
+          Сильные стороны: <span class="about-highlight">лидерство</span>, <span class="about-highlight">эмпатия</span>, <span class="about-highlight">коммуникация</span>, <span class="about-highlight">кризис-менеджмент</span>, <span class="about-highlight">системное и творческое мышление</span>.
+        </p>
+        <div class="status-row">
+          <span class="status-pill">архитектура</span>
+          <span class="status-pill">бэкенд</span>
+          <span class="status-pill cyan">деплой &amp; безопасность</span>
+          <span class="status-pill">продукт</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="panel" id="experience">
+    <div class="panel-head">
+      <span class="path">experience.json</span>
+      <span class="rule"></span>
+      <span class="tag">опыт работы</span>
+    </div>
+    <div class="case-file">
+      <div class="case-head">
+        <div class="case-title">
+          BeerJa Project — B2B-платформа для общепита и мероприятий
+        </div>
+        <div class="case-status">
+         РЕЛИЗ: ВЫПОЛНЕН
+       </div>
+     </div>
+
+     <div class="case-body">
+
+       <div class="stack-row">
+          <span class="stack-chip">C#</span>
+          <span class="stack-chip">Node.js</span>
+          <span class="stack-chip">Python</span>
+          <span class="stack-chip">PostgreSQL</span>
+          <span class="stack-chip">MySQL</span>
+          <span class="stack-chip">Docker</span>
+         <span class="stack-chip">Git</span>
+       </div>
+
+        <ul class="case-list">
+
+          <li>
+            <strong>Продукт:</strong>
+            разработала концепцию B2B-сервиса для автоматизации процессов
+            в сфере общепита, организации мероприятий и сбора аналитики спроса —
+            от идеи и проектирования до рабочего релиза.
+          </li>
+
+          <li>
+            <strong>Full-Stack разработка:</strong>
+            спроектировала архитектуру приложения, базу данных и серверную часть,
+            реализовала пользовательскую логику, авторизацию и работу с данными.
+          </li>
+
+          <li>
+            <strong>UX/UI и геймификация:</strong>
+            самостоятельно спроектировала интерфейс и пользовательские сценарии,
+            внедрила игровые механики для повышения вовлечённости пользователей.
+          </li>
+
+          <li>
+            <strong>Инфраструктура:</strong>
+            выполнила деплой проекта, настроила сервер, доменную инфраструктуру,
+            SSL и базовые механизмы защиты веб-приложения.
+          </li>
+
+          <li>
+            <strong>Команда:</strong>
+            сформировала команду разработки под задачи проекта, распределила зоны
+            ответственности, организовала рабочие процессы и выступила тимлидом
+            на этапе реализации и релиза.
+          </li>
+
+          <li>
+            <strong>Product Management:</strong>
+            совмещала техническую разработку с управлением продуктом —
+            определяла приоритеты, связывала бизнес-задачи с техническими решениями
+            и контролировала движение проекта к результату.
+          </li>
+
+        </ul>
+    </div>
+</div>
+  </section>
+  <section class="panel" id="education">
+    <div class="panel-head">
+      <span class="path">education.cfg</span>
+      <span class="rule"></span>
+      <span class="tag">образование</span>
+    </div>
+    <div class="edu-card">
+      <div class="edu-row">
+        <span class="k">учебное заведение</span>
+        <span class="v">СПбПУ Петра Великого</span>
+      </div>
+      <div class="edu-row">
+        <span class="k">курс</span>
+        <span class="v">4 курс</span>
+      </div>
+      <div class="edu-row">
+        <span class="k">направление</span>
+        <span class="v">Информационные системы и технологии</span>
+      </div>
+      <div class="edu-thesis">
+        <b>Санкт-Петербургский политехнический университет Петра Великого (СПбПУ) -</b> предлагает сильное IT-образование по направлениям программной инженерии, системного программирования и разработки ПО</b>
+      </div>
+    </div>
+  </section>
+  <section class="panel" id="skills">
+    <div class="panel-head">
+      <span class="path">skills.map</span>
+      <span class="rule"></span>
+      <span class="tag">hard skills</span>
+    </div>
+    <div class="skills-grid">
+
+      <div class="skill-group">
+        <h3>языки &amp; разработка</h3>
+        <div class="skill-tags">
+          <span>C#</span>
+          <span>JavaScript</span>
+          <span>Node.js</span>
+          <span>Python</span>
+         <span>Full-Stack</span>
+       </div>
+     </div>
+
+      <div class="skill-group">
+        <h3>backend &amp; архитектура</h3>
+        <div class="skill-tags">
+          <span>REST API</span>
+          <span>архитектура приложений</span>
+          <span>авторизация</span>
+          <span>интеграции</span>
+          <span>бизнес-логика</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <h3>данные &amp; инфраструктура</h3>
+        <div class="skill-tags">
+          <span>PostgreSQL</span>
+          <span>MySQL</span>
+          <span>проектирование БД</span>
+          <span>Docker</span>
+          <span>Git</span>
+          <span>SSL / серверы</span>
+        </div>
+      </div>
+
+      <div class="skill-group">
+        <h3>product &amp; management</h3>
+        <div class="skill-tags">
+          <span>UX/UI</span>
+          <span>Product Management</span>
+          <span>геймификация</span>
+          <span>тимлид</span>
+          <span>сборка команды</span>
+          <span>деплой</span>
+       </div>
+      </div>
+
+    </div>
+  </section>
+  <section class="panel" id="traits">
+    <div class="panel-head">
+      <span class="path">traits.dat</span>
+      <span class="rule"></span>
+      <span class="tag">soft skills</span>
+    </div>
+    <div class="log">
+      <div class="log-line">
+        <span class="ts">[01]</span>
+        <span class="msg">
+          <strong>Лидерство:</strong> умею формировать команду под задачи проекта,
+         распределять зоны ответственности и контролировать результат.
+        </span>
+      </div>
+
+      <div class="log-line">
+       <span class="ts">[02]</span>
+        <span class="msg">
+          <strong>Коммуникация:</strong> умею объяснять сложные технические решения
+          простым языком, выстраивать взаимодействие с командой и договариваться
+          с партнёрами.
+        </span>
+      </div>
+
+      <div class="log-line">
+        <span class="ts">[03]</span>
+        <span class="msg">
+          <strong>Системное мышление:</strong> вижу проект целиком — от бизнес-задачи
+          и пользовательского опыта до архитектуры, разработки и деплоя.
+        </span>
+      </div>
+
+      <div class="log-line">
+        <span class="ts">[04]</span>
+       <span class="msg">
+          <strong>Эмпатия:</strong> учитываю интересы пользователей, команды и бизнеса
+          при принятии решений и проектировании продукта.
+        </span>
+      </div>
+
+      <div class="log-line">
+        <span class="ts">[05]</span>
+        <span class="msg">
+          <strong>Кризис-менеджмент:</strong> сохраняю спокойствие в нестандартных
+          ситуациях, быстро определяю приоритеты и довожу задачи до результата
+          даже при жёстких сроках.
+        </span>
+      </div>
+
+      <div class="log-line">
+        <span class="ts">[06]</span>
+        <span class="msg">
+          <strong>Адаптивность:</strong> быстро погружаюсь в новые задачи, инструменты
+          и предметные области, самостоятельно нахожу необходимую информацию
+          и решения.
+        </span>
+      </div>
+    </div>
+  </section>
+  <section class="panel contact-panel" id="contact">
+    <div class="panel-head">
+      <span class="path">contact.sh</span>
+      <span class="rule"></span>
+      <span class="tag">связь</span>
+    </div>
+    <div class="contact-box">
+      <div class="contact-prompt">
+        <b>&gt;</b> ./установить_соединение
+      </div>
+      <div class="contact-fields">
+        <div class="cfield">
+          <span class="k">email</span>
+          <a class="v" href="mailto:beerjaproject@yandex.com">beerjaproject@yandex.com ↗</a>
+        </div>
+        <div class="cfield">
+          <span class="k">telegram</span>
+          <a class="v" href="https://t.me/beerjaP" target="_blank" rel="noopener noreferrer">@beerjaP ↗</a>
+        </div>
+        <div class="cfield">
+          <span class="k">github</span>
+          <a class="v" href="https://github.com/Kiberjaba" target="_blank" rel="noopener noreferrer">https://github.com/Kiberjaba ↗</a>
+        </div>
+        <div class="cfield">
+          <span class="k">мой проект</span>
+          <a class="v" href="https://beerjaproject.ru" target="_blank" rel="noopener noreferrer">beerjaproject.ru ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="contact-eof" id="contactEof" aria-live="polite">
+      <span class="eof-text"></span>
+      <span class="cursor"></span>
+    </div>
+  </section>
+</div>
+<div class="assistant-stage" aria-live="polite">
+  <div id="assistantBubble" class="assistant-bubble"></div>
+  <div class="assistant-wrap" id="assistantWrap">
+    <img id="assistantImg" class="assistant-img" src="assistant/frame-1.png" alt="Пиксельная помощница">
+  </div>
+  <div class="assistant-label">// assistant.exe</div>
+</div>
+<script>
+/* =========================================================
+   BOOT INTRO
+========================================================= */
+(function(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const bootLines = document.querySelectorAll('#bootSequence .boot-line');
+  const heroEl = document.querySelector('.hero');
+  const heroName = document.getElementById('resume-name');
+  const wait = ms => new Promise(resolve => setTimeout(resolve,ms));
+  function typeInto(el,text,speed){
+    return new Promise(resolve => {
+      let i = 0;
+      el.textContent = '';
+      el.classList.add('typing');
+      const cursor = document.createElement('span');
+      cursor.className = 'type-cursor';
+      el.appendChild(cursor);
+      const timer = setInterval(() => {
+        i++;
+        el.textContent = text.slice(0,i);
+        el.appendChild(cursor);
+        if(i >= text.length){
+          clearInterval(timer);
+          cursor.remove();
+          el.classList.remove('typing');
+          el.classList.add('done');
+          resolve();
+        }
+      },speed);
+    });
+  }
+  async function runIntro(){
+    if(reduceMotion){
+      bootLines.forEach(line => line.classList.add('done'));
+      heroEl.classList.add('revealed');
+      return;
+    }
+    for(const line of bootLines){
+      const finalHTML = line.innerHTML;
+      const plainText = line.textContent;
+      await typeInto(line,plainText,16);
+      line.innerHTML = finalHTML;
+      await wait(180);
+    }
+    await wait(250);
+    const fullName = heroName.textContent;
+    await typeInto(heroName,fullName,55);
+    await wait(150);
+    heroEl.classList.add('revealed');
+  }
+  document.addEventListener('DOMContentLoaded',runIntro);
+})();
+/* =========================================================
+   ASSISTANT
+========================================================= */
+const assistantImg = document.getElementById('assistantImg');
+const assistantBubble = document.getElementById('assistantBubble');
+const assistantWrap = document.getElementById('assistantWrap');
+const assistantFrames = [
+  'assistant/frame-1.png',
+  'assistant/frame-2.png',
+  'assistant/frame-3.png',
+  'assistant/frame-4.png',
+  'assistant/frame-5.png',
+  'assistant/frame-6.png',
+  'assistant/frame-7.png',
+  'assistant/frame-8.png',
+  'assistant/frame-10.png',
+  'assistant/frame-11.png',
+  'assistant/frame-12.png'
+];
+const assistantAnimations = {
+  idle:[0,1,2,1],
+  point:[4,5,6,7],
+  talk:[1,2,3,2],
+  happy:[5,6,7,6],
+  heart:[8,9,10,9]
+};
+let assistantState = 'idle';
+let assistantTimer = null;
+let assistantFramePosition = 0;
+let hideBubbleTimer = null;
+let contactHeartTimer = null;
+function playAssistant(state){
+  if(!assistantAnimations[state]){
+    state = 'idle';
+  }
+  assistantState = state;
+  assistantFramePosition = 0;
+  clearInterval(assistantTimer);
+  const sequence = assistantAnimations[state];
+  const speed = state === 'idle' ? 650 : state === 'heart' ? 260 : 220;
+  assistantImg.src = assistantFrames[sequence[0]];
+  assistantTimer = setInterval(() => {
+    assistantFramePosition = (assistantFramePosition + 1) % sequence.length;
+    assistantImg.src = assistantFrames[sequence[assistantFramePosition]];
+  },speed);
+}
+function showAssistantMessage(text,keep = false){
+  clearTimeout(hideBubbleTimer);
+  assistantBubble.textContent = '> ' + text;
+  assistantBubble.classList.add('show');
+  if(!keep){
+    hideBubbleTimer = setTimeout(() => {
+      assistantBubble.classList.remove('show');
+    },2800);
+  }
+}
+function assistantReact(state,message){
+  playAssistant(state);
+  if(message){
+    showAssistantMessage(message);
+  }
+}
+/* =========================================================
+   ASSISTANT MESSAGES
+========================================================= */
+const assistantMessages = {
+  about:'Здесь можно узнать немного обо мне ♡',
+  experience:'А вот здесь — мой опыт и то, что я уже сделала.',
+  education:'Здесь лежит информация об образовании.',
+  skills:'Вот мои инструменты и технические навыки!',
+  traits:'А здесь — то, как я работаю и взаимодействую с людьми.',
+  contact:'Здесь можно найти способы связаться со мной ♡'
+};
+const panels = document.querySelectorAll('section.panel');
+/* =========================================================
+   PANEL HOVER / CLICK
+========================================================= */
+panels.forEach(panel => {
+  panel.addEventListener('mouseenter',() => {
+    const id = panel.id;
+    panel.classList.add('assistant-target');
+    clearTimeout(contactHeartTimer);
+    if(id === 'contact'){
+      playAssistant('point');
+      showAssistantMessage(assistantMessages.contact,true);
+      contactHeartTimer = setTimeout(() => {
+        if(panel.matches(':hover')){
+          playAssistant('heart');
+          showAssistantMessage('Буду рада работать с вами ♡',true);
+        }
+      },1000);
+    }
+    else{
+      playAssistant('point');
+      showAssistantMessage(assistantMessages[id] || 'Смотри сюда!',true);
+    }
+  });
+  panel.addEventListener('mouseleave',() => {
+    panel.classList.remove('assistant-target');
+    clearTimeout(contactHeartTimer);
+    playAssistant('idle');
+    assistantBubble.classList.remove('show');
+  });
+  panel.addEventListener('click',event => {
+    if(event.target.closest('.id-card') || event.target.closest('a')){
+      return;
+    }
+    playAssistant('happy');
+    showAssistantMessage('Открываем этот раздел ♡');
+  });
+});
+/* =========================================================
+   ID CARD
+========================================================= */
+const idCard = document.getElementById('idCard');
+const cardHint = document.getElementById('cardHint');
+if(idCard){
+  idCard.addEventListener('click',event => {
+    event.stopPropagation();
+    const isActive = idCard.classList.toggle('active');
+    cardHint.textContent = isActive ? '// CLICK TO COLLAPSE' : '// CLICK TO EXPAND';
+    assistantReact(
+      isActive ? 'happy' : 'idle',
+      isActive ? 'Вот небольшая информация обо мне' : 'Наведи на раздел — я расскажу о нём.'
+    );
+  });
+  idCard.addEventListener('mouseenter',() => {
+    playAssistant('point');
+    showAssistantMessage('Нажми на карточку — там есть секретная информация.',true);
+  });
+  idCard.addEventListener('mouseleave',() => {
+    playAssistant('idle');
+    assistantBubble.classList.remove('show');
+  });
+}
+/* =========================================================
+   ASSISTANT HOVER
+========================================================= */
+assistantWrap.addEventListener('mouseenter',() => {
+  showAssistantMessage('Наведи на раздел — я расскажу о нём.');
+  playAssistant('talk');
+});
+assistantWrap.addEventListener('mouseleave',() => {
+  playAssistant('idle');
+});
+/* =========================================================
+   NAVIGATION
+========================================================= */
+document.querySelectorAll('.titlebar-nav a').forEach(link => {
+  link.addEventListener('click',() => {
+    playAssistant('happy');
+    showAssistantMessage('Перемещаемся сюда...');
+  });
+});
+/* =========================================================
+   PRELOAD ASSISTANT FRAMES
+========================================================= */
+assistantFrames.forEach(src => {
+  const img = new Image();
+  img.src = src;
+});
+playAssistant('idle');
+setTimeout(() => {
+  showAssistantMessage('Наведи на раздел — я расскажу о нём.');
+},900);
+/* =========================================================
+   EOF
+========================================================= */
+const contact = document.getElementById('contact');
+const eofText = document.querySelector('.eof-text');
+const eofMessage = 'EOF — сессия резюме завершена';
+let eofStarted = false;
+function typeEOF(){
+  if(eofStarted){
+    return;
+  }
+  eofStarted = true;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    eofText.textContent = eofMessage;
+    return;
+  }
+  let i = 0;
+  eofText.textContent = '';
+  const timer = setInterval(() => {
+    eofText.textContent = eofMessage.slice(0,++i);
+    if(i >= eofMessage.length){
+      clearInterval(timer);
+    }
+  },55);
+}
+const eofObserver = new IntersectionObserver(
+  entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting && entry.intersectionRatio >= .35){
+        typeEOF();
+      }
+    });
+  },
+  {
+    threshold:[.35,.6]
+  }
+);
+eofObserver.observe(contact);
+</script>
+</body>
+</html>

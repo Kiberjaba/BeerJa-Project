@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NISHE — Игрок</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Chakra+Petch:wght@500;600;700&display=swap"
+    rel="stylesheet"
+>
+
+
+<style>
+
+/* =========================================================
+   ОСНОВНЫЕ ЦВЕТА
+========================================================= */
+
+:root {
+
+    --bg: #050608;
+
+    --card: rgba(255,255,255,.035);
+
+    --border: rgba(234,255,43,.25);
+
+    --yellow: #eaff2b;
+
+    --cyan: #29e7ff;
+
+    --text: #ffffff;
+
+    --dim: #7d8790;
+
+    --red: #ff6b6b;
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+
+    background:
+        radial-gradient(
+            700px 500px at 20% 0%,
+            rgba(41,231,255,.10),
+            transparent 60%
+        ),
+        radial-gradient(
+            700px 500px at 80% 100%,
+            rgba(234,255,43,.08),
+            transparent 60%
+        ),
+        var(--bg);
+
+    color: var(--text);
+
+    font-family:
+        "Chakra Petch",
+        system-ui,
+        sans-serif;
+
+    min-height: 100vh;
+
+    padding: 16px;
+}
+
+
+/* =========================================================
+   FRAME
+========================================================= */
+
+.player-frame {
+
+    width: 100%;
+
+    max-width: 560px;
+
+    min-height: calc(100vh - 32px);
+
+    margin: 0 auto;
+
+    border: 1.5px solid var(--yellow);
+
+    border-radius: 28px;
+
+    padding: 24px 20px;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 32px;
+}
+
+.logo {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    letter-spacing: .08em;
+
+    color: var(--yellow);
+}
+
+.header-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.header-score {
+
+    color: var(--cyan);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 900;
+}
+
+.header-room {
+
+    color: var(--dim);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: .08em;
+}
+
+
+/* =========================================================
+   SCREENS
+========================================================= */
+
+.screen {
+
+    width: 100%;
+
+    flex: 1;
+}
+
+.hidden {
+
+    display: none !important;
+}
+
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+.eyebrow {
+
+    text-align: center;
+
+    color: var(--cyan);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: .2em;
+
+    text-transform: uppercase;
+
+    margin-bottom: 14px;
+}
+
+h1 {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: clamp(23px, 6vw, 32px);
+
+    line-height: 1.2;
+
+    color: var(--yellow);
+
+    text-align: center;
+
+    margin-bottom: 12px;
+}
+
+.subtitle {
+
+    color: var(--dim);
+
+    font-size: 14px;
+
+    line-height: 1.45;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   WAITING
+========================================================= */
+
+.waiting-screen {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    min-height: 60vh;
+}
+
+.wait-icon {
+
+    width: 76px;
+
+    height: 76px;
+
+    border-radius: 50%;
+
+    border: 2px solid var(--cyan);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--cyan);
+
+    font-size: 28px;
+
+    margin-bottom: 24px;
+
+    box-shadow:
+        0 0 30px rgba(41,231,255,.25);
+}
+
+.room-code {
+
+    margin-top: 24px;
+
+    color: var(--yellow);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 36px;
+
+    font-weight: 900;
+
+    letter-spacing: .12em;
+}
+
+.players-count {
+
+    margin-top: 20px;
+
+    color: var(--cyan);
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    letter-spacing: .08em;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   QUESTION
+========================================================= */
+
+.question-screen {
+
+    padding-top: 10px;
+}
+
+.question-number {
+
+    text-align: center;
+
+    color: var(--dim);
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .18em;
+
+    margin-bottom: 16px;
+}
+
+.question-text {
+
+    text-align: center;
+
+    color: #fff;
+
+    font-size: clamp(21px, 5vw, 28px);
+
+    line-height: 1.35;
+
+    font-weight: 700;
+
+    margin-bottom: 26px;
+}
+
+.options {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.option-btn {
+
+    width: 100%;
+
+    border-radius: 16px;
+
+    padding: 18px 16px;
+
+    background: var(--card);
+
+    border: 1.5px solid var(--border);
+
+    color: #fff;
+
+    text-align: left;
+
+    font-family: inherit;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        border-color .15s ease,
+        background .15s ease,
+        color .15s ease;
+}
+
+.option-btn:hover:not(:disabled) {
+
+    border-color: var(--yellow);
+
+    color: var(--yellow);
+}
+
+.option-btn.selected {
+
+    border-color: var(--yellow);
+
+    background: rgba(234,255,43,.10);
+
+    color: var(--yellow);
+}
+
+.option-btn:disabled {
+
+    opacity: .55;
+
+    cursor: default;
+}
+
+
+/* =========================================================
+   QUESTION BOTTOM
+========================================================= */
+
+.question-bottom {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-top: 24px;
+}
+
+.timer {
+
+    color: var(--cyan);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 22px;
+
+    font-weight: 900;
+}
+
+.timer-label {
+
+    color: var(--dim);
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+
+    margin-top: 3px;
+}
+
+.score {
+
+    color: var(--yellow);
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   RESULT
+========================================================= */
+
+.result-screen {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 60vh;
+}
+
+.result-card {
+
+    width: 100%;
+
+    text-align: center;
+
+    padding: 30px 10px;
+}
+
+.result-icon {
+
+    width: 70px;
+
+    height: 70px;
+
+    margin: 0 auto 22px;
+
+    border-radius: 50%;
+
+    border: 2px solid var(--cyan);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--cyan);
+
+    font-size: 28px;
+
+    box-shadow:
+        0 0 28px rgba(41,231,255,.25);
+}
+
+.result-title {
+
+    font-family: "Orbitron", sans-serif;
+
+    color: var(--yellow);
+
+    font-weight: 900;
+
+    font-size: 20px;
+
+    line-height: 1.35;
+
+    margin-bottom: 14px;
+}
+
+.result-text {
+
+    color: var(--dim);
+
+    font-size: 14px;
+
+    line-height: 1.5;
+
+    max-width: 390px;
+
+    margin: 0 auto 26px;
+}
+
+.result-score {
+
+    font-family: "Orbitron", sans-serif;
+
+    color: var(--cyan);
+
+    font-size: 46px;
+
+    font-weight: 900;
+
+    line-height: 1;
+}
+
+.result-score-label {
+
+    color: var(--dim);
+
+    text-transform: uppercase;
+
+    letter-spacing: .12em;
+
+    font-size: 9px;
+
+    margin-top: 8px;
+}
+
+.result-timer {
+
+    margin-top: 28px;
+
+    color: var(--cyan);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-weight: 900;
+
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   FINISH
+========================================================= */
+
+.finish-screen {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 60vh;
+}
+
+.finish-card {
+
+    text-align: center;
+
+    width: 100%;
+
+    padding: 20px;
+}
+
+.finish-score {
+
+    color: var(--yellow);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 58px;
+
+    font-weight: 900;
+
+    margin-top: 22px;
+}
+
+.finish-label {
+
+    color: var(--dim);
+
+    text-transform: uppercase;
+
+    letter-spacing: .12em;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error {
+
+    min-height: 20px;
+
+    margin-top: 14px;
+
+    text-align: center;
+
+    color: var(--red);
+
+    font-size: 13px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="player-frame">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+        <div class="logo">
+            NISHE
+        </div>
+
+
+        <div class="header-right">
+
+            <div
+                class="header-score"
+                id="headerScore"
+            >
+                ★ 0
+            </div>
+
+
+            <div
+                class="header-room"
+                id="headerRoom"
+            >
+                GAME
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         ОЖИДАНИЕ
+    ====================================================== -->
+
+    <section
+        id="waitingScreen"
+        class="screen waiting-screen hidden"
+    >
+
+        <div class="wait-icon">
+            ◇
+        </div>
+
+
+        <div class="eyebrow">
+            ВЫ ПОДКЛЮЧЕНЫ
+        </div>
+
+
+        <h1>
+            Ожидайте начала игры
+        </h1>
+
+
+        <p class="subtitle">
+            Ведущий ещё не начал игру.
+        </p>
+
+
+        <div
+            class="room-code"
+            id="roomCodeDisplay"
+        >
+            ----
+        </div>
+
+
+        <div class="players-count">
+
+            Игроков подключено:
+            <span id="playersCount">
+                0
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ВОПРОС
+    ====================================================== -->
+
+    <section
+        id="questionScreen"
+        class="screen question-screen hidden"
+    >
+
+        <div
+            class="question-number"
+            id="questionNumber"
+        >
+            ВОПРОС
+        </div>
+
+
+        <div
+            class="question-text"
+            id="questionText"
+        >
+        </div>
+
+
+        <div
+            class="options"
+            id="optionsContainer"
+        >
+        </div>
+
+
+        <div class="question-bottom">
+
+            <div>
+
+                <div
+                    class="timer"
+                    id="questionTimer"
+                >
+                    60
+                </div>
+
+                <div class="timer-label">
+                    секунд
+                </div>
+
+            </div>
+
+
+            <div class="score">
+
+                СЧЁТ:
+                <span id="scoreValue">
+                    0
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         РЕЗУЛЬТАТ
+    ====================================================== -->
+
+    <section
+        id="resultScreen"
+        class="screen result-screen hidden"
+    >
+
+        <div class="result-card">
+
+            <div class="result-icon">
+                ◇
+            </div>
+
+
+            <div class="eyebrow">
+                ВОПРОС ЗАВЕРШЁН
+            </div>
+
+
+            <div class="result-title">
+                Посмотрите результаты
+                на главном экране
+            </div>
+
+
+            <div class="result-text">
+
+                Каждый нишевый ответ
+                прибавляет вам
+
+                <strong
+                    style="color:var(--yellow);"
+                >
+                    1 балл
+                </strong>.
+
+            </div>
+
+
+            <div
+                class="result-score"
+                id="resultScore"
+            >
+                0
+            </div>
+
+
+            <div class="result-score-label">
+                ваших баллов
+            </div>
+
+
+            <div
+                class="result-timer"
+                id="resultTimer"
+            >
+                30
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ФИНИШ
+    ====================================================== -->
+
+    <section
+        id="finishScreen"
+        class="screen finish-screen hidden"
+    >
+
+        <div class="finish-card">
+
+            <div class="eyebrow">
+                ИГРА ЗАВЕРШЕНА
+            </div>
+
+
+            <h1>
+                Ваш результат
+            </h1>
+
+
+            <div
+                class="finish-score"
+                id="finishScore"
+            >
+                0
+            </div>
+
+
+            <div class="finish-label">
+                баллов
+            </div>
+
+
+            <p
+                class="subtitle"
+                style="margin-top:24px;"
+            >
+                Спасибо за игру!
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
+    <div
+        class="error"
+        id="errorMessage"
+    ></div>
+
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   API
+========================================================= */
+
+const API_BASE =
+    "/api/niche-game";
+
+
+/* =========================================================
+   СОСТОЯНИЕ ИГРОКА
+========================================================= */
+
+const playerState = {
+
+    /*
+     * users.user_id
+     *
+     * Получается из JWT / join-room.
+     */
+    userId: null,
+
+    /*
+     * ID игровой сессии.
+     */
+    gameId: null,
+
+    username: null,
+
+    roomCode: null,
+
+    currentStep: null,
+
+    currentQuestionId: null,
+
+    questionNumber: 0,
+
+    score: 0,
+
+    /*
+     * Шаги reveal, за которые
+     * уже был начислен балл.
+     */
+    countedRevealSteps: [],
+
+    /*
+     * Вопрос, на который
+     * уже отправлен ответ.
+     */
+    answeredStep: null
+};
+
+
+let pollingTimer = null;
+
+let questionTimer = null;
+
+let resultTimer = null;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const $ = id =>
+    document.getElementById(id);
+
+
+/* =========================================================
+   ЭКРАНЫ
+========================================================= */
+
+function showScreen(id) {
+
+    [
+        "waitingScreen",
+        "questionScreen",
+        "resultScreen",
+        "finishScreen"
+    ].forEach(
+        screenId => {
+
+            $(screenId)
+                .classList
+                .add("hidden");
+
+        }
+    );
+
+
+    $(id)
+        .classList
+        .remove("hidden");
+}
+
+
+/* =========================================================
+   ОШИБКА
+========================================================= */
+
+function setError(message) {
+
+    $("errorMessage").textContent =
+        message || "";
+
+}
+
+
+/* =========================================================
+   API
+========================================================= */
+
+async function api(
+    path,
+    options = {}
+) {
+
+    const token =
+        localStorage.getItem("token");
+
+
+    if (!token) {
+
+        throw new Error(
+            "Вы не авторизованы"
+        );
+
+    }
+
+
+    const headers = {
+
+        "Content-Type":
+            "application/json",
+
+        ...(options.headers || {}),
+
+        /*
+         * Критически важно:
+         * все защищённые endpoints
+         * получают JWT.
+         */
+        "Authorization":
+            "Bearer " + token
+    };
+
+
+    const response =
+        await fetch(
+            API_BASE + path,
+            {
+                ...options,
+                headers
+            }
+        );
+
+
+    const data =
+        await response
+            .json()
+            .catch(() => null);
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            data?.message ||
+            `Ошибка ${response.status}`
+        );
+
+    }
+
+
+    return data;
+}
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function stopQuestionTimer() {
+
+    if (questionTimer) {
+
+        clearInterval(
+            questionTimer
+        );
+
+        questionTimer = null;
+    }
+}
+
+
+function stopResultTimer() {
+
+    if (resultTimer) {
+
+        clearInterval(
+            resultTimer
+        );
+
+        resultTimer = null;
+    }
+}
+
+
+function stopAllTimers() {
+
+    stopQuestionTimer();
+
+    stopResultTimer();
+}
+
+
+/* =========================================================
+   ТАЙМЕР ВОПРОСА
+========================================================= */
+
+function startQuestionTimer() {
+
+    stopQuestionTimer();
+
+
+    let seconds = 60;
+
+
+    $("questionTimer")
+        .textContent = seconds;
+
+
+    questionTimer =
+        setInterval(
+            () => {
+
+                seconds--;
+
+
+                $("questionTimer")
+                    .textContent =
+                    Math.max(
+                        0,
+                        seconds
+                    );
+
+
+                if (seconds <= 0) {
+
+                    stopQuestionTimer();
+
+                }
+
+            },
+            1000
+        );
+}
+
+
+/* =========================================================
+   ТАЙМЕР РЕЗУЛЬТАТОВ
+========================================================= */
+
+function startResultTimer() {
+
+    stopResultTimer();
+
+
+    let seconds = 30;
+
+
+    $("resultTimer")
+        .textContent = seconds;
+
+
+    resultTimer =
+        setInterval(
+            () => {
+
+                seconds--;
+
+
+                $("resultTimer")
+                    .textContent =
+                    Math.max(
+                        0,
+                        seconds
+                    );
+
+
+                if (seconds <= 0) {
+
+                    stopResultTimer();
+
+                }
+
+            },
+            1000
+        );
+}
+
+
+/* =========================================================
+   СОХРАНЕНИЕ
+========================================================= */
+
+function savePlayerState() {
+
+    localStorage.setItem(
+        "nishe-player",
+        JSON.stringify(
+            playerState
+        )
+    );
+}
+
+
+/* =========================================================
+   ВОССТАНОВЛЕНИЕ
+========================================================= */
+
+function loadSavedState() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(
+                "nishe-player"
+            );
+
+
+        if (!raw) {
+
+            return false;
+
+        }
+
+
+        const saved =
+            JSON.parse(raw);
+
+
+        if (
+            !saved.gameId ||
+            !saved.userId
+        ) {
+
+            return false;
+
+        }
+
+
+        Object.assign(
+            playerState,
+            saved
+        );
+
+
+        $("headerRoom")
+            .textContent =
+            "RM—" +
+            (
+                playerState.roomCode ||
+                "----"
+            );
+
+
+        $("roomCodeDisplay")
+            .textContent =
+            playerState.roomCode ||
+            "----";
+
+
+        updateScoreUI();
+
+
+        return true;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Ошибка восстановления состояния:",
+            error
+        );
+
+        return false;
+
+    }
+}
+
+
+/* =========================================================
+   SCORE UI
+========================================================= */
+
+function updateScoreUI() {
+
+    $("scoreValue")
+        .textContent =
+        playerState.score;
+
+
+    $("headerScore")
+        .textContent =
+        `★ ${playerState.score}`;
+
+
+    $("resultScore")
+        .textContent =
+        playerState.score;
+
+
+    $("finishScore")
+        .textContent =
+        playerState.score;
+
+}
+
+
+/* =========================================================
+   ПАРАМЕТРЫ URL
+========================================================= */
+
+function getUrlGameData() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    return {
+
+        gameId:
+            Number(
+                params.get("gameId")
+            ),
+
+        userId:
+            Number(
+                params.get("userId")
+            ),
+
+        roomCode:
+            params.get("roomCode")
+
+    };
+}
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+async function initPlayer() {
+
+    const token =
+        localStorage.getItem("token");
+
+
+    if (!token) {
+
+        setError(
+            "Необходимо войти в аккаунт"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Сначала смотрим параметры URL.
+     *
+     * Это важно после нового подключения:
+     *
+     * NishGameUser.html?gameId=23&userId=5...
+     */
+
+    const urlData =
+        getUrlGameData();
+
+
+    if (
+        urlData.gameId &&
+        urlData.userId
+    ) {
+
+        playerState.gameId =
+            urlData.gameId;
+
+
+        playerState.userId =
+            urlData.userId;
+
+
+        if (urlData.roomCode) {
+
+            playerState.roomCode =
+                urlData.roomCode;
+
+        }
+
+
+        savePlayerState();
+
+    }
+    else {
+
+        /*
+         * Если URL пустой —
+         * восстанавливаем старую сессию.
+         */
+
+        const restored =
+            loadSavedState();
+
+
+        if (!restored) {
+
+            setError(
+                "Игровая сессия не найдена"
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    $("headerRoom")
+        .textContent =
+        "RM—" +
+        (
+            playerState.roomCode ||
+            "----"
+        );
+
+
+    $("roomCodeDisplay")
+        .textContent =
+        playerState.roomCode ||
+        "----";
+
+
+    updateScoreUI();
+
+
+    startPolling();
+
+}
+
+
+/* =========================================================
+   POLLING
+========================================================= */
+
+function startPolling() {
+
+    stopPolling();
+
+    checkGameState();
+
+}
+
+
+function stopPolling() {
+
+    if (pollingTimer) {
+
+        clearTimeout(
+            pollingTimer
+        );
+
+        pollingTimer = null;
+
+    }
+
+}
+
+
+/* =========================================================
+   GAME STATE
+========================================================= */
+
+async function checkGameState() {
+
+    if (!playerState.gameId) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const data =
+            await api(
+                `/room-status/${playerState.gameId}`
+            );
+
+
+        const step =
+            data.currentStep ||
+            "lobby";
+
+
+        /*
+         * Код комнаты.
+         */
+
+        if (data.roomCode) {
+
+            playerState.roomCode =
+                data.roomCode;
+
+
+            $("headerRoom")
+                .textContent =
+                "RM—" +
+                data.roomCode;
+
+
+            $("roomCodeDisplay")
+                .textContent =
+                data.roomCode;
+
+        }
+
+
+        /*
+         * ЛОББИ
+         */
+
+        if (
+            step === "lobby"
+        ) {
+
+            stopAllTimers();
+
+
+            showScreen(
+                "waitingScreen"
+            );
+
+
+            await updatePlayersCount();
+
+
+            schedulePolling();
+
+            return;
+
+        }
+
+
+        /*
+         * ФИНИШ
+         */
+
+        if (
+            step === "finished"
+        ) {
+
+            stopAllTimers();
+
+
+            updateScoreUI();
+
+
+            showScreen(
+                "finishScreen"
+            );
+
+
+            stopPolling();
+
+            return;
+
+        }
+
+
+        /*
+         * ВОПРОС
+         */
+
+        if (
+            step.startsWith(
+                "question_"
+            )
+        ) {
+
+            handleQuestion(
+                step,
+                data
+            );
+
+
+            schedulePolling();
+
+            return;
+
+        }
+
+
+        /*
+         * РЕЗУЛЬТАТЫ
+         */
+
+        if (
+            step.startsWith(
+                "reveal_"
+            )
+        ) {
+
+            await handleReveal(
+                step
+            );
+
+
+            schedulePolling();
+
+            return;
+
+        }
+
+
+        schedulePolling();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Ошибка состояния игры:",
+            error
+        );
+
+
+        /*
+         * Для 401 выводим понятную ошибку.
+         */
+
+        setError(
+            error.message
+        );
+
+
+        schedulePolling();
+
+    }
+
+}
+
+
+/* =========================================================
+   NEXT POLL
+========================================================= */
+
+function schedulePolling() {
+
+    stopPolling();
+
+
+    pollingTimer =
+        setTimeout(
+            checkGameState,
+            1000
+        );
+
+}
+
+
+/* =========================================================
+   ИГРОКИ В ЛОББИ
+========================================================= */
+
+async function updatePlayersCount() {
+
+    try {
+
+        const data =
+            await api(
+                `/lobby/${playerState.gameId}`
+            );
+
+
+        $("playersCount")
+            .textContent =
+            data.playersCount ?? 0;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Ошибка получения количества игроков:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ВОПРОС
+========================================================= */
+
+function handleQuestion(
+    step,
+    data
+) {
+
+    stopResultTimer();
+
+
+    const isNewQuestion =
+        playerState.currentStep !== step;
+
+
+    /*
+     * Новый вопрос.
+     */
+
+    if (isNewQuestion) {
+
+        playerState.currentStep =
+            step;
+
+
+        playerState.currentQuestionId =
+            Number(
+                step.replace(
+                    "question_",
+                    ""
+                )
+            );
+
+
+        playerState.questionNumber++;
+
+
+        /*
+         * На новом вопросе
+         * можно снова голосовать.
+         */
+
+        playerState.answeredStep =
+            null;
+
+
+        $("questionNumber")
+            .textContent =
+            `ВОПРОС ${playerState.questionNumber}`;
+
+
+        startQuestionTimer();
+
+
+        savePlayerState();
+
+    }
+
+
+    /*
+     * ВСЕГДА обновляем содержимое вопроса.
+     *
+     * Это важно после обновления страницы.
+     */
+
+    $("questionText")
+        .textContent =
+        data.questionText ||
+        "Вопрос";
+
+
+    /*
+     * Если уже ответил —
+     * показываем состояние "Ответ принят".
+     */
+
+    if (
+        playerState.answeredStep ===
+        step
+    ) {
+
+        $("optionsContainer")
+            .innerHTML = `
+
+                <div
+                    style="
+                        text-align:center;
+                        color:var(--cyan);
+                        padding:22px 0;
+                        font-weight:700;
+                    "
+                >
+                    Ваш выбор зафиксирован.
+                </div>
+
+            `;
+
+    }
+    else {
+
+        renderOptions(
+            data.options || []
+        );
+
+    }
+
+
+    updateScoreUI();
+
+
+    showScreen(
+        "questionScreen"
+    );
+
+}
+
+
+/* =========================================================
+   ВАРИАНТЫ
+========================================================= */
+
+function renderOptions(
+    options
+) {
+
+    const container =
+        $("optionsContainer");
+
+
+    container.innerHTML = "";
+
+
+    const validOptions =
+        options.filter(
+            option =>
+                option !== null &&
+                option !== undefined &&
+                String(option).trim() !== ""
+        );
+
+
+    validOptions.forEach(
+        (
+            option,
+            index
+        ) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.className =
+                "option-btn";
+
+
+            button.textContent =
+                option;
+
+
+            button.dataset.value =
+                option;
+
+
+            button.addEventListener(
+                "click",
+                () =>
+                    sendAnswer(
+                        option,
+                        button
+                    )
+            );
+
+
+            container.appendChild(
+                button
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ОТПРАВКА ОТВЕТА
+========================================================= */
+
+async function sendAnswer(
+    choice,
+    clickedButton
+) {
+
+    const step =
+        playerState.currentStep;
+
+
+    /*
+     * Нельзя ответить дважды
+     * на один и тот же шаг.
+     */
+
+    if (
+        playerState.answeredStep ===
+        step
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        /*
+         * Сразу блокируем варианты.
+         */
+
+        document
+            .querySelectorAll(
+                ".option-btn"
+            )
+            .forEach(
+                button => {
+
+                    button.disabled =
+                        true;
+
+                }
+            );
+
+
+        clickedButton
+            .classList
+            .add("selected");
+
+
+        /*
+         * ВАЖНО:
+         *
+         * UserId здесь НЕ передаём.
+         *
+         * Сервер сам берёт users.user_id
+         * из JWT.
+         */
+
+        await api(
+            "/submit-answer",
+            {
+                method: "POST",
+
+                body: JSON.stringify({
+
+                    GameId:
+                        playerState.gameId,
+
+                    AnswerChoice:
+                        choice
+
+                })
+            }
+        );
+
+
+        playerState.answeredStep =
+            step;
+
+
+        savePlayerState();
+
+
+        $("questionText")
+            .textContent =
+            "Ответ принят";
+
+
+        $("optionsContainer")
+            .innerHTML = `
+
+                <div
+                    style="
+                        text-align:center;
+                        color:var(--cyan);
+                        padding:22px 0;
+                        font-weight:700;
+                    "
+                >
+                    Ваш выбор зафиксирован.
+                </div>
+
+            `;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Ошибка отправки ответа:",
+            error
+        );
+
+
+        /*
+         * Если запрос не прошёл —
+         * разблокируем варианты.
+         */
+
+        document
+            .querySelectorAll(
+                ".option-btn"
+            )
+            .forEach(
+                button => {
+
+                    button.disabled =
+                        false;
+
+                }
+            );
+
+
+        clickedButton
+            .classList
+            .remove("selected");
+
+
+        setError(
+            error.message ||
+            "Не удалось отправить ответ"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   РЕЗУЛЬТАТЫ
+========================================================= */
+
+async function handleReveal(
+    step
+) {
+
+    stopQuestionTimer();
+
+
+    /*
+     * Очки за один reveal начисляем
+     * только один раз.
+     */
+
+    const alreadyCounted =
+        playerState
+            .countedRevealSteps
+            .includes(step);
+
+
+    if (!alreadyCounted) {
+
+        const questionId =
+            step.replace(
+                "reveal_",
+                ""
+            );
+
+
+        const questionStep =
+            `question_${questionId}`;
+
+
+        try {
+
+            const results =
+                await api(
+                    `/calculate-results/${playerState.gameId}/${questionStep}`
+                );
+
+
+            const winners =
+                results.nicheWinners ||
+                [];
+
+
+            /*
+             * ВАЖНО:
+             *
+             * nicheWinners теперь содержит
+             * users.user_id.
+             *
+             * Это совпадает с playerState.userId.
+             */
+
+            const currentUserIsWinner =
+                winners
+                    .map(Number)
+                    .includes(
+                        Number(
+                            playerState.userId
+                        )
+                    );
+
+
+            if (
+                currentUserIsWinner
+            ) {
+
+                playerState.score++;
+
+            }
+
+
+            playerState
+                .countedRevealSteps
+                .push(step);
+
+
+            savePlayerState();
+
+        }
+        catch (error) {
+
+            console.error(
+                "Ошибка расчёта результатов:",
+                error
+            );
+
+            /*
+             * Не помечаем reveal
+             * обработанным, если запрос
+             * к серверу не удался.
+             */
+
+        }
+
+    }
+
+
+    updateScoreUI();
+
+
+    showScreen(
+        "resultScreen"
+    );
+
+
+    /*
+     * Таймер результатов —
+     * 30 секунд.
+     *
+     * Это визуальный таймер.
+     * Переключением реально занимается ведущий.
+     */
+
+    startResultTimer();
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+initPlayer();
+
+</script>
+
+</body>
+
+</html>

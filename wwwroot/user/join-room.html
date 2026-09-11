@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Подключение к комнате</title>
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+body{
+  min-height:100vh;
+  padding:20px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+  background:
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(164,248,0,.06),
+      transparent 34%
+    ),
+    #0f1319;
+}
+.card{
+  width:100%;
+  max-width:420px;
+  padding:32px;
+  border:1px solid #283240;
+  border-radius:16px;
+  background:#171d25;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+.card-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+.badge{
+  color:#a4f800;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+.profile-chip{
+  width:38px;
+  height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(198,255,61,.35);
+  border-radius:50%;
+  color:#fff;
+  text-decoration:none;
+  font-size:17px;
+  line-height:1;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(198,255,61,.16),
+      rgba(198,255,61,.05)
+    );
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    background .15s ease;
+}
+.profile-chip:hover{
+  transform:scale(1.08);
+  border-color:rgba(198,255,61,.6);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(198,255,61,.28),
+      rgba(198,255,61,.08)
+    );
+}
+.profile-chip:active{
+  transform:scale(.96);
+}
+h1{
+  font-size:26px;
+  font-weight:700;
+  margin-bottom:8px;
+  line-height:1.2;
+}
+.subtitle{
+  color:#929bb0;
+  font-size:14px;
+  margin-bottom:24px;
+  line-height:1.45;
+}
+.username-line{
+  margin-top:-12px;
+  margin-bottom:24px;
+  font-size:15px;
+}
+.username-line strong{
+  color:#a4f800;
+  font-weight:700;
+}
+.form-group{
+  margin-bottom:20px;
+}
+label{
+  display:block;
+  margin-bottom:8px;
+  color:#929bb0;
+  font-size:13px;
+  font-weight:500;
+}
+input[type="text"]{
+  width:100%;
+  padding:14px 16px;
+  border:1px solid #283240;
+  border-radius:10px;
+  outline:none;
+  color:#fff;
+  background:#0f1319;
+  text-align:center;
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  transition:
+    border-color .2s,
+    box-shadow .2s;
+}
+input[type="text"]:focus{
+  border-color:#a4f800;
+  box-shadow:
+    0 0 0 3px rgba(164,248,0,.08);
+}
+input[type="text"]::placeholder{
+  color:#4a5568;
+  letter-spacing:normal;
+  font-weight:400;
+  font-size:15px;
+}
+.btn-submit{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:10px;
+  cursor:pointer;
+  color:#0f1319;
+  background:#a4f800;
+  font-size:16px;
+  font-weight:700;
+  transition:
+    transform .1s,
+    background-color .2s;
+}
+.btn-submit:hover:not(:disabled){
+  background:#b5ff1a;
+}
+.btn-submit:active{
+  transform:scale(.98);
+}
+.btn-submit:disabled{
+  opacity:.55;
+  cursor:default;
+}
+#toastContainer{
+  position:fixed;
+  top:20px;
+  right:20px;
+  left:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  z-index:1000;
+  pointer-events:none;
+}
+.toast{
+  max-width:min(420px,100%);
+  padding:14px 20px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-radius:12px;
+  background:#ff5252;
+  color:#fff;
+  font-size:14px;
+  font-weight:600;
+  box-shadow:0 4px 15px rgba(0,0,0,.3);
+  opacity:0;
+  transform:translateY(-20px);
+  transition:all .3s ease;
+}
+.toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
+.toast.success{
+  background:#2e7d32;
+}
+.toast.info{
+  background:#1769aa;
+}
+@media(max-width:560px){
+  body{
+    padding:14px;
+  }
+  .card{
+    padding:24px;
+  }
+  #toastContainer{
+    right:14px;
+    left:14px;
+  }
+  .toast{
+    width:100%;
+  }
+}
+</style>
+</head>
+<body>
+<div id="toastContainer"></div>
+<div class="card">
+  <div class="card-header">
+    <div class="badge">ПОИСК КОМНАТЫ</div>
+    <a
+      href="../lichuser.html"
+      class="profile-chip"
+      title="Профиль"
+      aria-label="Профиль"
+    >👤</a>
+  </div>
+  <h1>Подключайся к любой комнате</h1>
+  <div class="username-line">
+    <strong id="username">Загрузка...</strong>
+  </div>
+  <p class="subtitle">
+    Введи код комнаты, который показывает ведущий.
+  </p>
+  <form id="joinForm">
+    <div class="form-group">
+      <label for="roomCode">КОД КОМНАТЫ</label>
+      <input
+        type="text"
+        id="roomCode"
+        placeholder="Например: 6336"
+        maxlength="10"
+        required
+        autocomplete="off"
+        inputmode="numeric"
+      >
+    </div>
+    <button
+      type="submit"
+      class="btn-submit"
+      id="joinButton"
+    >
+      Войти в комнату
+    </button>
+  </form>
+</div>
+<script>
+"use strict";
+
+const NICHE_URL = "/Game/NishGameUser.html";
+const QUIZ_URL  = "/Game/QuisGameUser.html";
+let currentUser = null;
+
+function showToast(message, type = "error") {
+  if (!message) return;
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span>${type === "error" ? "⚠️" : type === "info" ? "ℹ️" : "✅"}</span>
+    <span>${escapeHtml(message)}</span>
+  `;
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getToken() {
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("jwt") ||
+    localStorage.getItem("accessToken") ||
+    localStorage.getItem("authToken") ||
+    ""
+  );
+}
+
+function clearAuth() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("jwt");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("authToken");
+  window.location.href = "../index.html";
+}
+
+// Универсальный запрос с проверкой правильного пути
+async function apiRequest(endpoint, options = {}) {
+  const token = getToken();
+  if (!token) {
+    clearAuth();
+    throw new Error("Необходима авторизация");
+  }
+
+  const headers = {
+    Accept: "application/json",
+    ...(options.body ? { "Content-Type": "application/json" } : {}),
+    ...(options.headers || {}),
+    Authorization: "Bearer " + token
+  };
+
+  const response = await fetch(endpoint, {
+    ...options,
+    credentials: "same-origin",
+    headers
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (response.status === 401) {
+    clearAuth();
+    throw new Error("Сессия истекла");
+  }
+
+  if (!response.ok) {
+    const error = new Error(
+      data?.message || data?.error || `Ошибка сервера: ${response.status}`
+    );
+    error.status = response.status;
+    error.payload = data;
+    throw error;
+  }
+  return data;
+}
+
+// Загрузка профиля (пробуем несколько возможных эндпоинтов, чтобы избежать 404)
+async function loadCurrentUser() {
+  const token = getToken();
+  if (!token) {
+    clearAuth();
+    return;
+  }
+  
+  const possibleEndpoints = ["/api/auth/me", "/api/user/me", "/api/games/me", "/api/me"];
+  let data = null;
+
+  for (const endpoint of possibleEndpoints) {
+    try {
+      data = await apiRequest(endpoint);
+      if (data) break;
+    } catch (e) {
+      // Пробуем следующий путь, если этот вернул 404
+      if (e.status === 401) {
+        clearAuth();
+        return;
+      }
+    }
+  }
+
+  if (data) {
+    currentUser = data;
+    document.getElementById("username").textContent =
+      data?.username || data?.userName || data?.name || "Игрок";
+  } else {
+    document.getElementById("username").textContent = "Игрок";
+  }
+}
+
+function getGameType(data) {
+  if (!data || typeof data !== "object") return 0;
+  const values = [
+    data.gameType,
+    data.game_type,
+    data.session?.gameType,
+    data.session?.game_type,
+    data.game?.gameType,
+    data.game?.game_type,
+    data.event?.gameType,
+    data.event?.game_type
+  ];
+  for (const value of values) {
+    const type = Number(value);
+    if (type === 1 || type === 2) return type;
+  }
+  return 0;
+}
+
+function savePlayerState(data) {
+  const gameId = Number(data.gameId || data.id);
+  const userId = Number(data.userId || currentUser?.userId || currentUser?.id || 0);
+  const username = data.username || data.userName || currentUser?.username || currentUser?.userName || "Игрок";
+  const eventId = Number(data.eventId || data.event_id || 0) || null;
+  const roomCode = String(data.roomCode || data.room_code || "");
+  const gameType = Number(getGameType(data));
+
+  const common = { gameId, userId, username, eventId, roomCode, gameType, savedAt: Date.now() };
+  
+  localStorage.setItem("currentGameId", String(gameId));
+  localStorage.setItem("currentUserId", String(userId));
+  localStorage.setItem("currentRoomCode", roomCode);
+  localStorage.setItem("currentGameType", String(gameType));
+  localStorage.setItem("beerja-last-game", JSON.stringify(common));
+
+  if (gameType === 1) {
+    localStorage.setItem("niche-active-game", String(gameId));
+    if (eventId) localStorage.setItem("niche-active-event", String(eventId));
+    localStorage.setItem("nishe-player", JSON.stringify({
+      gameId, userId, username, roomCode, eventId, gameType: 1, score: 0, currentStep: null, answeredStep: null
+    }));
+  }
+
+  if (gameType === 2) {
+    localStorage.setItem("beerja-team-quiz-gameId", String(gameId));
+    localStorage.setItem("beerja-team-quiz-join", JSON.stringify({
+      gameId, userId, username, roomCode, eventId, teamId: null, teamName: "", gameType: 2
+    }));
+  }
+  return common;
+}
+
+function redirectToGame(data) {
+  const gameType = getGameType(data);
+  const gameId = Number(data.gameId || data.id);
+  const userId = Number(data.userId || currentUser?.userId || currentUser?.id || 0);
+  const roomCode = String(data.roomCode || data.room_code || "");
+  const eventId = Number(data.eventId || data.event_id || 0) || null;
+
+  if (!gameId) throw new Error("Сервер не вернул gameId");
+
+  if (gameType === 1) {
+    const url = NICHE_URL + `?gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(userId)}&roomCode=${encodeURIComponent(roomCode)}`;
+    window.location.replace(url);
+    return;
+  }
+
+  if (gameType === 2) {
+    const url = QUIZ_URL + `?gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(userId)}&roomCode=${encodeURIComponent(roomCode)}` + (eventId ? `&eventId=${encodeURIComponent(eventId)}` : "");
+    window.location.replace(url);
+    return;
+  }
+  throw new Error("Для этой комнаты сервер не вернул gameType 1 или 2");
+}
+
+document.getElementById("joinForm").addEventListener("submit", handleJoinRoom);
+
+async function handleJoinRoom(event) {
+  event.preventDefault();
+  const input = document.getElementById("roomCode");
+  const button = document.getElementById("joinButton");
+  const roomCode = input.value.trim().toUpperCase();
+
+  if (!roomCode) {
+    showToast("Введите код комнаты");
+    input.focus();
+    return;
+  }
+  if (!getToken()) {
+    clearAuth();
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Проверяем комнату...";
+
+  try {
+    // Пробуем отправить запрос на подключение к комнате
+    const possibleJoinEndpoints = ["/api/games/join-room", "/api/join-room", "/join-room"];
+    let data = null;
+    let lastError = null;
+
+    for (const endpoint of possibleJoinEndpoints) {
+      try {
+        data = await apiRequest(endpoint, {
+          method: "POST",
+          body: JSON.stringify({ GameCode: roomCode })
+        });
+        if (data) break;
+      } catch (err) {
+        lastError = err;
+        if (err.status === 401) {
+          clearAuth();
+          return;
+        }
+      }
+    }
+
+    if (!data) {
+      throw lastError || new Error("Сервер не вернул данные комнаты");
+    }
+
+    const gameType = getGameType(data);
+    if (gameType !== 1 && gameType !== 2) {
+      throw new Error("Сервер не вернул gameType для комнаты (нужно 1 или 2).");
+    }
+
+    savePlayerState(data);
+    showToast(gameType === 1 ? "Нишевая игра найдена" : "Командный квиз найден", "success");
+    button.textContent = gameType === 1 ? "Открываем нишевую игру..." : "Открываем квиз...";
+
+    setTimeout(() => {
+      try {
+        redirectToGame(data);
+      } catch (error) {
+        showToast(error.message || "Не удалось открыть игру");
+        button.disabled = false;
+        button.textContent = "Войти в комнату";
+      }
+    }, 250);
+
+  } catch (error) {
+    showToast(error?.payload?.message || error.message || "Не удалось подключиться к комнате");
+    button.disabled = false;
+    button.textContent = "Войти в комнату";
+  }
+}
+
+loadCurrentUser();
+</script>
+</body>
+</html>

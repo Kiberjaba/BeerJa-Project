@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Личный кабинет игрока</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:auto; min-height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    min-height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+  }
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 440px;
+      min-height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 18px 8px;
+  }
+  .role-chip{
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .role-chip .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+  }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--border); background: var(--card);
+    color: var(--text); font-size:15px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ===== CONTENT AREA (теперь просто течёт вместе со страницей) ===== */
+  .content{
+    flex:1 1 auto;
+    padding: 10px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .profile-head{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  .avatar-big{
+    width: 76px; height:76px; border-radius: 50%;
+    background: linear-gradient(135deg, #3a3f2a, #1c1e16);
+    border: 3px solid var(--lime);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 26px; font-weight:800; color:var(--lime);
+    position: relative;
+    flex-shrink:0;
+    cursor:pointer;
+    overflow: hidden;
+  }
+  .avatar-big img{
+    width:100%; height:100%; object-fit:cover;
+  }
+  .avatar-edit{
+    position:absolute; bottom:-2px; right:-2px;
+    width:24px; height:24px; border-radius:50%;
+    background: var(--lime); color:#10130a;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px; font-weight:900;
+    border: 2px solid var(--bg);
+  }
+  .profile-name{ display:flex; flex-direction:column; gap:6px; }
+  .nick{ font-size: 20px; font-weight: 800; }
+  .change-avatar{
+    font-size: 12px; color: var(--lime); font-weight:700;
+    background:none; border:none; cursor:pointer; padding:0;
+    text-align:left;
+  }
+
+  .level-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px 18px;
+    margin-bottom: 6px;
+  }
+  .level-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom: 10px;
+  }
+  .level-num{ font-size: 20px; font-weight:900; }
+  .level-num span{ color: var(--lime); }
+  .level-pts{ font-size: 12px; color: var(--text-dim); font-weight:700; }
+  .bar-track{
+    height: 8px; border-radius: 999px;
+    background: #2a2c2e;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%; width: 0%;
+    background: var(--lime);
+    border-radius: 999px;
+    transition: width 0.6s ease-out;
+  }
+  .bar-caption{
+    margin-top:8px; font-size:11px; color: var(--text-faint);
+  }
+
+  .stats-row{
+    display:flex; gap: 12px; margin-bottom: 6px;
+  }
+  .stat-box{
+    flex:1;
+    background: var(--card-2);
+    border:1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 14px;
+  }
+  .stat-num{ font-size: 20px; font-weight:900; color: var(--lime); }
+  .stat-label{ font-size: 11px; color: var(--text-dim); margin-top:4px; font-weight:600; }
+
+  /* ===== ACCORDION SECTIONS ===== */
+  .accordion-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .accordion-header {
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .accordion-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .section-title{
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text);
+  }
+  .accordion-preview {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+  }
+  .accordion-arrow {
+    font-size: 14px;
+    color: var(--text-dim);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+  }
+
+  /* Плавная анимация через CSS grid: 0fr -> 1fr подстраивается
+     под реальную высоту содержимого, без рывков и magic numbers */
+  .accordion-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    padding: 0 18px;
+    transition:
+      grid-template-rows 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+      padding 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .accordion-body-inner{
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* Active Accordion State */
+  .accordion-section.active {
+    border-color: rgba(198,255,61,0.4);
+    background: var(--card-2);
+  }
+  .accordion-section.active .accordion-header {
+    border-bottom: 1px solid var(--border);
+  }
+  .accordion-section.active .accordion-arrow {
+    transform: rotate(180deg);
+    color: var(--lime);
+  }
+  .accordion-section.active .accordion-body {
+    grid-template-rows: 1fr;
+    padding: 16px 18px;
+  }
+  .accordion-section.active .accordion-preview {
+    opacity: 0;
+  }
+
+  /* ===== TEAMS STYLES (внутренний скролл убран — контент разворачивается целиком) ===== */
+  .teams-section {
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .team-card{
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 12px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .team-info{ display:flex; flex-direction:column; gap:3px; }
+  .team-name{ font-size: 13px; font-weight:700; color: var(--text); }
+  .team-status{ font-size: 11px; font-weight: 700; }
+  .status-pending { color: #f39c12; }
+  .status-accepted { color: var(--lime); }
+  .team-actions { display: flex; gap: 6px; }
+
+  .btn-lime {
+    background: var(--lime);
+    color: #10130a;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .create-team-box {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .team-input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+  }
+  .team-input:focus { border-color: var(--lime); }
+
+  .manage-teams-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    width:100%;
+    margin-top:10px;
+    background: transparent;
+    color: var(--lime);
+    border: 1px dashed rgba(198,255,61,0.4);
+    padding: 11px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .manage-teams-btn:hover{
+    background: rgba(198,255,61,0.08);
+    border-color: var(--lime);
+  }
+  .manage-teams-arrow{
+    transition: transform 0.2s ease;
+  }
+  .manage-teams-btn:hover .manage-teams-arrow{
+    transform: translateX(3px);
+  }
+
+  /* ===== ACHIEVEMENTS STYLES (внутренний скролл убран) ===== */
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    align-content: start;
+  }
+  .achievement-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .achievement-icon {
+    font-size: 20px;
+    background: rgba(198,255,61,0.1);
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .achievement-info { display: flex; flex-direction: column; gap: 2px; }
+  .achievement-title { font-size: 12px; font-weight: 700; }
+  .achievement-desc { font-size: 10px; color: var(--text-dim); }
+
+  /* ===== HISTORY STYLES (внутренний скролл убран) ===== */
+  .history{
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .history-item{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+  .hist-left{ display:flex; flex-direction:column; gap:3px; }
+  .hist-name{ font-size:13px; font-weight:700; }
+  .hist-date{ font-size:11px; color: var(--text-faint); }
+  .hist-score{ font-size: 13px; font-weight:800; color: var(--lime); }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <div class="role-chip"><span class="dot"></span>Игрок</div>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn" onclick="window.location.href='user/settings.html'">⚙</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="profile-head">
+      <div class="avatar-big" id="avatarBig" onclick="window.location.href='user/settings.html'">
+        <span id="avatarLetter">-</span>
+        <div class="avatar-edit">✎</div>
+      </div>
+      <div class="profile-name">
+        <div class="nick" id="userNickname">Загрузка...</div>
+        <button class="change-avatar" onclick="window.location.href='settings.html'">Сменить аватар</button>
+      </div>
+    </div>
+
+    <div class="level-card">
+      <div class="level-top">
+        <div class="level-num">Уровень <span id="userLevel">-</span></div>
+        <div class="level-pts" id="levelProgressText">0 / 0 очков</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="progressBar"></div></div>
+      <div class="bar-caption" id="remainingText">Загрузка данных...</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="sessionsCount">0</div>
+        <div class="stat-label">Сессий пройдено</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="totalPoints">0</div>
+        <div class="stat-label">Баллов всего</div>
+      </div>
+    </div>
+
+    <!-- БЛОК 1: МОИ КОМАНДЫ -->
+    <div class="accordion-section active" id="accTeams">
+      <div class="accordion-header" onclick="toggleAccordion('accTeams')">
+        <div class="accordion-title-wrap">
+          <div class="section-title">Мои команды</div>
+          <div class="accordion-preview" id="teamsPreviewCount">Загрузка...</div>
+        </div>
+        <div class="accordion-arrow">▼</div>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          <div class="teams-section" id="teamsContainer">
+            <div style="color: var(--text-faint); font-size: 13px;">Загрузка команд...</div>
+          </div>
+          <div class="create-team-box">
+            <input type="text" id="newTeamNameInput" class="team-input" placeholder="Название новой команды">
+            <button class="btn-lime" onclick="createTeam()">Создать</button>
+          </div>
+          <button class="manage-teams-btn" onclick="window.location.href='teams.html'">
+            Управление командами
+            <span class="manage-teams-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- БЛОК 2: МОИ ДОСТИЖЕНИЯ -->
+    <div class="accordion-section" id="accAchievements">
+      <div class="accordion-header" onclick="toggleAccordion('accAchievements')">
+        <div class="accordion-title-wrap">
+          <div class="section-title">Мои достижения</div>
+          <div class="accordion-preview" id="achievementsPreviewCount">Загрузка...</div>
+        </div>
+        <div class="accordion-arrow">▼</div>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          <div class="achievements-grid" id="achievementsContainer">
+            <div style="color: var(--text-faint); font-size: 13px;">Загрузка достижений...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- БЛОК 3: ИСТОРИЯ СЕССИЙ -->
+    <div class="accordion-section" id="accHistory">
+      <div class="accordion-header" onclick="toggleAccordion('accHistory')">
+        <div class="accordion-title-wrap">
+          <div class="section-title">История сессий</div>
+          <div class="accordion-preview" id="historyPreviewCount">Загрузка...</div>
+        </div>
+        <div class="accordion-arrow">▼</div>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          <div class="history" id="historyContainer">
+            <div style="color: var(--text-faint); font-size: 13px;">Загрузка истории...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API_HOST = '';
+  const API_BASE_URL = `${API_HOST}/api/v1/User`;
+
+  // Логика работы аккордеона: при клике открывается выбранный, остальные автоматически сворачиваются
+  function toggleAccordion(sectionId) {
+    const sections = document.querySelectorAll('.accordion-section');
+    sections.forEach(sec => {
+      if (sec.id === sectionId) {
+        sec.classList.toggle('active');
+      } else {
+        sec.classList.remove('active');
+      }
+    });
+  }
+
+  async function loadUserProfile() {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/profile-data`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+
+      const data = await response.json();
+
+      document.getElementById('userNickname').innerText = data.username;
+      document.getElementById('sessionsCount').innerText = data.sessionsCount;
+      document.getElementById('totalPoints').innerText = data.totalPoints.toLocaleString('ru-RU');
+
+      if (data.photo) {
+        document.getElementById('avatarBig').innerHTML =
+          `<img src="${API_HOST}${data.photo}" alt="Аватар"><div class="avatar-edit">✎</div>`;
+      } else if (data.username && data.username.length > 0) {
+        document.getElementById('avatarLetter').textContent = data.username.charAt(0).toUpperCase();
+      }
+
+      document.getElementById('userLevel').innerText = data.level;
+      document.getElementById('levelProgressText').innerText = `${data.pointsInCurrentLevel} / ${data.pointsRequiredForNext} очков`;
+      
+      const progress = Math.min(Math.max(data.progressPercentage, 0), 100);
+      document.getElementById('progressBar').style.width = `${progress}%`;
+      document.getElementById('remainingText').innerText = `До уровня ${data.level + 1} осталось ${data.pointsRemaining} очков`;
+
+      // Загрузка истории чекинов
+      const historyContainer = document.getElementById('historyContainer');
+      historyContainer.innerHTML = '';
+
+      if (!data.recentCheckins || data.recentCheckins.length === 0) {
+        historyContainer.innerHTML = '<div style="color: var(--text-faint); font-size: 13px;">У вас пока нет пройденных сессий</div>';
+        document.getElementById('historyPreviewCount').innerText = 'Нет сессий';
+      } else {
+        document.getElementById('historyPreviewCount').innerText = `${data.recentCheckins.length} записей`;
+        data.recentCheckins.forEach(item => {
+          const dateObj = new Date(item.checkedInAt);
+          const formattedDate = dateObj.toLocaleString('ru-RU', { 
+            day: 'numeric', 
+            month: 'long', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+
+          historyContainer.insertAdjacentHTML('beforeend', `
+            <div class="history-item">
+              <div class="hist-left">
+                <div class="hist-name">${item.eventTitle}</div>
+                <div class="hist-date">${formattedDate}</div>
+              </div>
+              <div class="hist-score">+${item.pointsAwarded}</div>
+            </div>
+          `);
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки профиля:', error);
+    }
+  }
+
+  // Загрузка списка команд
+  async function loadMyTeams() {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch('/api/teams/my-teams', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) return;
+
+      const teams = await response.json();
+      const container = document.getElementById('teamsContainer');
+      container.innerHTML = '';
+
+      if (teams.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-faint); font-size: 13px;">Вы пока не состоите в командах</div>';
+        document.getElementById('teamsPreviewCount').innerText = 'Нет команд';
+        return;
+      }
+
+      document.getElementById('teamsPreviewCount').innerText = `${teams.length} активных`;
+
+      teams.forEach(t => {
+        let statusText = t.status === 'accepted' ? 'Участник' : 'Ожидает подтверждения';
+        let statusClass = t.status === 'accepted' ? 'status-accepted' : 'status-pending';
+        
+        let actionsHtml = '';
+        if (t.status === 'pending') {
+          actionsHtml = `
+            <div class="team-actions">
+              <button class="btn-lime" onclick="respondInvite(${t.teamId}, true)">Принять</button>
+              <button class="btn-outline" onclick="respondInvite(${t.teamId}, false)">Отклонить</button>
+            </div>
+          `;
+        } else if (t.isCreator) {
+          actionsHtml = `<span style="font-size:11px; color:var(--text-dim); font-weight:700;">Создатель</span>`;
+        }
+
+        container.insertAdjacentHTML('beforeend', `
+          <div class="team-card">
+            <div class="team-info">
+              <div class="team-name">${t.teamName}</div>
+              <div class="team-status ${statusClass}">${statusText}</div>
+            </div>
+            ${actionsHtml}
+          </div>
+        `);
+      });
+    } catch (e) {
+      console.error('Ошибка загрузки команд', e);
+    }
+  }
+
+  // Загрузка достижений (achievements + user_achievements)
+  async function loadAchievements() {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+      const response = await fetch('/api/v1/User/achievements', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) return;
+
+      const achievements = await response.json();
+      const container = document.getElementById('achievementsContainer');
+      container.innerHTML = '';
+
+      if (!achievements || achievements.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-faint); font-size: 13px;">Достижения пока не добавлены</div>';
+        document.getElementById('achievementsPreviewCount').innerText = 'Нет достижений';
+        return;
+      }
+
+      const unlockedCount = achievements.filter(a => a.isUnlocked).length;
+      document.getElementById('achievementsPreviewCount').innerText =
+        `Открыто ${unlockedCount} из ${achievements.length}`;
+
+      achievements.forEach(a => {
+        const lockedStyle = a.isUnlocked ? '' : 'opacity: 0.4;';
+        const icon = a.icon || '🏅';
+
+        container.insertAdjacentHTML('beforeend', `
+          <div class="achievement-item" style="${lockedStyle}">
+            <div class="achievement-icon">${icon}</div>
+            <div class="achievement-info">
+              <div class="achievement-title">${a.title}</div>
+              <div class="achievement-desc">${a.description}</div>
+            </div>
+          </div>
+        `);
+      });
+    } catch (e) {
+      console.error('Ошибка загрузки достижений', e);
+    }
+  }
+
+  // Создание команды
+  async function createTeam() {
+    const nameInput = document.getElementById('newTeamNameInput');
+    const name = nameInput.value.trim();
+    if (!name) {
+      alert('Введите название команды');
+      return;
+    }
+
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+
+    try {
+      const response = await fetch('/api/teams/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        nameInput.value = '';
+        loadMyTeams();
+      } else {
+        alert(data.message || 'Ошибка создания');
+      }
+    } catch (e) {
+      console.error('Ошибка:', e);
+    }
+  }
+
+  // Ответ на инвайт
+  async function respondInvite(teamId, accept) {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+
+    try {
+      const response = await fetch('/api/teams/respond-invite', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ teamId, accept })
+      });
+
+      if (response.ok) {
+        loadMyTeams();
+      }
+    } catch (e) {
+      console.error('Ошибка:', e);
+    }
+  }
+
+  // Запуск при загрузке страницы
+  document.addEventListener('DOMContentLoaded', () => {
+    loadUserProfile();
+    loadMyTeams();
+    loadAchievements();
+  });
+</script>
+
+</body>
+</html>

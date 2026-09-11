@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Личный кабинет ведущего</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(198,255,61,0.06) 0%, transparent 60%),
+      radial-gradient(60% 40% at 100% 100%, rgba(198,255,61,0.04) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  .phone{
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    background: var(--bg);
+    overflow:hidden;
+  }
+  @media (min-width: 560px){
+    body{ padding: 28px 16px; }
+    .phone{
+      max-width: 440px;
+      height: min(880px, 94vh);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 90px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+  }
+
+  /* ===== HEADER ===== */
+  .top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 18px 8px;
+  }
+  .role-chip{
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .role-chip .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+  }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--border); background: var(--card);
+    color: var(--text); font-size:15px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ===== SCROLL AREA ===== */
+  .content{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding: 10px 18px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .content::-webkit-scrollbar{ width:0; }
+
+  /* PROFILE HEAD */
+  .profile-head{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .avatar-big{
+    width: 76px; height:76px; border-radius: 50%;
+    background: linear-gradient(135deg, #3a3f2a, #1c1e16);
+    border: 3px solid var(--lime);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 26px; font-weight:800; color:var(--lime);
+    position: relative;
+    flex-shrink:0;
+    cursor:pointer;
+    overflow: hidden;
+  }
+  .avatar-big img{
+    width:100%; height:100%; object-fit:cover;
+  }
+  .avatar-edit{
+    position:absolute; bottom:-2px; right:-2px;
+    width:24px; height:24px; border-radius:50%;
+    background: var(--lime); color:#10130a;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px; font-weight:900;
+    border: 2px solid var(--bg);
+  }
+  .profile-name{ display:flex; flex-direction:column; gap:6px; }
+  .nick{ font-size: 20px; font-weight: 800; }
+  .change-avatar{
+    font-size: 12px; color: var(--lime); font-weight:700;
+    background:none; border:none; cursor:pointer; padding:0;
+    text-align:left;
+  }
+
+  /* ===== STATS ===== */
+  .stats{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .stat{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align:center;
+  }
+  .stat b{ display:block; font-size: 22px; font-weight:900; }
+  .stat b.lime{ color: var(--lime); }
+  .stat span{ display:block; font-size: 10px; color: var(--text-dim); font-weight:600; margin-top:4px; line-height:1.3; }
+
+  /* ===== GAMES LIST ===== */
+  .section-title{
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-dim);
+    margin: 4px 0 10px;
+  }
+
+  .game-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    margin-bottom: 12px;
+  }
+  .game-top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+    margin-bottom: 4px;
+  }
+  .game-name{ font-size: 15px; font-weight: 800; line-height:1.3; }
+  .game-room{ font-size: 12px; color: var(--text-faint); margin-top:3px; font-weight:600; }
+
+  .status-tag{
+    flex-shrink:0;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 5px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-draft{ background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .status-done{ background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .status-ready{ background: rgba(198,255,61,0.12); color: var(--lime); }
+
+  .game-meta{
+    font-size: 12px; color: var(--text-dim); margin-top: 10px; line-height:1.5;
+  }
+
+  .game-actions{ margin-top: 14px; }
+  .btn-outline{
+    width:100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 0;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor:pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-outline:hover{ border-color: var(--lime); color: var(--lime); }
+  .btn-lime{
+    width:100%;
+    background: var(--lime);
+    color: #10130a;
+    border: none;
+    padding: 12px 0;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 13px;
+    cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .btn-lime:hover{ transform: translateY(-1px); }
+  .btn-disabled{
+    width:100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-faint);
+    padding: 11px 0;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor:not-allowed;
+  }
+  .progress-track{
+    height: 6px; border-radius: 999px; background: #2a2c2e;
+    overflow:hidden; margin-top: 12px;
+  }
+  .progress-fill{
+    height:100%;
+    background: var(--text-faint);
+    border-radius: 999px;
+  }
+
+  /* ===== BOTTOM BAR ===== */
+  .bottom{
+    flex:0 0 auto;
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .bottom .btn-lime{ font-size:14px; padding:14px 0; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="top">
+    <div class="role-chip"><span class="dot"></span>Ведущий</div>
+    <button class="icon-btn" onclick="window.location.href='ved/settings.html'">⚙</button>
+  </div>
+
+  <div class="content">
+    <!-- Блок профиля -->
+    <div class="profile-head">
+      <div class="avatar-big" id="avatarBig" onclick="window.location.href='ved/settings.html'">
+        <span id="avatarLetter">-</span>
+        <div class="avatar-edit">✎</div>
+      </div>
+      <div class="profile-name">
+        <div class="nick" id="userNickname">Загрузка...</div>
+        <button class="change-avatar" onclick="window.location.href='ved/settings.html'">Сменить аватар</button>
+      </div>
+    </div>
+
+    <!-- Статистика ведущего -->
+    <div class="stats">
+      <div class="stat"><b class="lime" id="hostedSessionsCount">0</b><span>сессий<br>проведено</span></div>
+      <div class="stat"><b id="createdGamesCount">0</b><span>игр<br>создано</span></div>
+      <div class="stat"><b id="totalPlayersCount">0</b><span>участников<br>охвачено</span></div>
+    </div>
+
+    <div class="section-title">Мои игры</div>
+
+    <!-- Контейнер для динамического списка игр из БД -->
+    <div id="gamesContainer">
+      <div class="game-meta" style="text-align:center; padding: 20px;">Загрузка игр...</div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <button class="btn-lime" onclick="window.location.href='allmechanics.html'">+ Создать новую игру</button>
+  </div>
+
+<script>
+  const API_HOST = '';
+  const API_BASE_URL = `${API_HOST}/api/v1/host`;
+
+  async function loadHostDashboard() {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+
+    if (!token) {
+      alert('Токен авторизации не найден. Пожалуйста, войдите в систему.');
+      window.location.href = 'glav.html'; // или страница входа
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/dashboard`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert('Сессия истекла. Пожалуйста, войдите снова.');
+        }
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // 1. Заполняем профиль
+      document.getElementById('userNickname').innerText = data.username;
+
+      if (data.photo) {
+        document.getElementById('avatarBig').innerHTML =
+          `<img src="${API_HOST}${data.photo}" alt="Аватар"><div class="avatar-edit">✎</div>`;
+      } else if (data.username && data.username.length > 0) {
+        document.getElementById('avatarLetter').textContent = data.username.charAt(0).toUpperCase();
+      }
+
+      // 2. Заполняем статистику
+      document.getElementById('hostedSessionsCount').innerText = data.hostedSessionsCount ?? 0;
+      document.getElementById('createdGamesCount').innerText = data.createdGamesCount ?? 0;
+      document.getElementById('totalPlayersCount').innerText = data.totalPlayersCount ?? 0;
+
+      // 3. Рендерим список игр из базы данных
+      const container = document.getElementById('gamesContainer');
+      container.innerHTML = '';
+
+      if (!data.games || data.games.length === 0) {
+        container.innerHTML = '<div class="game-meta" style="text-align:center; color: var(--text-faint);">У вас пока нет созданных игр</div>';
+        return;
+      }
+
+      data.games.forEach(game => {
+        let statusTagClass = 'status-draft';
+        let statusText = 'в процессе создания';
+        let actionButtonHTML = '';
+        let metaDetails = game.description || 'Сценарий в разработке.';
+        let roomText = game.roomCode ? `Комната ${game.roomCode}` : 'черновик · без комнаты';
+
+        if (game.status === 'completed' || game.status === 'done') {
+          statusTagClass = 'status-done';
+          statusText = 'завершена';
+          const dateStr = game.startsAt ? new Date(game.startsAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) : '';
+          metaDetails = `${game.format || 'Офлайн'} · проведена ${dateStr}`;
+          actionButtonHTML = `<button class="btn-outline" onclick="alert('Статистика игры ${game.roomCode || game.eventId}')">Посмотреть статистику</button>`;
+        } else if (game.status === 'ready' || game.status === 'upcoming') {
+          statusTagClass = 'status-ready';
+          statusText = 'готова к запуску';
+          metaDetails = 'Сценарий готов, участники могут подключаться по коду комнаты.';
+          actionButtonHTML = `<button class="btn-lime" onclick="alert('Запуск игры ${game.roomCode}')">Запустить</button>`;
+        } else {
+          // Черновик (draft)
+          actionButtonHTML = `<button class="btn-disabled" disabled>Игра ещё не готова к запуску</button>`;
+        }
+
+        // Прогресс бар для черновиков
+        let progressHTML = '';
+        if (game.status === 'draft') {
+          const prog = game.progressPercentage || 0;
+          progressHTML = `
+            <div class="game-meta">Заполнено ${prog}% сценария. Автосохранение включено.</div>
+            <div class="progress-track"><div class="progress-fill" style="width: ${prog}%"></div></div>
+          `;
+        } else {
+          progressHTML = `<div class="game-meta">${metaDetails}</div>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.innerHTML = `
+          <div class="game-top">
+            <div>
+              <div class="game-name">${escapeHtml(game.title)}</div>
+              <div class="game-room">${roomText}</div>
+            </div>
+            <div class="status-tag ${statusTagClass}">${statusText}</div>
+          </div>
+          ${progressHTML}
+          <div class="game-actions">
+            ${actionButtonHTML}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+    } catch (error) {
+      console.error('Не удалось загрузить данные личного кабинета:', error);
+      document.getElementById('gamesContainer').innerHTML = '<div class="game-meta" style="text-align:center; color: #ff6b6b;">Ошибка загрузки данных с сервера</div>';
+    }
+  }
+
+  // Защита от XSS при вводе текста
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
+  document.addEventListener('DOMContentLoaded', loadHostDashboard);
+</script>
+
+</body>
+</html>

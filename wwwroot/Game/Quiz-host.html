@@ -1,0 +1,5544 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BeerJa — Пульт ведущего</title>
+
+<meta name="theme-color" content="#101116">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="beerja-api-base" content="/api/v1">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
+
+<style>
+:root{
+  --ink:#101116;
+  --night:#191b22;
+  --cloud:#f4f2ec;
+  --fog:#9699a3;
+
+  --pulse:#705cff;
+  --signal:#c9ff47;
+  --coral:#ff6b61;
+  --gold:#ffc85a;
+
+  --line:rgba(244,242,236,.14);
+  --radius:22px;
+  --pill:999px;
+
+  --ui:"Onest","Avenir Next","SF Pro Text",system-ui,sans-serif;
+  --display:"Onest","Arial Rounded MT Bold","SF Pro Display",system-ui,sans-serif;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  min-height:100%;
+  background:#07080b;
+  color:var(--cloud);
+  font-family:var(--ui);
+}
+
+body{
+  overflow-x:hidden;
+}
+
+button{
+  font:inherit;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+#app{
+  min-height:100vh;
+}
+
+.desk{
+  min-height:100vh;
+
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(112,92,255,.18),
+      transparent 32rem
+    ),
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(201,255,71,.07),
+      transparent 28rem
+    ),
+    #07080b;
+}
+
+.top{
+  height:72px;
+
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+
+  gap:18px;
+  padding:0 28px;
+
+  border-bottom:1px solid var(--line);
+
+  background:rgba(16,17,22,.88);
+  backdrop-filter:blur(18px);
+
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+
+.chip{
+  justify-self:start;
+
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+
+  padding:9px 14px;
+
+  border:1px solid var(--line);
+  border-radius:var(--pill);
+
+  background:rgba(244,242,236,.06);
+
+  font-weight:900;
+  font-size:13px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+
+  border-radius:50%;
+
+  background:var(--signal);
+
+  box-shadow:
+    0 0 20px rgba(201,255,71,.7);
+}
+
+.code{
+  font-family:var(--display);
+  font-size:24px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+
+.timer-mini{
+  justify-self:end;
+
+  min-width:48px;
+
+  text-align:center;
+
+  font-weight:950;
+  color:var(--signal);
+}
+
+.content{
+  padding:28px;
+}
+
+.layout{
+  width:min(1380px,100%);
+  margin:0 auto;
+
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 360px;
+
+  gap:22px;
+}
+
+.main{
+  min-width:0;
+}
+
+.kicker{
+  color:var(--fog);
+
+  font-size:12px;
+  font-weight:900;
+
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.title{
+  margin:8px 0 6px;
+
+  font:
+    950
+    clamp(30px,4vw,54px)/1.02
+    var(--display);
+
+  letter-spacing:-.025em;
+}
+
+.subtitle{
+  margin:0 0 18px;
+
+  color:var(--fog);
+
+  font-size:15px;
+}
+
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+
+  gap:10px;
+
+  margin-bottom:16px;
+}
+
+.metric{
+  padding:14px;
+
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+
+  background:rgba(244,242,236,.055);
+}
+
+.metric strong{
+  display:block;
+
+  font:
+    950
+    24px/1
+    var(--display);
+}
+
+.metric span{
+  display:block;
+
+  margin-top:6px;
+
+  color:var(--fog);
+
+  font-size:12px;
+}
+
+.panel{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+
+  padding:18px;
+
+  background:rgba(16,17,22,.86);
+
+  box-shadow:
+    0 20px 70px rgba(0,0,0,.18);
+}
+
+.panel+.panel{
+  margin-top:14px;
+}
+
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:12px;
+
+  margin-bottom:14px;
+}
+
+.panel-head strong{
+  font-weight:950;
+}
+
+.panel-head span{
+  color:var(--fog);
+  font-size:12px;
+}
+
+.question{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+
+  padding:24px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(112,92,255,.12),
+      rgba(16,17,22,.92)
+    );
+}
+
+.badges{
+  display:flex;
+  flex-wrap:wrap;
+
+  gap:8px;
+
+  margin-bottom:18px;
+}
+
+.badge{
+  padding:7px 10px;
+
+  border-radius:var(--pill);
+
+  background:rgba(244,242,236,.08);
+  border:1px solid var(--line);
+
+  font-size:11px;
+  font-weight:900;
+}
+
+.qtext{
+  font:
+    900
+    clamp(25px,3vw,42px)/1.08
+    var(--display);
+}
+
+.media-block{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px dashed var(--line);
+}
+
+.media-label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  margin-bottom:10px;
+
+  color:var(--fog);
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.media-label .media-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:rgba(201,255,71,.15);
+  color:var(--signal);
+  font-size:11px;
+}
+
+.media{
+  overflow:hidden;
+
+  border-radius:18px;
+  border:1px solid var(--line);
+
+  background:rgba(0,0,0,.35);
+}
+
+.media+.media{
+  margin-top:12px;
+}
+
+.media img{
+  display:block;
+  width:100%;
+  max-height:420px;
+  object-fit:contain;
+  background:#000;
+}
+.media audio{
+  display:block;
+  width:100%;
+  padding:14px;
+  background:rgba(244,242,236,.04);
+}
+.media video{
+  display:block;
+  width:100%;
+  max-height:460px;
+  object-fit:contain;
+  background:#000;
+}
+
+.options{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+
+  gap:10px;
+
+  margin-top:20px;
+}
+
+.option{
+  display:flex;
+  align-items:center;
+
+  gap:12px;
+
+  min-height:74px;
+
+  padding:14px 16px;
+
+  border:1px solid var(--line);
+  border-radius:18px;
+
+  background:rgba(244,242,236,.055);
+}
+
+.option-num{
+  display:grid;
+  place-items:center;
+
+  width:34px;
+  height:34px;
+
+  flex:0 0 34px;
+
+  border-radius:50%;
+
+  background:rgba(244,242,236,.1);
+
+  font-weight:950;
+}
+
+.info{
+  display:grid;
+  gap:9px;
+}
+
+.info-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:15px;
+
+  padding:12px 14px;
+
+  border-radius:16px;
+
+  background:rgba(244,242,236,.055);
+}
+
+.info-row strong{
+  display:block;
+  font-size:14px;
+}
+
+.info-row span{
+  display:block;
+
+  margin-top:3px;
+
+  color:var(--fog);
+
+  font-size:12px;
+}
+
+.info-row>b{
+  font-weight:950;
+}
+
+.teams,
+.results{
+  display:grid;
+  gap:9px;
+}
+
+.team,
+.result{
+  display:flex;
+  align-items:center;
+
+  gap:12px;
+
+  padding:14px;
+
+  border-radius:17px;
+
+  background:rgba(244,242,236,.055);
+}
+
+.team-name,
+.result-name{
+  min-width:0;
+  flex:1;
+}
+
+.team-name strong,
+.result-name strong{
+  display:block;
+
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.team-name span,
+.result-name span{
+  display:block;
+
+  margin-top:4px;
+
+  color:var(--fog);
+
+  font-size:12px;
+}
+
+.score,
+.result-score{
+  font:
+    950
+    22px/1
+    var(--display);
+}
+
+.result.gold{
+  background:rgba(255,200,90,.16);
+
+  border:
+    1px solid
+    rgba(255,200,90,.35);
+}
+
+.rank{
+  width:30px;
+
+  font-weight:950;
+
+  color:var(--fog);
+}
+
+.empty{
+  padding:24px;
+
+  border:1px dashed var(--line);
+  border-radius:18px;
+
+  text-align:center;
+}
+
+.empty strong{
+  display:block;
+  font-weight:950;
+}
+
+.empty span{
+  display:block;
+
+  margin-top:6px;
+
+  color:var(--fog);
+
+  font-size:13px;
+}
+
+.controls{
+  position:sticky;
+  top:94px;
+
+  height:max-content;
+
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+
+  padding:18px;
+
+  background:rgba(16,17,22,.92);
+
+  box-shadow:
+    0 24px 80px rgba(0,0,0,.28);
+}
+
+.control-box{
+  margin-top:12px;
+
+  padding:14px;
+
+  border-radius:18px;
+
+  background:rgba(244,242,236,.045);
+}
+
+.control-label{
+  color:var(--fog);
+
+  font-size:11px;
+  font-weight:900;
+
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.big-state{
+  margin-top:8px;
+
+  font:
+    950
+    30px/1
+    var(--display);
+
+  color:var(--signal);
+}
+
+.actions{
+  display:grid;
+  gap:10px;
+
+  margin-top:14px;
+}
+
+.btn{
+  width:100%;
+  min-height:58px;
+
+  border:0;
+  border-radius:var(--pill);
+
+  padding:0 18px;
+
+  font-weight:950;
+}
+
+.btn.primary{
+  background:var(--signal);
+  color:var(--ink);
+}
+
+.btn.coral{
+  background:var(--coral);
+  color:#fff;
+}
+
+.btn.purple{
+  background:var(--pulse);
+  color:#fff;
+}
+
+.btn.secondary{
+  background:rgba(244,242,236,.1);
+  color:var(--cloud);
+}
+
+.command-hint{
+  margin-top:10px;
+
+  color:var(--fog);
+
+  font-size:12px;
+  line-height:1.4;
+}
+
+.connection{
+  display:flex;
+  align-items:center;
+
+  gap:9px;
+
+  font-size:13px;
+}
+
+.connection-dot{
+  width:9px;
+  height:9px;
+
+  border-radius:50%;
+
+  background:var(--coral);
+}
+
+.connection-dot.ok{
+  background:var(--signal);
+
+  box-shadow:
+    0 0 18px rgba(201,255,71,.55);
+}
+
+.toast{
+  position:fixed;
+
+  top:88px;
+  left:50%;
+  z-index:50;
+
+  transform:translateX(-50%);
+
+  padding:12px 18px;
+
+  border:1px solid var(--line);
+  border-radius:var(--pill);
+
+  background:rgba(16,17,22,.96);
+
+  font-weight:850;
+
+  box-shadow:
+    0 18px 60px rgba(0,0,0,.4);
+}
+
+.error{
+  margin-top:14px;
+
+  padding:13px 15px;
+
+  border:
+    1px solid
+    rgba(255,107,97,.35);
+
+  border-radius:16px;
+
+  background:
+    rgba(255,107,97,.1);
+
+  color:#ffb2ad;
+
+  font-weight:750;
+}
+
+.correct{
+  margin-top:16px;
+
+  padding:14px 16px;
+
+  border-radius:16px;
+
+  background:
+    rgba(201,255,71,.1);
+
+  border:
+    1px solid
+    rgba(201,255,71,.28);
+
+  font-weight:900;
+}
+
+.response-grid{
+  display:grid;
+  gap:8px;
+
+  margin-top:12px;
+}
+
+.response{
+  display:flex;
+  justify-content:space-between;
+
+  gap:12px;
+
+  padding:10px 12px;
+
+  border-radius:14px;
+
+  background:rgba(244,242,236,.05);
+}
+
+.response.ok{
+  border:
+    1px solid
+    rgba(201,255,71,.28);
+}
+
+.response.bad{
+  border:
+    1px solid
+    rgba(255,107,97,.2);
+}
+
+.answer-count{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+
+  font-weight:950;
+
+  color:var(--signal);
+}
+
+.answer-count-dot{
+  width:8px;
+  height:8px;
+
+  border-radius:50%;
+
+  background:var(--signal);
+
+  box-shadow:
+    0 0 14px
+    rgba(201,255,71,.6);
+}
+
+@media(max-width:900px){
+
+  .layout{
+    grid-template-columns:1fr;
+  }
+
+  .controls{
+    position:static;
+  }
+
+  .top{
+    grid-template-columns:1fr auto;
+
+    height:64px;
+
+    padding:0 16px;
+  }
+
+  .timer-mini{
+    display:none;
+  }
+
+  .content{
+    padding:16px;
+  }
+}
+
+@media(max-width:560px){
+
+  .metrics{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .options{
+    grid-template-columns:1fr;
+  }
+
+  .title{
+    font-size:34px;
+  }
+
+  .qtext{
+    font-size:27px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/*
+  BeerJa — ПУЛЬТ ВЕДУЩЕГО
+
+  Логика:
+
+  lobby
+      ↓
+  start
+      ↓
+  questionOpen
+      ↓
+  close_question
+      ↓
+  questionClosed
+      ↓
+  reveal
+      ↓
+  revealQueue
+      ↓
+  ┌─────────────────────────────┐
+  │ обычный вопрос              │
+  │ open_question + QuestionId  │
+  └──────────────┬──────────────┘
+                 ↓
+           следующий вопрос
+
+  После последнего вопроса раунда:
+      ↓
+  roundReview
+      ↓
+  следующий раунд
+
+  После последнего раунда:
+      ↓
+  finish
+      ↓
+  final
+
+
+  ВАЖНО:
+
+  Backend может отдавать:
+
+    CurrentStep = "question_123"
+    CurrentStep = "question_closed"
+    CurrentStep = "reveal"
+
+  Поэтому фронт сохраняет последний известный
+  QuestionId в sessionStorage.
+*/
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const params =
+  new URLSearchParams(location.search);
+
+const requestedGameId =
+  Number(
+    params.get("gameId") || 0
+  );
+
+const apiBase =
+  document.querySelector(
+    'meta[name="beerja-api-base"]'
+  )?.content || "/api/v1";
+
+const assets = {
+
+  lobby:
+    "/assets/generated/quiz-lobby-night-v1-web.jpg",
+
+  question:
+    "/assets/generated/quiz-question-projector-v1-web.jpg",
+
+  final:
+    "/assets/generated/quiz-final-celebration-v1-web.jpg"
+};
+
+
+const app =
+  document.getElementById("app");
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let state = {
+
+  gameId:
+    requestedGameId > 0
+      ? requestedGameId
+      : null,
+
+  eventId:
+    null,
+
+  gameType:
+    null,
+
+  currentStep:
+    "lobby",
+
+  phase:
+    "lobby",
+
+  roomCode:
+    null,
+
+  isActive:
+    false,
+
+  teams:
+    [],
+
+  players:
+    [],
+
+  captains:
+    [],
+
+  questions:
+    [],
+
+  question:
+    null,
+
+  /*
+    Количество УНИКАЛЬНЫХ команд,
+    которые ответили на текущий вопрос.
+  */
+  answeredTeams:
+    0,
+
+  questionResults:
+    [],
+
+  /*
+    true только для локального экрана
+    итогов раунда.
+
+    Backend в этот момент может всё ещё
+    находиться на CurrentStep = "reveal".
+  */
+  roundReview:
+    false,
+
+  roundResults:
+    [],
+
+  finalResults:
+    [],
+
+  loading:
+    false,
+
+  connected:
+    false,
+
+  error:
+    "",
+
+  toast:
+    "",
+
+  lastUpdatedAt:
+    null
+};
+
+
+let pollTimer =
+  null;
+
+let refreshInProgress =
+  false;
+
+let toastTimer =
+  null;
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function esc(value){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+function num(
+  value,
+  fallback = 0
+){
+
+  const n =
+    Number(value);
+
+  return Number.isFinite(n)
+    ? n
+    : fallback;
+}
+
+
+function first(...values){
+
+  for(
+    const value of values
+  ){
+
+    if(
+      value !== undefined &&
+      value !== null
+    ){
+      return value;
+    }
+  }
+
+  return null;
+}
+
+
+/*
+  Нормализует ссылку на медиа-файл.
+
+  Защищает от случаев, когда backend
+  или БД хранят не настоящий пустой
+  null, а строку "null", "undefined"
+  или просто пробелы — из-за этого
+  блок с картинкой/аудио/видео мог
+  не показываться либо показываться
+  сломанным.
+*/
+function cleanMediaUrl(value){
+
+  const raw =
+    String(value ?? "").trim();
+
+  if(!raw)
+    return "";
+
+  const lowered =
+    raw.toLowerCase();
+
+  if(
+    lowered === "null" ||
+    lowered === "undefined" ||
+    lowered === "none"
+  ){
+    return "";
+  }
+
+  return raw;
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+function getToken(){
+
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("jwt") ||
+    null
+  );
+}
+
+
+/* =========================================================
+   HTTP
+========================================================= */
+
+async function request(
+  path,
+  options = {}
+){
+
+  const headers = {
+
+    Accept:
+      "application/json",
+
+    ...(options.body
+      ? {
+          "Content-Type":
+            "application/json"
+        }
+      : {}),
+
+    ...(options.headers || {})
+  };
+
+
+  const token =
+    getToken();
+
+  /*
+    Никаких выдуманных Bearer user-1
+    здесь нет.
+
+    Если авторизация есть —
+    отправляем реальный токен.
+  */
+
+  if(token){
+
+    headers.Authorization =
+      `Bearer ${token}`;
+  }
+
+
+  const response =
+    await fetch(
+      `${apiBase}${path}`,
+      {
+        ...options,
+
+        cache:
+          "no-store",
+
+        credentials:
+          "same-origin",
+
+        headers
+      }
+    );
+
+
+  const data =
+    response.status === 204
+      ? null
+      : await response
+          .json()
+          .catch(() => null);
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.message ||
+      data?.error ||
+      `Ошибка ${response.status}`
+    );
+  }
+
+
+  return data;
+}
+
+
+/* =========================================================
+   API
+========================================================= */
+
+const api = {
+
+  hostState(gameId){
+
+    return request(
+      `/games/${gameId}/host-state`
+    );
+  },
+
+
+  command(
+    gameId,
+    action,
+    extra = {}
+  ){
+
+    return request(
+      `/games/${gameId}/commands`,
+      {
+        method:
+          "POST",
+
+        body:
+          JSON.stringify({
+
+            Action:
+              action,
+
+            ...extra
+
+          })
+      }
+    );
+  },
+
+
+  questionResults(
+    gameId,
+    stepIdentifier
+  ){
+
+    return request(
+      `/games/${gameId}/results/${encodeURIComponent(
+        stepIdentifier
+      )}`
+    );
+  },
+
+
+  finalResults(gameId){
+
+    return request(
+      `/games/${gameId}/final-results`
+    );
+  }
+};
+
+
+/* =========================================================
+   PHASE
+========================================================= */
+
+function normalizePhase(
+  rawPhase,
+  step
+){
+
+  const phase =
+    String(
+      rawPhase || ""
+    ).trim();
+
+
+  if(
+    phase === "finished" ||
+    phase === "final"
+  ){
+
+    return "final";
+  }
+
+
+  if(
+    phase === "lobby"
+  ){
+
+    return "lobby";
+  }
+
+
+  if(
+    phase === "question_open" ||
+    phase === "questionOpen"
+  ){
+
+    return "questionOpen";
+  }
+
+
+  if(
+    phase === "question_closed" ||
+    phase === "questionClosed"
+  ){
+
+    return "questionClosed";
+  }
+
+
+  if(
+    phase === "reveal" ||
+    phase === "revealQueue"
+  ){
+
+    return "revealQueue";
+  }
+
+
+  if(
+    phase === "round_results" ||
+    phase === "round_result" ||
+    phase === "round_review" ||
+    phase === "roundReview"
+  ){
+
+    return "roundReview";
+  }
+
+
+  const s =
+    String(step || "");
+
+
+  if(s === "lobby")
+    return "lobby";
+
+
+  if(s === "finished")
+    return "final";
+
+
+  if(s === "question_closed")
+    return "questionClosed";
+
+
+  if(s === "reveal")
+    return "revealQueue";
+
+
+  if(s === "leaderboard")
+    return "roundReview";
+
+
+  if(
+    /^question_\d+$/.test(s)
+  ){
+
+    return "questionOpen";
+  }
+
+
+  if(
+    /^question_closed_\d+$/.test(s)
+  ){
+
+    return "questionClosed";
+  }
+
+
+  if(
+    /^reveal_\d+$/.test(s)
+  ){
+
+    return "revealQueue";
+  }
+
+
+  if(
+    /^round_results_\d+_\d+$/.test(s)
+  ){
+
+    return "roundReview";
+  }
+
+
+  if(
+    /^round_review_\d+_\d+$/.test(s)
+  ){
+
+    return "roundReview";
+  }
+
+
+  return "lobby";
+}
+
+
+/* =========================================================
+   QUESTION ID
+========================================================= */
+
+function extractQuestionId(
+  step
+){
+
+  const s =
+    String(step || "");
+
+
+  let m =
+    s.match(
+      /^question_(\d+)$/
+    );
+
+  if(m)
+    return num(m[1]);
+
+
+  m =
+    s.match(
+      /^question_closed_(\d+)$/
+    );
+
+  if(m)
+    return num(m[1]);
+
+
+  m =
+    s.match(
+      /^reveal_(\d+)$/
+    );
+
+  if(m)
+    return num(m[1]);
+
+
+  m =
+    s.match(
+      /^(?:round_results|round_review)_(\d+)_(\d+)$/
+    );
+
+  if(m)
+    return num(m[2]);
+
+
+  return null;
+}
+
+
+/* =========================================================
+   OPTIONS
+========================================================= */
+
+function normalizeOptions(
+  value
+){
+
+  if(
+    Array.isArray(value)
+  ){
+
+    return value;
+  }
+
+
+  if(
+    typeof value !== "string"
+  ){
+
+    return [];
+  }
+
+
+  try{
+
+    const parsed =
+      JSON.parse(value);
+
+    return Array.isArray(parsed)
+      ? parsed
+      : [];
+
+  }
+  catch{
+
+    return value
+      .split(",")
+      .map(
+        x => x.trim()
+      )
+      .filter(Boolean);
+  }
+}
+
+
+/* =========================================================
+   QUESTION
+========================================================= */
+
+function normalizeQuestion(q){
+
+  if(!q)
+    return null;
+
+
+  /*
+    ВАЖНО:
+
+    CorrectOption не создаём,
+    если сервер его не передал.
+
+    Поэтому во время questionOpen
+    правильный ответ не появится.
+  */
+
+  return {
+
+    id:
+      num(q.id),
+
+    eventId:
+      num(
+        q.eventId,
+        state.eventId || 0
+      ),
+
+    questionText:
+      q.questionText || "",
+
+    options:
+      normalizeOptions(
+        first(
+          q.options,
+          q.optionsJson,
+          []
+        )
+      ),
+
+    stepOrder:
+      num(
+        first(
+          q.stepOrder,
+          q.questionNumber,
+          0
+        )
+      ),
+
+    roundNumber:
+      num(
+        first(
+          q.roundNumber,
+          1
+        ),
+        1
+      ),
+
+    imageUrl:
+      cleanMediaUrl(
+        first(
+          q.imageUrl,
+          q.ImageUrl,
+          q.image_url
+        )
+      ),
+
+    audioUrl:
+      cleanMediaUrl(
+        first(
+          q.audioUrl,
+          q.AudioUrl,
+          q.audio_url
+        )
+      ),
+
+    videoUrl:
+      cleanMediaUrl(
+        first(
+          q.videoUrl,
+          q.VideoUrl,
+          q.video_url
+        )
+      ),
+
+    timerSeconds:
+      num(
+        first(
+          q.timerSeconds,
+          q.TimerSeconds,
+          q.timer_seconds,
+          0
+        )
+      ),
+
+    correctOption:
+      q.correctOption === undefined ||
+      q.correctOption === null
+        ? null
+        : num(q.correctOption)
+  };
+}
+
+
+/* =========================================================
+   QUESTIONS
+========================================================= */
+
+function sortQuestions(
+  questions
+){
+
+  return [
+    ...questions
+  ].sort(
+    (a,b) =>
+
+      num(a.roundNumber) -
+      num(b.roundNumber)
+
+      ||
+
+      num(a.stepOrder) -
+      num(b.stepOrder)
+
+      ||
+
+      num(a.id) -
+      num(b.id)
+  );
+}
+
+
+function getQuestionsForRound(
+  roundNumber
+){
+
+  return state.questions
+    .filter(
+      q =>
+        num(q.roundNumber) ===
+        num(roundNumber)
+    )
+    .sort(
+      (a,b) =>
+
+        num(a.stepOrder) -
+        num(b.stepOrder)
+
+        ||
+
+        num(a.id) -
+        num(b.id)
+    );
+}
+
+
+function getNextQuestion(
+  questionId
+){
+
+  const ordered =
+    sortQuestions(
+      state.questions
+    );
+
+
+  const index =
+    ordered.findIndex(
+      q =>
+        num(q.id) ===
+        num(questionId)
+    );
+
+
+  return (
+    index >= 0 &&
+    index + 1 <
+      ordered.length
+  )
+    ? ordered[index + 1]
+    : null;
+}
+
+
+function isLastQuestionOfRound(
+  q
+){
+
+  if(!q)
+    return false;
+
+
+  const inRound =
+    getQuestionsForRound(
+      q.roundNumber
+    );
+
+
+  return (
+    inRound.length > 0 &&
+
+    num(
+      inRound[
+        inRound.length - 1
+      ].id
+    ) ===
+    num(q.id)
+  );
+}
+
+
+function totalRounds(){
+
+  return [
+    ...new Set(
+
+      state.questions
+
+        .map(
+          q =>
+            num(
+              q.roundNumber
+            )
+        )
+
+        .filter(Boolean)
+
+    )
+  ].length;
+}
+
+
+/* =========================================================
+   SESSION STORAGE
+========================================================= */
+
+function saveLastQuestion(q){
+
+  if(
+    !state.gameId ||
+    !q
+  ){
+
+    return;
+  }
+
+
+  sessionStorage.setItem(
+
+    `beerja-host-last-question-${state.gameId}`,
+
+    String(q.id)
+
+  );
+}
+
+
+function loadLastQuestion(){
+
+  if(!state.gameId)
+    return null;
+
+
+  const id =
+    num(
+      sessionStorage.getItem(
+        `beerja-host-last-question-${state.gameId}`
+      )
+    );
+
+
+  if(id <= 0)
+    return null;
+
+
+  return (
+    state.questions.find(
+      q =>
+        num(q.id) === id
+    ) || null
+  );
+}
+
+
+/* =========================================================
+   APPLY SERVER STATE
+========================================================= */
+
+function applyServerState(
+  data
+){
+
+  if(!data)
+    return;
+
+
+  state.gameId =
+    num(
+      first(
+        data.gameId,
+        state.gameId
+      )
+    );
+
+
+  state.eventId =
+    num(
+      first(
+        data.eventId,
+        state.eventId
+      )
+    );
+
+
+  state.gameType =
+    num(
+      first(
+        data.gameType,
+        state.gameType
+      )
+    );
+
+
+  state.roomCode =
+    first(
+      data.roomCode,
+      state.roomCode
+    );
+
+
+  state.currentStep =
+    data.currentStep ||
+    "lobby";
+
+
+  state.phase =
+    normalizePhase(
+      data.phase,
+      state.currentStep
+    );
+
+
+  state.isActive =
+    data.isActive === true;
+
+
+  state.teams =
+    Array.isArray(
+      data.teams
+    )
+      ? data.teams
+      : [];
+
+
+  state.players =
+    Array.isArray(
+      data.players
+    )
+      ? data.players
+      : [];
+
+
+  state.captains =
+    Array.isArray(
+      data.captains
+    )
+      ? data.captains
+      : [];
+
+
+  state.questions =
+    sortQuestions(
+
+      Array.isArray(
+        data.questions
+      )
+
+        ? data.questions
+            .map(
+              normalizeQuestion
+            )
+            .filter(Boolean)
+
+        : []
+    );
+
+
+  /*
+    Сначала берём значение backend,
+    если оно есть.
+
+    Затем loadQuestionResults()
+    пересчитает его по уникальным
+    командам.
+  */
+
+  state.answeredTeams =
+    num(
+      first(
+        data.answeredTeams,
+        data.answeredTeamCount,
+        0
+      )
+    );
+
+
+  const directQuestion =
+    data.currentQuestion ||
+    data.question ||
+    null;
+
+
+  const idFromStep =
+    extractQuestionId(
+      state.currentStep
+    );
+
+
+  if(directQuestion){
+
+    state.question =
+      normalizeQuestion(
+        directQuestion
+      );
+
+
+    saveLastQuestion(
+      state.question
+    );
+  }
+
+  else if(idFromStep){
+
+    state.question =
+      state.questions.find(
+        q =>
+          num(q.id) ===
+          idFromStep
+      ) || null;
+
+
+    if(state.question){
+
+      saveLastQuestion(
+        state.question
+      );
+    }
+  }
+
+  else if(
+
+    state.phase ===
+      "questionClosed" ||
+
+    state.phase ===
+      "revealQueue" ||
+
+    state.phase ===
+      "roundReview"
+
+  ){
+
+    /*
+      Backend может отдавать просто:
+
+        question_closed
+        reveal
+
+      без ID.
+
+      Поэтому используем последний
+      известный вопрос.
+    */
+
+    state.question =
+      loadLastQuestion();
+  }
+
+  else{
+
+    state.question =
+      null;
+  }
+
+
+  state.connected =
+    true;
+
+  state.error =
+    "";
+
+  state.lastUpdatedAt =
+    Date.now();
+}
+
+
+/* =========================================================
+   COUNT UNIQUE ANSWERED TEAMS
+========================================================= */
+
+function getResponseTeamKey(
+  response
+){
+
+  /*
+    Основной вариант —
+    TeamId.
+
+    Backend должен возвращать
+    teamId в /results/question_X.
+  */
+
+  const teamId =
+    num(
+      first(
+        response?.teamId,
+        response?.TeamId,
+        0
+      )
+    );
+
+
+  if(teamId > 0){
+
+    return `team:${teamId}`;
+  }
+
+
+  /*
+    Запасной вариант.
+
+    Если backend временно не вернул
+    teamId, используем teamName.
+
+    Это нужно именно для счётчика,
+    чтобы один и тот же капитан
+    не считался дважды.
+  */
+
+  const teamName =
+    String(
+      first(
+        response?.teamName,
+        response?.TeamName,
+        ""
+      )
+    ).trim();
+
+
+  if(teamName){
+
+    return `name:${teamName.toLowerCase()}`;
+  }
+
+
+  return null;
+}
+
+
+function countUniqueAnsweredTeams(
+  responses
+){
+
+  if(
+    !Array.isArray(responses)
+  ){
+
+    return 0;
+  }
+
+
+  const keys =
+    new Set();
+
+
+  for(
+    const response of responses
+  ){
+
+    const key =
+      getResponseTeamKey(
+        response
+      );
+
+
+    if(key){
+
+      keys.add(key);
+    }
+  }
+
+
+  return keys.size;
+}
+
+
+/* =========================================================
+   QUESTION RESULTS
+========================================================= */
+
+async function loadQuestionResults(){
+
+  if(
+    !state.gameId ||
+    !state.question
+  ){
+
+    state.questionResults = [];
+    return;
+  }
+
+
+  try{
+
+    const data =
+      await api.questionResults(
+        state.gameId,
+
+        `question_${state.question.id}`
+      );
+
+
+    state.questionResults =
+      Array.isArray(
+        data?.responses
+      )
+        ? data.responses
+        : [];
+
+
+    /*
+      ВОТ ЗДЕСЬ ИСПРАВЛЕН СЧЁТЧИК.
+
+      Не количество капитанов.
+      Не количество HTTP-запросов.
+      Не количество записей.
+
+      А количество УНИКАЛЬНЫХ КОМАНД.
+    */
+
+    const calculated =
+      countUniqueAnsweredTeams(
+        state.questionResults
+      );
+
+
+    /*
+      Если backend прислал своё значение,
+      берём максимум.
+
+      Это защищает от ситуации, когда
+      results endpoint обновился чуть позже.
+    */
+
+    state.answeredTeams =
+      Math.max(
+        calculated,
+        num(
+          state.answeredTeams
+        )
+      );
+
+  }
+  catch(error){
+
+    /*
+      Ошибка получения результатов
+      не должна ломать экран ведущего.
+    */
+
+    console.warn(
+      "BeerJa: не удалось получить результаты вопроса",
+      error
+    );
+
+    state.questionResults =
+      [];
+  }
+}
+
+
+/* =========================================================
+   ROUND RESULTS
+========================================================= */
+
+async function buildRoundResults(){
+
+  const q =
+    state.question;
+
+
+  if(!q)
+    return;
+
+
+  const roundQuestions =
+    getQuestionsForRound(
+      q.roundNumber
+    );
+
+
+  const map =
+    new Map();
+
+
+  /*
+    Сначала создаём строку для каждой команды.
+  */
+
+  for(
+    const team of state.teams
+  ){
+
+    const teamId =
+      num(team.id);
+
+
+    if(!teamId)
+      continue;
+
+
+    map.set(
+      teamId,
+      {
+
+        teamId,
+
+        teamName:
+          team.name ||
+          "Команда",
+
+        roundScore:
+          0,
+
+        totalScore:
+          num(
+            first(
+              team.score,
+              team.totalScore,
+              0
+            )
+          ),
+
+        correctAnswers:
+          0,
+
+        questionsCount:
+          roundQuestions.length
+      }
+    );
+  }
+
+
+  /*
+    Считаем правильные ответы
+    по каждому вопросу раунда.
+  */
+
+  for(
+    const question of roundQuestions
+  ){
+
+    try{
+
+      const data =
+        await api.questionResults(
+          state.gameId,
+
+          `question_${question.id}`
+        );
+
+
+      const responses =
+        Array.isArray(
+          data?.responses
+        )
+          ? data.responses
+          : [];
+
+
+      /*
+        Одна команда должна дать
+        максимум один результат
+        на один вопрос.
+
+        Поэтому seenTeams.
+      */
+
+      const seenTeams =
+        new Set();
+
+
+      for(
+        const response of responses
+      ){
+
+        const teamId =
+          num(
+            first(
+              response.teamId,
+              response.TeamId,
+              0
+            )
+          );
+
+
+        if(
+          !teamId ||
+          seenTeams.has(teamId)
+        ){
+
+          continue;
+        }
+
+
+        seenTeams.add(teamId);
+
+
+        if(
+          response.isCorrect === true ||
+          response.IsCorrect === true
+        ){
+
+          const row =
+            map.get(teamId);
+
+
+          if(row){
+
+            row.roundScore += 1;
+
+            row.correctAnswers += 1;
+          }
+        }
+      }
+
+    }
+    catch(error){
+
+      console.warn(
+        "BeerJa: ошибка результатов вопроса",
+        question.id,
+        error
+      );
+    }
+  }
+
+
+  /*
+    Обновляем общий счёт.
+  */
+
+  for(
+    const team of state.teams
+  ){
+
+    const row =
+      map.get(
+        num(team.id)
+      );
+
+
+    if(row){
+
+      row.totalScore =
+        num(
+          first(
+            team.score,
+            team.totalScore,
+            row.totalScore
+          )
+        );
+    }
+  }
+
+
+  state.roundResults =
+    [...map.values()]
+      .sort(
+        (a,b) =>
+
+          b.roundScore -
+          a.roundScore
+
+          ||
+
+          b.totalScore -
+          a.totalScore
+
+          ||
+
+          a.teamName.localeCompare(
+            b.teamName,
+            "ru"
+          )
+      );
+}
+
+
+/* =========================================================
+   FINAL RESULTS
+========================================================= */
+
+async function loadFinalResults(){
+
+  if(!state.gameId)
+    return;
+
+
+  try{
+
+    const data =
+      await api.finalResults(
+        state.gameId
+      );
+
+
+    state.finalResults =
+      Array.isArray(
+        data?.results
+      )
+        ? data.results
+        : [];
+
+  }
+  catch(error){
+
+    console.warn(
+      "BeerJa: не удалось получить финальные результаты",
+      error
+    );
+
+    state.finalResults =
+      [];
+  }
+}
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+async function refresh(){
+
+  if(!state.gameId){
+
+    state.connected =
+      false;
+
+    state.error =
+      "В URL не указан gameId.";
+
+    render();
+
+    return;
+  }
+
+
+  if(refreshInProgress)
+    return;
+
+
+  refreshInProgress =
+    true;
+
+
+  try{
+
+    const data =
+      await api.hostState(
+        state.gameId
+      );
+
+
+    applyServerState(
+      data
+    );
+
+
+    /*
+      roundReview — локальный экран.
+
+      Backend в это время может оставаться
+      на reveal.
+
+      Поэтому НЕ сбрасываем roundReview,
+      пока сервер всё ещё на reveal.
+    */
+
+    if(
+
+      state.phase ===
+        "revealQueue" &&
+
+      state.roundReview
+
+    ){
+
+      /*
+        Ничего не делаем.
+      */
+
+    }
+
+    else if(
+
+      state.phase !==
+        "roundReview"
+
+    ){
+
+      state.roundReview =
+        false;
+    }
+
+
+    /*
+      Результаты нужны не только на reveal.
+
+      Именно это позволяет ведущему видеть:
+
+        Ответили: 0
+
+      потом:
+
+        Ответили: 1
+
+      потом:
+
+        Ответили: 2
+
+      и т.д.
+
+      прямо во время questionOpen.
+    */
+
+    if(
+
+      state.phase ===
+        "questionOpen" ||
+
+      state.phase ===
+        "questionClosed" ||
+
+      state.phase ===
+        "revealQueue"
+
+    ){
+
+      await loadQuestionResults();
+    }
+
+
+    if(
+      state.phase ===
+      "final"
+    ){
+
+      await loadFinalResults();
+    }
+
+
+    render();
+
+  }
+  catch(error){
+
+    state.connected =
+      false;
+
+    state.error =
+      error?.message ||
+      "Не удалось получить состояние игры.";
+
+    render();
+
+  }
+  finally{
+
+    refreshInProgress =
+      false;
+  }
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(
+  message
+){
+
+  state.toast =
+    String(
+      message || ""
+    );
+
+
+  render();
+
+
+  clearTimeout(
+    toastTimer
+  );
+
+
+
+  toastTimer =
+    setTimeout(
+      () => {
+
+        state.toast =
+          "";
+
+        render();
+
+      },
+      2500
+    );
+}
+
+
+/* =========================================================
+   AFTER REVEAL
+========================================================= */
+
+async function continueAfterReveal(){
+
+  const q =
+    state.question;
+
+
+  if(!q){
+
+    showToast(
+      "Текущий вопрос не определён."
+    );
+
+    return;
+  }
+
+
+  /*
+    Последний вопрос раунда.
+
+    Не отправляем next_question.
+
+    Просто строим локальные итоги.
+  */
+
+  if(
+    isLastQuestionOfRound(q)
+  ){
+
+    state.loading =
+      true;
+
+    render();
+
+
+    try{
+
+      await buildRoundResults();
+
+
+      state.roundReview =
+        true;
+
+
+      showToast(
+        `Раунд ${q.roundNumber} завершён`
+      );
+
+    }
+    catch(error){
+
+      state.error =
+        error?.message ||
+        "Не удалось построить итоги раунда.";
+
+    }
+    finally{
+
+      state.loading =
+        false;
+
+      render();
+    }
+
+
+    return;
+  }
+
+
+  /*
+    Обычный переход
+    к следующему вопросу.
+  */
+
+  const next =
+    getNextQuestion(
+      q.id
+    );
+
+
+  if(!next){
+
+    await sendCommand(
+      "finish"
+    );
+
+    return;
+  }
+
+
+  await sendCommand(
+    "open_question",
+    {
+      QuestionId:
+        String(next.id)
+    }
+  );
+}
+
+
+/* =========================================================
+   AFTER ROUND
+========================================================= */
+
+async function continueAfterRound(){
+
+  const q =
+    state.question;
+
+
+  if(!q){
+
+    showToast(
+      "Не удалось определить завершённый раунд."
+    );
+
+    return;
+  }
+
+
+  const next =
+    getNextQuestion(
+      q.id
+    );
+
+
+  /*
+    Вопросов больше нет.
+
+    Значит это был последний раунд.
+  */
+
+  if(!next){
+
+    state.roundReview =
+      false;
+
+    await sendCommand(
+      "finish"
+    );
+
+    return;
+  }
+
+
+  state.roundReview =
+    false;
+
+  state.roundResults =
+    [];
+
+
+  /*
+    Открываем конкретный следующий
+    вопрос из GameQuestions.
+  */
+
+  await sendCommand(
+    "open_question",
+    {
+      QuestionId:
+        String(next.id)
+    }
+  );
+}
+
+
+/* =========================================================
+   SEND COMMAND
+========================================================= */
+
+async function sendCommand(
+  action,
+  extra = {}
+){
+
+  if(
+    !state.gameId ||
+    !action
+  ){
+
+    return;
+  }
+
+
+  if(state.loading)
+    return;
+
+
+  state.loading =
+    true;
+
+  state.error =
+    "";
+
+  render();
+
+
+  try{
+
+    const result =
+      await api.command(
+        state.gameId,
+        action,
+        extra
+      );
+
+
+    await refresh();
+
+
+    showToast(
+      result?.message ||
+      "Команда выполнена"
+    );
+
+  }
+  catch(error){
+
+    state.error =
+      error?.message ||
+      "Команда не выполнена.";
+
+
+    showToast(
+      state.error
+    );
+
+  }
+  finally{
+
+    state.loading =
+      false;
+
+    render();
+  }
+}
+
+
+/* =========================================================
+   METRICS
+========================================================= */
+
+function renderMetrics(){
+
+  const q =
+    state.question;
+
+
+  const roundQuestions =
+    q
+      ? getQuestionsForRound(
+          q.roundNumber
+        )
+      : [];
+
+
+  const localQuestionNumber =
+    q
+
+      ? Math.max(
+          1,
+
+          roundQuestions.findIndex(
+            x =>
+              num(x.id) ===
+              num(q.id)
+          ) + 1
+        )
+
+      : "—";
+
+
+  const round =
+    q?.roundNumber ||
+    "—";
+
+
+  const rounds =
+    totalRounds() ||
+    "—";
+
+
+  return `
+
+    <div class="metrics">
+
+      <div class="metric">
+
+        <strong>
+          ${esc(localQuestionNumber)}
+          ${
+            roundQuestions.length
+              ? ` / ${roundQuestions.length}`
+              : ""
+          }
+        </strong>
+
+        <span>
+          вопрос в раунде
+        </span>
+
+      </div>
+
+
+      <div class="metric">
+
+        <strong>
+          ${esc(round)}
+          ${
+            rounds !== "—"
+              ? ` / ${rounds}`
+              : ""
+          }
+        </strong>
+
+        <span>
+          раунд
+        </span>
+
+      </div>
+
+
+      <div class="metric">
+
+        <strong>
+          ${state.teams.length}
+        </strong>
+
+        <span>
+          команд
+        </span>
+
+      </div>
+
+
+      <div class="metric">
+
+        <strong>
+          ${state.players.length}
+        </strong>
+
+        <span>
+          игроков
+        </span>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   TEAMS
+========================================================= */
+
+function renderTeams(){
+
+  if(
+    !state.teams.length
+  ){
+
+    return `
+
+      <div class="empty">
+
+        <strong>
+          Команды пока не подключились
+        </strong>
+
+        <span>
+          Ждём игроков.
+        </span>
+
+      </div>
+
+    `;
+  }
+
+
+  return `
+
+    <div class="teams">
+
+      ${
+        state.teams
+          .map(
+            team => `
+
+              <div class="team">
+
+                <div class="team-name">
+
+                  <strong>
+                    ${esc(
+                      team.name ||
+                      "Команда"
+                    )}
+                  </strong>
+
+                  <span>
+
+                    ${
+                      num(
+                        team.connected
+                      )
+                    }
+
+                    /
+
+                    ${
+                      num(
+                        team.capacity
+                      )
+                    }
+
+                    участников
+
+                    ·
+
+                    ${
+                      team.captainId
+                        ? "капитан выбран"
+                        : "капитан не выбран"
+                    }
+
+                  </span>
+
+                </div>
+
+
+                <div class="score">
+
+                  ${
+                    num(
+                      first(
+                        team.score,
+                        team.totalScore,
+                        0
+                      )
+                    )
+                  }
+
+                </div>
+
+              </div>
+
+            `
+          )
+          .join("")
+      }
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   CAPTAINS
+========================================================= */
+
+function renderCaptains(){
+
+  if(
+    !state.captains.length
+  ){
+
+    return `
+
+      <div class="empty">
+
+        <strong>
+          Капитаны ещё не определены
+        </strong>
+
+        <span>
+          Проверьте выбор капитанов в лобби.
+        </span>
+
+      </div>
+
+    `;
+  }
+
+
+  return `
+
+    <div class="results">
+
+      ${
+        state.captains
+          .map(
+            c => `
+
+              <div class="result">
+
+                <div class="rank">
+                  ✓
+                </div>
+
+                <div class="result-name">
+
+                  <strong>
+                    ${esc(
+                      c.teamName ||
+                      "Команда"
+                    )}
+                  </strong>
+
+                  <span>
+
+                    капитан:
+
+                    ${esc(
+                      c.captainUsername ||
+                      "—"
+                    )}
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            `
+          )
+          .join("")
+      }
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   QUESTION TIMER
+========================================================= */
+
+let questionTimerInterval = null;
+let questionTimerStartedFor = null;
+let questionTimerLeft = null;
+
+function syncQuestionTimer(){
+
+  const q = state.question;
+
+  if(
+    !q ||
+    num(q.timerSeconds) <= 0 ||
+    state.phase !== "questionOpen"
+  ){
+
+    questionTimerLeft = q ? num(q.timerSeconds) : null;
+
+    if(questionTimerInterval){
+      clearInterval(questionTimerInterval);
+      questionTimerInterval = null;
+    }
+
+    questionTimerStartedFor = null;
+    return;
+  }
+
+  const key = `question:${q.id}`;
+
+  if(questionTimerStartedFor !== key){
+
+    questionTimerStartedFor = key;
+
+    const storageKey =
+      `beerja_host_question_started_${state.gameId}_${q.id}`;
+
+    const stored =
+      Number(
+        sessionStorage.getItem(storageKey) || 0
+      );
+
+    const startedAt =
+      stored > 0
+        ? stored
+        : Date.now();
+
+    if(!stored){
+      sessionStorage.setItem(
+        storageKey,
+        String(startedAt)
+      );
+    }
+
+    const tick = () => {
+
+      const elapsed =
+        Math.floor(
+          (Date.now() - startedAt) / 1000
+        );
+
+      questionTimerLeft =
+        Math.max(
+          0,
+          num(q.timerSeconds) - elapsed
+        );
+
+      const timerEl =
+        document.getElementById(
+          "hostQuestionTimer"
+        );
+
+      if(timerEl){
+        timerEl.textContent =
+          `${questionTimerLeft}с`;
+      }
+
+      if(
+        questionTimerLeft <= 0 &&
+        questionTimerInterval
+      ){
+        clearInterval(
+          questionTimerInterval
+        );
+
+        questionTimerInterval =
+          null;
+      }
+    };
+
+    tick();
+
+    if(questionTimerInterval){
+      clearInterval(
+        questionTimerInterval
+      );
+    }
+
+    questionTimerInterval =
+      setInterval(
+        tick,
+        250
+      );
+  }
+}
+
+
+/* =========================================================
+   MEDIA (изображение / аудио / видео к вопросу)
+========================================================= */
+
+function renderQuestionMedia(q){
+
+  if(!q)
+    return "";
+
+  const blocks = [];
+
+  if(q.imageUrl){
+
+    blocks.push(`
+      <div class="media">
+        <img src="${esc(q.imageUrl)}" alt="Изображение к вопросу">
+      </div>
+    `);
+  }
+
+  if(q.audioUrl){
+
+    blocks.push(`
+      <div class="media">
+        <audio controls preload="metadata" src="${esc(q.audioUrl)}"></audio>
+      </div>
+    `);
+  }
+
+  if(q.videoUrl){
+
+    blocks.push(`
+      <div class="media">
+        <video controls preload="metadata" playsinline src="${esc(q.videoUrl)}"></video>
+      </div>
+    `);
+  }
+
+  if(!blocks.length)
+    return "";
+
+  return `
+    <div class="media-block">
+      <div class="media-label">
+        <span class="media-icon">▶</span>
+        <span>Медиа к вопросу</span>
+      </div>
+      ${blocks.join("")}
+    </div>
+  `;
+}
+
+
+/* =========================================================
+   QUESTION
+========================================================= */
+
+function renderQuestion(){
+
+  const q =
+    state.question;
+
+
+  if(!q){
+
+    return `
+
+      <div class="empty">
+
+        <strong>
+          Текущий вопрос не найден
+        </strong>
+
+        <span>
+          Сервер ещё не сообщил активный вопрос.
+        </span>
+
+      </div>
+
+    `;
+  }
+
+
+  /*
+    Правильный ответ показываем
+    только на reveal.
+  */
+
+  const reveal =
+    state.phase ===
+    "revealQueue";
+
+
+  return `
+
+    <section class="question">
+
+      <div class="badges">
+
+        <span class="badge">
+
+          РАУНД
+          ${q.roundNumber}
+
+        </span>
+
+
+        <span class="badge">
+
+          ВОПРОС
+          ${q.stepOrder}
+
+        </span>
+
+
+        <span class="badge">
+
+          ID
+          ${q.id}
+
+        </span>
+
+        ${
+          num(q.timerSeconds) > 0
+            ? `<span class="badge">⏱ <span id="hostQuestionTimer">${esc(
+                state.phase === "questionOpen"
+                  ? (questionTimerLeft ?? q.timerSeconds)
+                  : q.timerSeconds
+              )}с</span></span>`
+            : ""
+        }
+
+      </div>
+
+
+      <div class="qtext">
+
+        ${esc(
+          q.questionText
+        )}
+
+      </div>
+
+
+      ${renderQuestionMedia(q)}
+
+
+      ${
+        q.options.length
+
+          ? `
+
+            <div class="options">
+
+              ${
+                q.options
+
+                  .map(
+                    (
+                      option,
+                      index
+                    ) => {
+
+                      const correct =
+
+                        reveal &&
+
+                        q.correctOption !==
+                          null &&
+
+                        q.correctOption ===
+                          index;
+
+
+                      return `
+
+                        <div
+                          class="option"
+
+                          ${
+                            correct
+
+                              ? `
+                                style="
+                                  border:2px solid var(--signal);
+                                  background:rgba(201,255,71,.10)
+                                "
+                              `
+
+                              : ""
+                          }
+                        >
+
+                          <div class="option-num">
+
+                            ${
+                              index + 1
+                            }
+
+                          </div>
+
+
+                          <strong>
+
+                            ${esc(
+                              option
+                            )}
+
+                          </strong>
+
+
+                          ${
+                            correct
+
+                              ? `
+
+                                <b
+                                  style="
+                                    margin-left:auto;
+                                    color:var(--signal)
+                                  "
+                                >
+                                  ✓
+                                </b>
+
+                              `
+
+                              : ""
+                          }
+
+                        </div>
+
+                      `;
+                    }
+                  )
+
+                  .join("")
+              }
+
+            </div>
+
+          `
+
+          : ""
+      }
+
+
+      ${
+        reveal &&
+        q.correctOption !== null
+
+          ? `
+
+            <div class="correct">
+
+              Правильный ответ:
+
+              №${q.correctOption + 1}
+
+            </div>
+
+          `
+
+          : ""
+      }
+
+    </section>
+
+  `;
+}
+
+
+/* =========================================================
+   QUESTION RESPONSES
+========================================================= */
+
+function renderQuestionResponses(){
+
+  if(
+    state.phase !==
+    "revealQueue"
+  ){
+
+    return "";
+  }
+
+
+  const rows =
+    [...state.questionResults];
+
+
+  if(!rows.length){
+
+    return `
+
+      <section class="panel">
+
+        <div class="panel-head">
+
+          <strong>
+            Ответы команд
+          </strong>
+
+          <span>
+            0 команд
+          </span>
+
+        </div>
+
+
+        <div class="empty">
+
+          <strong>
+            Ответов нет
+          </strong>
+
+          <span>
+            Ни одна команда не отправила
+            ответ на этот вопрос.
+          </span>
+
+        </div>
+
+      </section>
+
+    `;
+  }
+
+
+  rows.sort(
+    (a,b) =>
+
+      num(
+        first(
+          a.teamId,
+          a.TeamId,
+          0
+        )
+      ) -
+
+      num(
+        first(
+          b.teamId,
+          b.TeamId,
+          0
+        )
+      )
+  );
+
+
+  return `
+
+    <section class="panel">
+
+      <div class="panel-head">
+
+        <strong>
+          Ответы команд
+        </strong>
+
+        <span>
+
+          ${state.answeredTeams}
+
+          команд
+
+        </span>
+
+      </div>
+
+
+      <div class="response-grid">
+
+        ${
+          rows
+            .map(
+              r => {
+
+                const correct =
+                  r.isCorrect === true ||
+                  r.IsCorrect === true;
+
+
+                return `
+
+                  <div
+                    class="
+                      response
+                      ${
+                        correct
+                          ? "ok"
+                          : "bad"
+                      }
+                    "
+                  >
+
+                    <div>
+
+                      <strong>
+
+                        ${esc(
+                          first(
+                            r.teamName,
+                            r.TeamName,
+                            "Команда"
+                          )
+                        )}
+
+                      </strong>
+
+
+                      <div
+                        style="
+                          color:var(--fog);
+                          font-size:12px;
+                          margin-top:3px
+                        "
+                      >
+
+                        ${esc(
+                          first(
+                            r.username,
+                            r.Username,
+                            "капитан"
+                          )
+                        )}
+
+                      </div>
+
+                    </div>
+
+
+                    <b>
+
+                      ${
+                        correct
+                          ? "✓ +1"
+                          : "✕ 0"
+                      }
+
+                    </b>
+
+                  </div>
+
+                `;
+              }
+            )
+            .join("")
+        }
+
+      </div>
+
+    </section>
+
+  `;
+}
+
+
+/* =========================================================
+   ROUND RESULTS
+========================================================= */
+
+function renderRoundResults(){
+
+  if(
+    !state.roundResults.length
+  ){
+
+    return `
+
+      <div class="empty">
+
+        <strong>
+          Итоги раунда пока пусты
+        </strong>
+
+        <span>
+          Не удалось получить ответы команд.
+        </span>
+
+      </div>
+
+    `;
+  }
+
+
+  return `
+
+    <div class="results">
+
+      ${
+        state.roundResults
+
+          .map(
+            (
+              row,
+              index
+            ) => `
+
+              <div
+                class="
+                  result
+                  ${
+                    index === 0
+                      ? "gold"
+                      : ""
+                  }
+                "
+              >
+
+                <div class="rank">
+
+                  #${index + 1}
+
+                </div>
+
+
+                <div class="result-name">
+
+                  <strong>
+
+                    ${esc(
+                      row.teamName
+                    )}
+
+                  </strong>
+
+
+                  <span>
+
+                    ${
+                      row.correctAnswers
+                    }
+
+                    /
+
+                    ${
+                      row.questionsCount
+                    }
+
+                    правильных
+
+                    · всего
+
+                    ${
+                      row.totalScore
+                    }
+
+                  </span>
+
+                </div>
+
+
+                <div class="result-score">
+
+                  +${row.roundScore}
+
+                </div>
+
+              </div>
+
+            `
+          )
+
+          .join("")
+      }
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   FINAL
+========================================================= */
+
+function renderFinalResults(){
+
+  const rows =
+
+    state.finalResults.length
+
+      ? state.finalResults.map(
+          x => ({
+
+            teamName:
+              first(
+                x.teamName,
+                x.name,
+                "Команда"
+              ),
+
+            score:
+              num(
+                first(
+                  x.score,
+                  x.totalScore,
+                  0
+                )
+              ),
+
+            answeredQuestions:
+              num(
+                first(
+                  x.answeredQuestions,
+                  x.questionsAnswered,
+                  0
+                )
+              )
+
+          })
+        )
+
+      : state.teams.map(
+          x => ({
+
+            teamName:
+              x.name ||
+              "Команда",
+
+            score:
+              num(
+                first(
+                  x.score,
+                  x.totalScore,
+                  0
+                )
+              ),
+
+            answeredQuestions:
+              0
+
+          })
+        );
+
+
+  rows.sort(
+    (a,b) =>
+
+      b.score -
+      a.score
+
+      ||
+
+      b.answeredQuestions -
+      a.answeredQuestions
+
+      ||
+
+      a.teamName.localeCompare(
+        b.teamName,
+        "ru"
+      )
+  );
+
+
+  if(!rows.length){
+
+    return `
+
+      <div class="empty">
+
+        <strong>
+          Нет итоговых данных
+        </strong>
+
+        <span>
+          Сервер не вернул финальную таблицу.
+        </span>
+
+      </div>
+
+    `;
+  }
+
+
+  return `
+
+    <div class="results">
+
+      ${
+        rows
+          .map(
+            (
+              row,
+              index
+            ) => `
+
+              <div
+                class="
+                  result
+                  ${
+                    index === 0
+                      ? "gold"
+                      : ""
+                  }
+                "
+              >
+
+                <div class="rank">
+
+                  #${index + 1}
+
+                </div>
+
+
+                <div class="result-name">
+
+                  <strong>
+
+                    ${esc(
+                      row.teamName
+                    )}
+
+                  </strong>
+
+
+                  <span>
+
+                    ${
+                      row.answeredQuestions
+                    }
+
+                    отвеченных вопросов
+
+                  </span>
+
+                </div>
+
+
+                <div class="result-score">
+
+                  ${row.score}
+
+                </div>
+
+              </div>
+
+            `
+          )
+          .join("")
+      }
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+function renderMain(){
+
+  if(!state.gameId){
+
+    return `
+
+      <section class="panel">
+
+        <div class="empty">
+
+          <strong>
+            Нет gameId
+          </strong>
+
+          <span>
+            Откройте
+            Quiz-host.html?gameId=74
+          </span>
+
+        </div>
+
+      </section>
+
+    `;
+  }
+
+
+  /*
+    Итоги раунда имеют приоритет
+    над серверным reveal.
+  */
+
+  if(state.roundReview){
+
+    const q =
+      state.question;
+
+
+    return `
+
+      <section class="panel">
+
+        <div class="panel-head">
+
+          <strong>
+            Итоги раунда
+          </strong>
+
+          <span>
+
+            Раунд
+
+            ${
+              esc(
+                q?.roundNumber ||
+                "—"
+              )
+            }
+
+          </span>
+
+        </div>
+
+
+        <div class="info">
+
+          <div class="info-row">
+
+            <div>
+
+              <strong>
+                Раунд завершён
+              </strong>
+
+              <span>
+                Все вопросы этого
+                раунда обработаны.
+              </span>
+
+            </div>
+
+
+            <b>
+
+              ${
+                getQuestionsForRound(
+                  q?.roundNumber || 0
+                ).length
+              }
+
+            </b>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="panel"
+          style="margin-top:14px"
+        >
+
+          <div class="panel-head">
+
+            <strong>
+              Баллы команд
+            </strong>
+
+            <span>
+              за раунд · всего
+            </span>
+
+          </div>
+
+
+          ${renderRoundResults()}
+
+        </div>
+
+      </section>
+
+    `;
+  }
+
+
+  switch(state.phase){
+
+    /* =====================================================
+       LOBBY
+    ===================================================== */
+
+    case "lobby":
+
+      return `
+
+        <section class="panel">
+
+          <div class="panel-head">
+
+            <strong>
+              Лобби
+            </strong>
+
+            <span>
+
+              комната
+
+              ${esc(
+                state.roomCode ||
+                "—"
+              )}
+
+            </span>
+
+          </div>
+
+
+          ${renderTeams()}
+
+
+          <div
+            class="panel"
+            style="margin-top:14px"
+          >
+
+            <div class="panel-head">
+
+              <strong>
+                Капитаны
+              </strong>
+
+              <span>
+                ${state.captains.length}
+              </span>
+
+            </div>
+
+
+            ${renderCaptains()}
+
+          </div>
+
+        </section>
+
+      `;
+
+
+    /* =====================================================
+       QUESTION OPEN
+    ===================================================== */
+
+    case "questionOpen":
+
+      return `
+
+        ${renderQuestion()}
+
+
+        <section class="panel">
+
+          <div class="panel-head">
+
+            <strong>
+              Приём ответов
+            </strong>
+
+
+            <span class="answer-count">
+
+              <span
+                class="answer-count-dot"
+              ></span>
+
+              ${state.answeredTeams}
+              ${
+                state.answeredTeams === 1
+                  ? "команда"
+                  : state.answeredTeams >= 2 &&
+                    state.answeredTeams <= 4
+                      ? "команды"
+                      : "команд"
+              }
+
+            </span>
+
+          </div>
+
+
+          <div class="info">
+
+            <div class="info-row">
+
+              <div>
+
+                <strong>
+                  Ответили
+                </strong>
+
+                <span>
+                  уникальных команд
+                </span>
+
+              </div>
+
+
+              <b>
+
+                ${state.answeredTeams}
+
+                /
+
+                ${state.teams.length}
+
+              </b>
+
+            </div>
+
+
+            <div class="info-row">
+
+              <div>
+
+                <strong>
+                  Раунд
+                </strong>
+
+                <span>
+                  текущий
+                </span>
+
+              </div>
+
+
+              <b>
+
+                ${
+                  state.question?.roundNumber ||
+                  "—"
+                }
+
+              </b>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      `;
+
+
+    /* =====================================================
+       QUESTION CLOSED
+    ===================================================== */
+
+    case "questionClosed":
+
+      return `
+
+        ${renderQuestion()}
+
+
+        <section class="panel">
+
+          <div class="panel-head">
+
+            <strong>
+              Ответы закрыты
+            </strong>
+
+            <span>
+              готово к разбору
+            </span>
+
+          </div>
+
+
+          <div class="info">
+
+            <div class="info-row">
+
+              <div>
+
+                <strong>
+                  Ответили
+                </strong>
+
+                <span>
+                  уникальных команд
+                </span>
+
+              </div>
+
+
+              <b>
+
+                ${state.answeredTeams}
+
+                /
+
+                ${state.teams.length}
+
+              </b>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      `;
+
+
+    /* =====================================================
+       REVEAL
+    ===================================================== */
+
+    case "revealQueue":
+
+      return `
+
+        ${renderQuestion()}
+
+        ${renderQuestionResponses()}
+
+      `;
+
+
+    /* =====================================================
+       FINAL
+    ===================================================== */
+
+    case "final":
+
+      return `
+
+        <section class="panel">
+
+          <div class="panel-head">
+
+            <strong>
+              Игра завершена
+            </strong>
+
+            <span>
+              финал
+            </span>
+
+          </div>
+
+
+          ${renderFinalResults()}
+
+        </section>
+
+      `;
+
+
+    default:
+
+      return `
+
+        <section class="panel">
+
+          <div class="empty">
+
+            <strong>
+
+              ${esc(
+                state.currentStep ||
+                "unknown"
+              )}
+
+            </strong>
+
+            <span>
+
+              Сервер вернул
+              неизвестный этап.
+
+            </span>
+
+          </div>
+
+        </section>
+
+      `;
+  }
+}
+
+
+/* =========================================================
+   CONTROL
+========================================================= */
+
+function getControl(){
+
+  if(!state.gameId){
+
+    return {
+
+      action:
+        null,
+
+      label:
+        "Нет игровой сессии",
+
+      type:
+        "secondary",
+
+      disabled:
+        true,
+
+      hint:
+        "Укажите gameId в URL."
+    };
+  }
+
+
+  if(state.roundReview){
+
+    return {
+
+      action:
+        "continue_round",
+
+      label:
+        "Следующий раунд",
+
+      type:
+        "primary",
+
+      disabled:
+        false,
+
+      hint:
+        "Откроется первый вопрос следующего раунда."
+    };
+  }
+
+
+  switch(state.phase){
+
+    case "lobby":
+
+      return {
+
+        action:
+          "start",
+
+        label:
+          "Начать игру",
+
+        type:
+          "primary",
+
+        disabled:
+          false,
+
+        hint:
+          "Откроется первый вопрос из GameQuestions."
+      };
+
+
+    case "questionOpen":
+
+      return {
+
+        action:
+          "close_question",
+
+        label:
+          "Закрыть ответы",
+
+        type:
+          "coral",
+
+        disabled:
+          false,
+
+        hint:
+          "Ответы текущего вопроса будут закрыты."
+      };
+
+
+    case "questionClosed":
+
+      return {
+
+        action:
+          "reveal",
+
+        label:
+          "Показать разбор",
+
+        type:
+          "purple",
+
+        disabled:
+          false,
+
+        hint:
+          "Покажем правильный вариант и результаты команд."
+      };
+
+
+    case "revealQueue":
+
+      return {
+
+        action:
+          "continue",
+
+        label:
+
+          isLastQuestionOfRound(
+            state.question
+          )
+
+            ? "Показать итоги раунда"
+
+            : "Следующий вопрос",
+
+        type:
+          "primary",
+
+        disabled:
+          false,
+
+        hint:
+
+          isLastQuestionOfRound(
+            state.question
+          )
+
+            ? "После последнего вопроса появятся итоги раунда."
+
+            : "Откроется следующий вопрос."
+      };
+
+
+    case "final":
+
+      return {
+
+        action:
+          null,
+
+        label:
+          "Игра завершена",
+
+        type:
+          "secondary",
+
+        disabled:
+          true,
+
+        hint:
+          "Все раунды завершены."
+      };
+
+
+    default:
+
+      return {
+
+        action:
+          null,
+
+        label:
+          "Ожидание сервера",
+
+        type:
+          "secondary",
+
+        disabled:
+          true,
+
+        hint:
+          "Неизвестный игровой этап."
+      };
+  }
+}
+
+
+/* =========================================================
+   CONTROLS UI
+========================================================= */
+
+function renderControls(){
+
+  const control =
+    getControl();
+
+
+  let status =
+    "ЛОББИ";
+
+
+  if(state.roundReview){
+
+    status =
+      "ИТОГИ РАУНДА";
+
+  }
+
+  else if(
+    state.phase ===
+    "questionOpen"
+  ){
+
+    status =
+      "ОТВЕТЫ ОТКРЫТЫ";
+
+  }
+
+  else if(
+    state.phase ===
+    "questionClosed"
+  ){
+
+    status =
+      "ОТВЕТЫ ЗАКРЫТЫ";
+
+  }
+
+  else if(
+    state.phase ===
+    "revealQueue"
+  ){
+
+    status =
+      "РАЗБОР";
+
+  }
+
+  else if(
+    state.phase ===
+    "final"
+  ){
+
+    status =
+      "ФИНИШ";
+  }
+
+
+  return `
+
+    <aside class="controls">
+
+      <div class="panel-head">
+
+        <strong>
+          Управление
+        </strong>
+
+        <span>
+
+          ${esc(
+            state.roomCode ||
+            "—"
+          )}
+
+        </span>
+
+      </div>
+
+
+      <div class="control-box">
+
+        <div class="control-label">
+          Состояние
+        </div>
+
+
+        <div class="big-state">
+
+          ${esc(status)}
+
+        </div>
+
+      </div>
+
+
+      <div class="control-box">
+
+        <div class="control-label">
+          Игра
+        </div>
+
+
+        <div
+          class="info"
+          style="margin-top:10px"
+        >
+
+          <div class="info-row">
+
+            <div>
+
+              <strong>
+                Game ID
+              </strong>
+
+              <span>
+                сессия
+              </span>
+
+            </div>
+
+            <b>
+              ${state.gameId}
+            </b>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <div>
+
+              <strong>
+                Event ID
+              </strong>
+
+              <span>
+                сценарий
+              </span>
+
+            </div>
+
+            <b>
+
+              ${
+                state.eventId ||
+                "—"
+              }
+
+            </b>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <div>
+
+              <strong>
+                Этап
+              </strong>
+
+              <span>
+                CurrentStep
+              </span>
+
+            </div>
+
+            <b>
+
+              ${esc(
+                state.currentStep
+              )}
+
+            </b>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <div>
+
+              <strong>
+                Раунд
+              </strong>
+
+              <span>
+                RoundNumber
+              </span>
+
+            </div>
+
+            <b>
+
+              ${
+                state.question?.roundNumber ||
+                "—"
+              }
+
+            </b>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <div>
+
+              <strong>
+                Вопрос
+              </strong>
+
+              <span>
+                StepOrder
+              </span>
+
+            </div>
+
+            <b>
+
+              ${
+                state.question?.stepOrder ||
+                "—"
+              }
+
+            </b>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <div>
+
+              <strong>
+                Ответили
+              </strong>
+
+              <span>
+                уникальных команд
+              </span>
+
+            </div>
+
+            <b>
+
+              ${state.answeredTeams}
+
+              /
+
+              ${state.teams.length}
+
+            </b>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="control-box">
+
+        <div class="control-label">
+          Соединение
+        </div>
+
+
+        <div
+          class="connection"
+          style="margin-top:10px"
+        >
+
+          <span
+            class="
+              connection-dot
+              ${
+                state.connected
+                  ? "ok"
+                  : ""
+              }
+            "
+          ></span>
+
+
+          <span>
+
+            ${
+              state.connected
+
+                ? "Сервер доступен"
+
+                : "Нет соединения"
+
+            }
+
+          </span>
+
+        </div>
+
+
+        ${
+          state.lastUpdatedAt
+
+            ? `
+
+              <div class="command-hint">
+
+                обновлено
+
+                ${
+                  new Date(
+                    state.lastUpdatedAt
+                  ).toLocaleTimeString(
+                    "ru-RU"
+                  )
+                }
+
+              </div>
+
+            `
+
+            : ""
+        }
+
+      </div>
+
+
+      <div class="actions">
+
+        ${
+          control.action
+
+            ? `
+
+              <button
+                class="
+                  btn
+                  ${control.type}
+                "
+
+                data-command="${esc(
+                  control.action
+                )}"
+
+                ${
+                  control.disabled ||
+                  state.loading
+
+                    ? "disabled"
+
+                    : ""
+                }
+              >
+
+                ${esc(
+                  control.label
+                )}
+
+              </button>
+
+            `
+
+            : `
+
+              <button
+                class="
+                  btn
+                  ${control.type}
+                "
+                disabled
+              >
+
+                ${esc(
+                  control.label
+                )}
+
+              </button>
+
+            `
+        }
+
+      </div>
+
+
+      <div class="command-hint">
+
+        ${esc(
+          control.hint
+        )}
+
+      </div>
+
+
+      ${
+        state.error
+
+          ? `
+
+            <div class="error">
+
+              ${esc(
+                state.error
+              )}
+
+            </div>
+
+          `
+
+          : ""
+      }
+
+    </aside>
+
+  `;
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function render(){
+
+  /*
+    Защита от:
+
+      Cannot set properties of null
+      (setting 'innerHTML')
+  */
+
+  if(!app){
+
+    console.error(
+      "BeerJa host: #app not found."
+    );
+
+    return;
+  }
+
+
+  let title =
+    "Пульт ведущего";
+
+
+  let kicker =
+    `Командный квиз · Game ID ${
+      state.gameId || "—"
+    }`;
+
+
+  let subtitle =
+    "Управление игровой сессией с сервера";
+
+
+  /* =======================================================
+     LOBBY
+  ======================================================= */
+
+  if(
+    state.phase ===
+    "lobby"
+  ){
+
+    title =
+      "Комната готова";
+
+
+    kicker =
+      `Комната ${
+        state.roomCode || "—"
+      }`;
+
+
+    subtitle =
+      "Игроки подключаются к игровой сессии.";
+  }
+
+
+  /* =======================================================
+     ROUND REVIEW
+  ======================================================= */
+
+  else if(
+    state.roundReview
+  ){
+
+    title =
+      "Итоги раунда";
+
+
+    kicker =
+      `Раунд ${
+        state.question?.roundNumber ||
+        "—"
+      } завершён`;
+
+
+    subtitle =
+      "Баллы за раунд и общий счёт команд.";
+  }
+
+
+  /* =======================================================
+     QUESTION OPEN
+  ======================================================= */
+
+  else if(
+    state.phase ===
+    "questionOpen"
+  ){
+
+    title =
+      state.question?.questionText ||
+      "Текущий вопрос";
+
+
+    kicker =
+      `Раунд ${
+        state.question?.roundNumber ||
+        "—"
+      } · вопрос ${
+        state.question?.stepOrder ||
+        "—"
+      }`;
+
+
+    subtitle =
+      "Ответы принимает сервер.";
+  }
+
+
+  /* =======================================================
+     QUESTION CLOSED
+  ======================================================= */
+
+  else if(
+    state.phase ===
+    "questionClosed"
+  ){
+
+    title =
+      "Ответы закрыты";
+
+
+    kicker =
+      `Раунд ${
+        state.question?.roundNumber ||
+        "—"
+      } · вопрос ${
+        state.question?.stepOrder ||
+        "—"
+      }`;
+
+
+    subtitle =
+      "Ответы сохранены. Готовим разбор.";
+  }
+
+
+  /* =======================================================
+     REVEAL
+  ======================================================= */
+
+  else if(
+    state.phase ===
+    "revealQueue"
+  ){
+
+    title =
+      "Разбор вопроса";
+
+
+    kicker =
+      `Раунд ${
+        state.question?.roundNumber ||
+        "—"
+      } · вопрос ${
+        state.question?.stepOrder ||
+        "—"
+      }`;
+
+
+    subtitle =
+      "Показываем правильный ответ и результаты команд.";
+  }
+
+
+  /* =======================================================
+     FINAL
+  ======================================================= */
+
+  else if(
+    state.phase ===
+    "final"
+  ){
+
+    title =
+      "Игра завершена";
+
+
+    kicker =
+      "Финал";
+
+
+    subtitle =
+      "Все раунды завершены. Итоговая таблица команд.";
+  }
+
+
+  const hero =
+
+    state.phase === "lobby"
+
+      ? assets.lobby
+
+      : state.phase === "final"
+
+        ? assets.final
+
+        : assets.question;
+
+
+  /*
+    ЕДИНСТВЕННАЯ точка записи
+    интерфейса в DOM.
+  */
+
+  app.innerHTML = `
+
+    <main
+      class="desk"
+
+      style="
+        --hero:url('${esc(hero)}')
+      "
+    >
+
+      <header class="top">
+
+        <div class="chip">
+
+          <span class="dot"></span>
+
+          <span>
+            Ведущий · LIVE
+          </span>
+
+        </div>
+
+
+        <div class="code">
+
+          ${esc(
+            state.roomCode ||
+            "—"
+          )}
+
+        </div>
+
+
+        <div class="timer-mini">
+
+          ${
+            state.phase ===
+            "questionOpen"
+
+              ? "●"
+
+              : "•"
+          }
+
+        </div>
+
+      </header>
+
+
+      <div class="content">
+
+        <section class="layout">
+
+          <div class="main">
+
+            <div class="kicker">
+
+              ${esc(kicker)}
+
+            </div>
+
+
+            <h1 class="title">
+
+              ${esc(title)}
+
+            </h1>
+
+
+            <p class="subtitle">
+
+              ${esc(subtitle)}
+
+            </p>
+
+
+            ${renderMetrics()}
+
+            ${renderMain()}
+
+          </div>
+
+
+          ${renderControls()}
+
+        </section>
+
+      </div>
+
+
+      ${
+        state.toast
+
+          ? `
+
+            <div class="toast">
+
+              ${esc(
+                state.toast
+              )}
+
+            </div>
+
+          `
+
+          : ""
+      }
+
+    </main>
+
+  `;
+
+  syncQuestionTimer();
+}
+
+
+/* =========================================================
+   CLICK HANDLER
+========================================================= */
+
+document.addEventListener(
+  "click",
+
+  async event => {
+
+    const button =
+      event.target.closest(
+        "[data-command]"
+      );
+
+
+    if(
+      !button ||
+      button.disabled
+    ){
+
+      return;
+    }
+
+
+    const action =
+      button.dataset.command;
+
+
+    /*
+      Локальный переход:
+      reveal → следующий вопрос
+      или reveal → итоги раунда.
+    */
+
+    if(
+      action ===
+      "continue"
+    ){
+
+      await continueAfterReveal();
+
+      return;
+    }
+
+
+    /*
+      Локальный переход:
+      итоги раунда → следующий раунд.
+    */
+
+    if(
+      action ===
+      "continue_round"
+    ){
+
+      await continueAfterRound();
+
+      return;
+    }
+
+
+    /*
+      Обычная backend-команда.
+    */
+
+    await sendCommand(
+      action
+    );
+  }
+);
+
+
+/* =========================================================
+   BOOT
+========================================================= */
+
+async function boot(){
+
+  /*
+    Сразу показываем интерфейс,
+    чтобы не было белого экрана.
+  */
+
+  render();
+
+
+  if(!state.gameId){
+
+    state.error =
+      "Откройте страницу с параметром ?gameId=ID";
+
+    render();
+
+    return;
+  }
+
+
+  await refresh();
+
+
+  if(pollTimer){
+
+    clearInterval(
+      pollTimer
+    );
+  }
+
+
+  /*
+    Обновление каждую секунду.
+
+    Именно поэтому счётчик:
+
+      Ответили 0 / 3
+
+    превращается в:
+
+      Ответили 1 / 3
+      Ответили 2 / 3
+      Ответили 3 / 3
+
+    без перезагрузки страницы.
+  */
+
+  pollTimer =
+    setInterval(
+      refresh,
+      1000
+    );
+}
+
+
+boot();
+
+</script>
+
+</body>
+</html>

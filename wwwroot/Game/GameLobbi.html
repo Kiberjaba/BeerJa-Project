@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>БИРЖА — настройка комнаты</title>
+
+<style>
+  :root{
+    --bg:#0b0c0d;
+    --card:#17181a;
+    --card-2:#1e2021;
+    --border:#2a2c2e;
+    --lime:#c6ff3d;
+    --text:#f2f2f0;
+    --text-dim:#9a9d9c;
+    --text-faint:#6c6f6e;
+    --red:#ff6b61;
+  }
+
+  *{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      Helvetica,
+      Arial,
+      sans-serif;
+  }
+
+  a{
+    color:inherit;
+    text-decoration:none;
+  }
+
+  button,
+  input{
+    font:inherit;
+  }
+
+  .wrap{
+    max-width:620px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  header{
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(11,12,13,.9);
+    backdrop-filter:blur(8px);
+  }
+
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 0;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+
+  .nav-left{
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:.06em;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .nav-left .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--lime);
+    box-shadow:0 0 8px var(--lime);
+  }
+
+  .nav-right{
+    font-size:12px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--text-dim);
+  }
+
+  .back-link{
+    color:var(--text-dim);
+    font-weight:700;
+    text-transform:none;
+    letter-spacing:0;
+  }
+
+  .back-link:hover{
+    color:var(--lime);
+  }
+
+  main{
+    padding:44px 0 80px;
+    text-align:center;
+  }
+
+  .eyebrow{
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--lime);
+    margin-bottom:10px;
+  }
+
+  h1{
+    font-size:clamp(24px,5vw,32px);
+    font-weight:900;
+    line-height:1.15;
+    margin-bottom:30px;
+  }
+
+  .pills{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+  }
+
+  .pill{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:16px 22px;
+    min-width:110px;
+  }
+
+  .pill strong{
+    display:block;
+    font-size:22px;
+    font-weight:900;
+  }
+
+  .pill span{
+    display:block;
+    font-size:11px;
+    color:var(--text-dim);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-top:4px;
+  }
+
+  .pill.live strong{
+    color:var(--lime);
+  }
+
+  .code-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:26px;
+    padding:30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    text-align:left;
+    flex-wrap:wrap;
+  }
+
+  .code-display{
+    flex:1;
+    min-width:160px;
+  }
+
+  .code-label{
+    font-size:11px;
+    font-weight:800;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:6px;
+  }
+
+  .code-value{
+    font-size:38px;
+    font-weight:900;
+    letter-spacing:.04em;
+    color:var(--text);
+  }
+
+  .code-value.ready{
+    color:var(--lime);
+  }
+
+  .code-sub{
+    font-size:12px;
+    color:var(--text-faint);
+    margin-top:4px;
+  }
+
+  .code-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-width:190px;
+  }
+
+  .btn-lime{
+    background:var(--lime);
+    color:#10130a;
+    border:none;
+    padding:14px 22px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:13px;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+
+  .btn-lime:hover:not(:disabled){
+    transform:translateY(-1px);
+  }
+
+  .btn-lime:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+  }
+
+  .btn-outline{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:14px 22px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:13px;
+    cursor:pointer;
+  }
+
+  .btn-outline:hover:not(:disabled){
+    border-color:var(--text-faint);
+  }
+
+  .btn-outline:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+  }
+
+  .msg{
+    font-size:13px;
+    color:var(--red);
+    margin-top:14px;
+    line-height:1.5;
+  }
+
+  .hidden{
+    display:none;
+  }
+
+  .config-toggle{
+    font-size:12px;
+    color:var(--text-faint);
+    text-align:right;
+    margin-bottom:14px;
+    cursor:pointer;
+  }
+
+  .config-toggle:hover{
+    color:var(--lime);
+  }
+
+  .config-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:18px;
+    text-align:left;
+  }
+
+  .config-card label{
+    display:block;
+    font-size:11px;
+    font-weight:800;
+    color:var(--text-dim);
+    margin-bottom:6px;
+    text-transform:uppercase;
+  }
+
+  .config-card input{
+    width:100%;
+    background:var(--card-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:11px 13px;
+    border-radius:10px;
+    outline:none;
+  }
+
+  .config-card input:focus{
+    border-color:var(--lime);
+  }
+
+  .status-line{
+    margin-top:18px;
+    font-size:12px;
+    color:var(--text-faint);
+    min-height:18px;
+  }
+
+  .status-line strong{
+    color:var(--text-dim);
+  }
+
+  @media (max-width:560px){
+
+    .code-card{
+      padding:22px;
+    }
+
+    .code-actions{
+      width:100%;
+    }
+
+    .code-value{
+      font-size:34px;
+    }
+
+  }
+</style>
+</head>
+
+
+<body>
+
+<header>
+  <div class="wrap nav">
+
+    <a href="dashboard.html" class="nav-left">
+      <span class="dot"></span>
+      БИРЖА
+    </a>
+
+    <span class="nav-right">
+      <a class="back-link" href="dashboard.html">
+        ← к списку игр
+      </a>
+    </span>
+
+  </div>
+</header>
+
+
+<main class="wrap">
+
+  <div class="eyebrow">
+    Настройка комнаты
+  </div>
+
+  <h1 id="gameTitle">
+    Загрузка игры…
+  </h1>
+
+
+  <div class="pills">
+
+    <div class="pill">
+      <strong id="questionsCount">—</strong>
+      <span>вопросов</span>
+    </div>
+
+    <div class="pill">
+      <strong id="roundsCount">—</strong>
+      <span>раундов</span>
+    </div>
+
+    <div class="pill live">
+      <strong id="joinedCount">0</strong>
+      <span>участников в лобби</span>
+    </div>
+
+  </div>
+
+
+  <div
+    class="config-toggle"
+    id="configToggle"
+  >
+    настроить параметры →
+  </div>
+
+
+  <div
+    class="config-card hidden"
+    id="configCard"
+  >
+
+    <label for="apiBase">
+      Адрес бэкенда (API_BASE)
+    </label>
+
+    <input
+      type="text"
+      id="apiBase"
+      value="/api"
+    >
+
+  </div>
+
+
+  <div class="code-card">
+
+    <div class="code-display">
+
+      <div class="code-label">
+        Код комнаты
+      </div>
+
+      <div
+        class="code-value"
+        id="codeValue"
+      >
+        — — — —
+      </div>
+
+      <div
+        class="code-sub"
+        id="codeSub"
+      >
+        Создайте игровую комнату
+      </div>
+
+    </div>
+
+
+    <div class="code-actions">
+
+      <button
+        class="btn-outline"
+        id="generateBtn"
+      >
+        Сгенерировать код
+      </button>
+
+      <button
+        class="btn-lime"
+        id="launchBtn"
+        disabled
+      >
+        Запустить игру
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="status-line"
+    id="statusLine"
+  ></div>
+
+
+  <div
+    class="msg hidden"
+    id="errorMsg"
+  ></div>
+
+</main>
+
+
+<script>
+"use strict";
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const $ = id =>
+  document.getElementById(id);
+
+
+/* =========================================================
+   API
+========================================================= */
+
+let API_BASE =
+  localStorage.getItem("game-api-base") ||
+  "/api";
+
+$("apiBase").value = API_BASE;
+
+
+$("configToggle").addEventListener(
+  "click",
+  () => {
+    $("configCard").classList.toggle("hidden");
+  }
+);
+
+
+$("apiBase").addEventListener(
+  "change",
+  () => {
+
+    API_BASE =
+      $("apiBase").value.trim() ||
+      "/api";
+
+    localStorage.setItem(
+      "game-api-base",
+      API_BASE
+    );
+
+  }
+);
+
+
+/* =========================================================
+   URL
+========================================================= */
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+
+const eventId =
+  Number(
+    params.get("eventId")
+  );
+
+
+const initialGameId =
+  Number(
+    params.get("gameId")
+  ) || null;
+
+
+const initialRoomCode =
+  params.get("roomCode") ||
+  "";
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+const token =
+  localStorage.getItem("token");
+
+
+if (!token) {
+
+  window.location.href =
+    "/ved/yandex.html";
+
+}
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let gameId =
+  initialGameId;
+
+let gameType =
+  null;
+
+let roomCode =
+  initialRoomCode || null;
+
+let currentGame =
+  null;
+
+let lobbyTimer =
+  null;
+
+
+/* =========================================================
+   VALIDATION
+========================================================= */
+
+if (
+  !eventId ||
+  Number.isNaN(eventId)
+) {
+
+  showError(
+    "Не указан eventId. Откройте игру из списка подготовленных игр."
+  );
+
+  $("generateBtn").disabled =
+    true;
+
+}
+
+
+/* =========================================================
+   REQUEST
+========================================================= */
+
+async function request(
+  path,
+  options = {}
+) {
+
+  const currentToken =
+    localStorage.getItem("token");
+
+  if (!currentToken) {
+
+    window.location.href =
+      "/ved/yandex.html";
+
+    throw new Error(
+      "Необходима авторизация"
+    );
+
+  }
+
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {})
+  };
+
+
+  headers["Authorization"] =
+    "Bearer " + currentToken;
+
+
+  const response =
+    await fetch(
+      `${API_BASE}${path}`,
+      {
+        ...options,
+        headers
+      }
+    );
+
+
+  const data =
+    await response
+      .json()
+      .catch(() => null);
+
+
+  if (response.status === 401) {
+
+    localStorage.removeItem("token");
+
+    window.location.href =
+      "/ved/yandex.html";
+
+    throw new Error(
+      "Сессия истекла"
+    );
+
+  }
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      data?.message ||
+      `Ошибка ${response.status}`
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+function showError(message) {
+
+  $("errorMsg").textContent =
+    message;
+
+  $("errorMsg").classList.remove(
+    "hidden"
+  );
+
+}
+
+
+function hideError() {
+
+  $("errorMsg").classList.add(
+    "hidden"
+  );
+
+}
+
+
+/* =========================================================
+   GAME TYPE
+========================================================= */
+
+function getGameTypeName(type) {
+
+  const names = {
+
+    1: "нишевая игра",
+
+    2: "командный квиз",
+
+    3: "индивидуальная игра"
+
+  };
+
+
+  return (
+    names[Number(type)] ||
+    `тип игры ${type}`
+  );
+
+}
+
+
+/* =========================================================
+   LOAD PREPARED GAME
+========================================================= */
+
+async function loadGame() {
+
+  if (!eventId) {
+    return;
+  }
+
+
+  try {
+
+    const games =
+      await request(
+        "/games/my-games"
+      );
+
+
+    if (!Array.isArray(games)) {
+
+      throw new Error(
+        "Сервер вернул некорректный список игр"
+      );
+
+    }
+
+
+    const game =
+      games.find(
+        item =>
+          Number(item.eventId) ===
+          eventId
+      );
+
+
+    if (!game) {
+
+      throw new Error(
+        "Эта подготовленная игра не найдена"
+      );
+
+    }
+
+
+    currentGame =
+      game;
+
+
+    gameType =
+      Number(game.gameType);
+
+
+    $("gameTitle").textContent =
+      game.title ||
+      "Без названия";
+
+
+    $("questionsCount").textContent =
+      game.questionsCount ??
+      "—";
+
+
+    $("roundsCount").textContent =
+      game.roundsCount ??
+      "—";
+
+
+    updateStatus();
+
+
+    /*
+      Если lobby уже открывали с gameId,
+      восстанавливаем существующую сессию.
+    */
+
+    if (initialGameId) {
+
+      await restoreSession();
+
+    }
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Ошибка загрузки игры:",
+      error
+    );
+
+    showError(
+      error.message ||
+      "Не удалось загрузить игру"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CREATE GAME SESSION
+========================================================= */
+
+$("generateBtn").addEventListener(
+  "click",
+  createSession
+);
+
+
+async function createSession() {
+
+  if (!eventId) {
+    return;
+  }
+
+
+  hideError();
+
+
+  $("generateBtn").disabled =
+    true;
+
+  $("launchBtn").disabled =
+    true;
+
+  $("generateBtn").textContent =
+    "Создаём комнату…";
+
+
+  try {
+
+    /*
+      ВАЖНО:
+      теперь это ОБЩИЙ контроллер.
+
+      POST /api/games/start-session/{eventId}
+    */
+
+    const data =
+      await request(
+        `/games/start-session/${eventId}`,
+        {
+          method: "POST"
+        }
+      );
+
+
+    if (!data?.gameId) {
+
+      throw new Error(
+        "Сервер не вернул gameId"
+      );
+
+    }
+
+
+    gameId =
+      Number(data.gameId);
+
+
+    gameType =
+      Number(
+        data.gameType ??
+        currentGame?.gameType
+      );
+
+
+    roomCode =
+      data.roomCode ||
+      null;
+
+
+    /*
+      Сохраняем текущую сессию.
+    */
+
+    localStorage.setItem(
+      "active-game-id",
+      String(gameId)
+    );
+
+    localStorage.setItem(
+      "active-event-id",
+      String(eventId)
+    );
+
+    localStorage.setItem(
+      "active-game-type",
+      String(gameType)
+    );
+
+
+    if (roomCode) {
+
+      localStorage.setItem(
+        "active-room-code",
+        roomCode
+      );
+
+    }
+
+
+    /*
+      Обновляем интерфейс.
+    */
+
+    $("codeValue").textContent =
+      formatRoomCode(roomCode);
+
+    $("codeValue").classList.add(
+      "ready"
+    );
+
+
+    $("codeSub").textContent =
+      `Сессия #${gameId} • ${getGameTypeName(gameType)}`;
+
+
+    $("generateBtn").textContent =
+      "Комната создана";
+
+
+    $("launchBtn").disabled =
+      false;
+
+
+    updateStatus();
+
+
+    startLobbyPolling();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Ошибка создания комнаты:",
+      error
+    );
+
+
+    showError(
+      error.message ||
+      "Не удалось создать игровую комнату"
+    );
+
+
+    $("generateBtn").disabled =
+      false;
+
+    $("generateBtn").textContent =
+      "Сгенерировать код";
+
+  }
+
+}
+
+
+/* =========================================================
+   RESTORE SESSION
+========================================================= */
+
+async function restoreSession() {
+
+  if (!gameId) {
+    return;
+  }
+
+
+  try {
+
+    /*
+      Сначала пробуем универсальный
+      host-state для командного квиза.
+    */
+
+    let state = null;
+
+
+    if (Number(gameType) === 2) {
+
+      state =
+        await request(
+          `/v1/games/${gameId}/host-state`
+        );
+
+    }
+
+
+    /*
+      Для нишевой игры состояние
+      берём через её endpoint.
+    */
+
+    if (Number(gameType) === 1) {
+
+      try {
+
+        state =
+          await request(
+            `/niche-game/${gameId}/state`
+          );
+
+      }
+
+      catch {
+
+        state = null;
+
+      }
+
+    }
+
+
+    if (!state) {
+
+      throw new Error(
+        "Игровая сессия не найдена"
+      );
+
+    }
+
+
+    gameId =
+      Number(
+        state.gameId ??
+        gameId
+      );
+
+
+    gameType =
+      Number(
+        state.gameType ??
+        gameType ??
+        currentGame?.gameType
+      );
+
+
+    roomCode =
+      state.roomCode ||
+      initialRoomCode ||
+      localStorage.getItem(
+        "active-room-code"
+      ) ||
+      null;
+
+
+    $("codeValue").textContent =
+      formatRoomCode(roomCode);
+
+
+    if (roomCode) {
+
+      $("codeValue").classList.add(
+        "ready"
+      );
+
+    }
+
+
+    $("codeSub").textContent =
+      `Сессия #${gameId} • ${getGameTypeName(gameType)}`;
+
+
+    $("generateBtn").textContent =
+      "Комната создана";
+
+
+    $("launchBtn").disabled =
+      false;
+
+
+    updateStatus();
+
+    startLobbyPolling();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Ошибка восстановления сессии:",
+      error
+    );
+
+
+    /*
+      Если gameId не удалось восстановить,
+      не блокируем создание новой комнаты.
+    */
+
+    if (initialGameId) {
+
+      showError(
+        error.message ||
+        "Не удалось восстановить игровую сессию"
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   FORMAT ROOM CODE
+========================================================= */
+
+function formatRoomCode(code) {
+
+  if (!code) {
+
+    return "— — — —";
+
+  }
+
+
+  return String(code)
+    .split("")
+    .join(" ");
+
+}
+
+
+/* =========================================================
+   LOBBY POLLING
+========================================================= */
+
+function startLobbyPolling() {
+
+  stopLobbyPolling();
+
+  if (!gameId) {
+    return;
+  }
+
+
+  pollLobby();
+
+}
+
+
+function stopLobbyPolling() {
+
+  if (lobbyTimer) {
+
+    clearTimeout(
+      lobbyTimer
+    );
+
+    lobbyTimer = null;
+
+  }
+
+}
+
+
+async function pollLobby() {
+
+  if (!gameId) {
+    return;
+  }
+
+
+  try {
+
+    await updateLobby();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Ошибка обновления лобби:",
+      error
+    );
+
+  }
+
+
+  lobbyTimer =
+    setTimeout(
+      pollLobby,
+      2500
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE LOBBY
+========================================================= */
+
+async function updateLobby() {
+
+  if (Number(gameType) === 2) {
+
+    /*
+      Командный квиз.
+    */
+
+    const state =
+      await request(
+        `/v1/games/${gameId}/host-state`
+      );
+
+
+    const players =
+      Array.isArray(state?.players)
+        ? state.players
+        : [];
+
+
+    $("joinedCount").textContent =
+      players.length;
+
+
+    if (
+      Array.isArray(state?.questions)
+    ) {
+
+      $("questionsCount").textContent =
+        state.questions.length;
+
+
+      const rounds =
+        new Set(
+          state.questions
+            .map(q => q.roundNumber)
+            .filter(
+              value =>
+                value !== null &&
+                value !== undefined
+            )
+        );
+
+
+      if (rounds.size > 0) {
+
+        $("roundsCount").textContent =
+          rounds.size;
+
+      }
+
+    }
+
+
+    /*
+      На случай, если сервер вернул
+      текущий gameType.
+    */
+
+    if (
+      state?.gameType !== undefined
+    ) {
+
+      gameType =
+        Number(state.gameType);
+
+      updateStatus();
+
+    }
+
+
+    return;
+
+  }
+
+
+  if (Number(gameType) === 1) {
+
+    /*
+      Нишевая игра.
+    */
+
+    const data =
+      await request(
+        `/niche-game/calculate-results/${gameId}/lobby`
+      );
+
+
+    $("joinedCount").textContent =
+      data?.totalAnswers ??
+      data?.totalPlayers ??
+      data?.totalParticipants ??
+      0;
+
+
+    return;
+
+  }
+
+
+  $("joinedCount").textContent =
+    "—";
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function updateStatus() {
+
+  if (!gameType) {
+
+    $("statusLine").textContent =
+      "";
+
+    return;
+
+  }
+
+
+  if (!gameId) {
+
+    $("statusLine").innerHTML =
+      `<strong>Сценарий:</strong>
+       ${getGameTypeName(gameType)}`;
+
+    return;
+
+  }
+
+
+  $("statusLine").innerHTML =
+    `<strong>Сессия:</strong> #${gameId}
+     &nbsp;•&nbsp;
+     <strong>Сценарий:</strong>
+     ${getGameTypeName(gameType)}`;
+
+}
+
+
+/* =========================================================
+   OPEN HOST
+========================================================= */
+
+$("launchBtn").addEventListener(
+  "click",
+  openHost
+);
+
+
+function openHost() {
+
+  if (!gameId) {
+    showError("Игровая сессия ещё не создана");
+    return;
+  }
+
+  if (!gameType) {
+    showError("Не удалось определить тип игры");
+    return;
+  }
+
+  /*
+    Маршрутизация по типу игровой механики.
+
+    1 = нишевая игра
+    2 = командный квиз
+  */
+
+  const hostRoutes = {
+    1: "niche-host.html",
+    2: "Quiz-host.html"
+  };
+
+  const hostPage =
+    hostRoutes[Number(gameType)];
+
+  if (!hostPage) {
+    showError(
+      `Для типа игры ${gameType} пока не настроен интерфейс ведущего.`
+    );
+    return;
+  }
+
+  stopLobbyPolling();
+
+  const target =
+    `${hostPage}` +
+    `?gameId=${encodeURIComponent(gameId)}` +
+    `&eventId=${encodeURIComponent(eventId)}`;
+
+  console.log("Открываем пульт ведущего:", {
+    gameId,
+    eventId,
+    gameType,
+    hostPage,
+    target
+  });
+
+  window.location.href = target;
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+loadGame();
+
+</script>
+
+</body>
+</html>

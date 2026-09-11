@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кабинет ведущего</title>
+<style>
+  :root{
+    --bg: #0b0c0d;
+    --card: #17181a;
+    --card-2: #1e2021;
+    --border: #2a2c2e;
+    --lime: #c6ff3d;
+    --lime-dim: #8fbf2a;
+    --text: #f2f2f0;
+    --text-dim: #9a9d9c;
+    --text-faint: #6c6f6e;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html, body{
+    height: 100%;
+  }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height:100vh;
+    display: flex;
+    flex-direction: column; /* чтобы футер всегда прижимался к низу, а не висел посередине */
+  }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+  }
+
+  /* ===== HEADER ===== */
+  header{
+    border-bottom: 1px solid var(--border);
+    position: sticky; top:0; z-index:50;
+    background: rgba(11,12,13,0.9);
+    backdrop-filter: blur(8px);
+  }
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 9px 0; /* шапка стала тоньше */
+    gap: 12px;
+  }
+  .nav-left{
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .06em;
+    display:flex; align-items:center; gap:8px;
+  }
+  .nav-left .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime);
+  }
+
+  .auth-actions{ display:flex; align-items:center; gap:8px; }
+
+  /* Кнопка "Профиль" — без круглой аватарки, светлый текст, читаемый акцент */
+  .profile-chip{
+    display:flex; align-items:center; gap:9px;
+    background: linear-gradient(135deg, rgba(198,255,61,0.16), rgba(198,255,61,0.05));
+    border: 1px solid rgba(198,255,61,0.35);
+    padding: 8px 18px 8px 14px;
+    border-radius: 999px;
+    cursor:pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: .01em;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .profile-chip:hover{
+    background: linear-gradient(135deg, rgba(198,255,61,0.26), rgba(198,255,61,0.08));
+    border-color: var(--lime);
+    transform: translateY(-1px);
+  }
+  .profile-chip svg{
+    width: 16px; height: 16px;
+    stroke: var(--lime);
+    flex-shrink: 0;
+  }
+
+  /* ===== MAIN ===== */
+  main{
+    flex: 1 0 auto; /* main растягивается, футер остаётся внизу страницы */
+    padding: 56px 0 60px;
+  }
+
+  .role-eyebrow{
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-top: 22px; /* заголовок теперь заметно отделён от шапки */
+    margin-bottom: 28px;
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 26px;
+    margin-bottom: 18px;
+  }
+
+  .card-order{
+    display:flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .card-title{
+    font-size: 26px;
+    font-weight: 800;
+  }
+  .btn-lime{
+    align-self: flex-start;
+    background: var(--lime);
+    color: #10130a;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor:pointer;
+    transition: transform .15s ease;
+  }
+  .btn-lime:hover{ transform: translateY(-2px); }
+
+  .card-launch{
+    text-align:center;
+    padding: 44px 26px;
+    cursor:pointer;
+    transition: border-color .15s, background .15s;
+    border-width: 1px;
+  }
+  .card-launch:hover{
+    border-color: var(--lime);
+    background: var(--card-2);
+  }
+  .card-launch .card-title{ font-size: 28px; }
+  .card-launch .card-sub{
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  /* ===== FOOTER ===== */
+ footer{
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    background: rgba(11, 12, 13, 0.85);
+  }
+  .footer-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .footer-links{
+    display:flex; gap: 32px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+  }
+  .footer-links a:hover{ color: var(--lime); }
+  
+  .footer-logo {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .footer-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .footer-logo:hover {
+    transform: scale(1.05);
+  }
+
+  /* Логотип — рисуется через CSS/SVG, ничего не подгружается извне */
+  .footer-logo {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px; /* квадрат со скруглением вместо круга */
+    background: linear-gradient(160deg, #1c1e16, #14150f);
+    border: 1px solid var(--border);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .footer-logo svg{
+    width: 20px; height: 20px;
+  }
+  .footer-logo:hover {
+    transform: scale(1.06);
+    border-color: var(--lime);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px){
+    .wrap{ padding: 0 16px; }
+    .card{ padding: 20px; }
+    .card-title{ font-size: 22px; }
+    .card-launch .card-title{ font-size: 22px; }
+    .profile-chip{ padding: 7px 14px 7px 10px; font-size: 12px; }
+    .footer-row{ flex-direction: column; gap: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="glav.html" class="nav-left"><span class="dot"></span>БИРЖА</a>
+
+    <a href="lichved.html" class="profile-link" style="display:none;">
+        <span class="profile-icon">👤</span>
+        <span>Профиль</span>
+    </a>
+
+    <!-- Авторизован -->
+    <div class="auth-actions" id="auth-user">
+      <button class="profile-chip" onclick="window.location.href='lichved.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21a8 8 0 0 0-16 0"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Профиль
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="role-eyebrow">Кабинет ведущего</div>
+
+  <div class="card card-order">
+    <div class="card-title">Все механики</div>
+    <a href="allmechanics.html" class="btn-lime">Жмать</a>
+  </div>
+
+  <div class="card card-launch" onclick="window.location.href='/Game/GameDesk.html'">
+    <div class="card-title">Запустить игру</div>
+    <div class="card-sub">Начать сессию с уже готовым сценарием</div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <a href="glav.html" class="footer-logo">
+      <img src="Code_Generated_Image.png" alt="БИРЖА Логотип">
+    </a>
+      </svg>
+    </a>
+
+    <div class="footer-links">
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Чатик</a>
+      <a href="https://t.me/LUSTRECASTLE" target="_blank">Блог</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function setLoggedIn(isLoggedIn){
+    document.getElementById('auth-user').style.display = isLoggedIn ? 'flex' : 'none';
+  }
+</script>
+
+</body>
+</html>
